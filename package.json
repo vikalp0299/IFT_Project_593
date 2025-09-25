@@ -1,0 +1,28 @@
+{
+  "name": "project_dev",
+  "version": "0.0.1",
+  "description": "First run at creating a file sharing system",
+  "homepage": "https://github.com/vikalp0299/IFT_Project_593#readme",
+  "bugs": {
+    "url": "https://github.com/vikalp0299/IFT_Project_593/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vikalp0299/IFT_Project_593.git"
+  },
+  "license": "MIT",
+  "author": "Vikalp Parashar",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "color": "^5.0.2",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
