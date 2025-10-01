@@ -47,8 +47,61 @@ const authenticateToken = (req, res, next) => {
 
 async function loginFunction(req, res) {
     // Implement login logic here
-    
-}
+     try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username and password are required',
+      });
+    }
+
+    // Allow login by username or email (case-insensitive)
+    const user = await User.findOne({
+      $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }],
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials',
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials',
+      });
+    }
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = generateToken(user._id, user.username);
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        userId: user._id,
+        username: user.username,
+        email: user.email,
+        token,
+        lastLogin: user.lastLogin,
+      },
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
 
 
 async function registerFunction(req, res) {
@@ -78,6 +131,15 @@ async function registerFunction(req, res) {
             return res.status(409).json({
                 success: false,
                 message: 'User with this username or email already exists'
+            });
+        }
+
+        //Check email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid email format'
             });
         }
 
@@ -119,6 +181,7 @@ async function registerFunction(req, res) {
 
 async function logoutFunction(req, res) {
     // Implement logout logic here
+    
 }
 
 export { loginFunction, registerFunction, logoutFunction };
