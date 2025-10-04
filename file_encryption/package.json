@@ -1,0 +1,11 @@
+{
+  "name": "file_encryption",
+  "version": "1.0.0",
+  "description": "a pubkey generator",
+  "main": "app.js",
+  "scripts": {
+    "test": "run"
+  },
+  "author": "",
+  "license": "ISC"
+}
