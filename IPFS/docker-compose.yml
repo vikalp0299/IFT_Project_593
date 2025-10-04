@@ -1,0 +1,33 @@
+# docker-compose.yml (for your LOCAL MACHINE)
+version: '3.8'
+
+services:
+  ipfs:
+    image: ipfs/kubo:latest
+    container_name: ipfs-local-node
+    ports:
+      - "4001:4001/tcp"
+      - "4001:4001/udp"
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ./ipfs_data:/data/ipfs
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - |
+        #!/bin/sh
+        set -e
+        if [ -e /data/ipfs/config ]; then
+          echo "Local node already configured."
+        else
+          ipfs init --profile server
+          ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001
+          ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/8080
+          # This line tells other nodes how to find you on your local network
+          ipfs config --json Addresses.Announce --append '["/ip4/192.168.1.236/tcp/4001"]'
+          ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
+          ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
+          echo "Local node configured."
+        fi
+        exec ipfs daemon --migrate=true --routing=dhtclient
