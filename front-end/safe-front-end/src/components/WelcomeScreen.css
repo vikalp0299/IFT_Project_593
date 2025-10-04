@@ -1,0 +1,61 @@
+/* CACHE BUST - Updated for wider containers */
+.welcome-container {
+  height: 100vh;
+  /* background-color: #FFFFFF; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.welcome-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 48px 32px;
+  max-width: 1500px;
+  width: 100%;
+  text-align: center;
+  /* border: 3px solid red; */
+}
+
+.welcome-heading {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.welcome-description {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #555555;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+.welcome-button {
+  background-color: #1A1A2E;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.welcome-button:hover {
+  background-color: #0A0A1A;
+}
+
+.welcome-button:active {
+  background-color: #000000;
+}
