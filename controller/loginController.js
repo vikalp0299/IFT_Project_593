@@ -181,6 +181,11 @@ async function registerFunction(req, res) {
 
 async function logoutFunction(req, res) {
     // Implement logout logic here
+    // For JWT, logout is typically handled client-side by deleting the token.
+    res.json({
+        success: true,
+        message: 'Logout successful (client should delete the token)'
+    });
     
 }
 
