@@ -1,0 +1,54 @@
+.account-success-container {
+  height: 100vh;
+  /* background-color: white; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.account-success-card {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 48px 32px;
+  max-width: 1200px;
+  width: 100%;
+  text-align: center;
+}
+
+.account-success-icon {
+  width: 56px;
+  height: 56px;
+  background-color: #22C55E;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px auto;
+}
+
+.account-success-checkmark {
+  width: 28px;
+  height: 28px;
+  color: #FFFFFF;
+}
+
+.account-success-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.account-success-message {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.5;
+}

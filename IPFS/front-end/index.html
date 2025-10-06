@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Decentralized File Manager</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; background-color: #f4f7f6; }
+        h1, h2 { color: #333; }
+        #app { background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input, button { font-size: 1rem; padding: 0.75rem; border-radius: 4px; border: 1px solid #ccc; }
+        button { background-color: #007bff; color: white; border-color: #007bff; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #status, #history { margin-top: 1.5rem; word-wrap: break-word; }
+        ul { list-style: none; padding: 0; }
+        li { background: #e9ecef; margin-bottom: 0.5rem; padding: 1rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { background-color: #dc3545; font-size: 0.8rem; padding: 0.5rem; }
+        .delete-btn:hover { background-color: #c82333; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Decentralized File Manager</h1>
+        
+        <h2>Upload New File</h2>
+        <input type="file" id="file-input">
+        <button id="upload-btn">Upload & Pin</button>
+        <div id="status"></div>
+
+        <h2>File History (Session)</h2>
+        <ul id="history"></ul>
+    </div>
+
+    <script>
+        const SERVER_API_URL = "http://localhost:3000";
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const statusDiv = document.getElementById('status');
+        const historyUl = document.getElementById('history');
+
+        // Function to render the history list
+        const renderHistory = () => {
+            historyUl.innerHTML = '';
+            const files = JSON.parse(sessionStorage.getItem('ipfsFiles') || '[]');
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>
+                        <strong>${file.name}</strong><br>
+                        <small><a href="${file.gatewayUrl}" target="_blank">${file.cid}</a></small>
+                    </span>
+                    <button class="delete-btn" data-cid="${file.cid}">Delete</button>
+                `;
+                historyUl.appendChild(li);
+            });
+        };
+
+        // Event listener for upload
+        uploadBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                statusDiv.textContent = 'Please select a file.';
+                return;
+            }
+            statusDiv.textContent = 'Uploading and pinning, please wait...';
+            
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${SERVER_API_URL}/upload`, { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.message || 'Upload failed');
+
+                statusDiv.textContent = `Success! File available at CID: ${result.cid}`;
+                
+                const files = JSON.parse(sessionStorage.getItem('ipfsFiles') || '[]');
+                files.unshift({ name: file.name, cid: result.cid, gatewayUrl: result.gatewayUrl });
+                sessionStorage.setItem('ipfsFiles', JSON.stringify(files));
+                renderHistory();
+
+            } catch (error) {
+                statusDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        // Event listener for delete (uses event delegation)
+        historyUl.addEventListener('click', async (event) => {
+            if (!event.target.matches('.delete-btn')) return;
+
+            const cid = event.target.dataset.cid;
+            if (!confirm(`Are you sure you want to delete file with CID: ${cid}?`)) return;
+
+            event.target.textContent = 'Deleting...';
+            event.target.disabled = true;
+
+            try {
+                const response = await fetch(`${SERVER_API_URL}/delete/${cid}`, { method: 'DELETE' });
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.message || 'Delete failed');
+
+                let files = JSON.parse(sessionStorage.getItem('ipfsFiles') || '[]');
+                files = files.filter(file => file.cid !== cid);
+                sessionStorage.setItem('ipfsFiles', JSON.stringify(files));
+                renderHistory();
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                renderHistory(); // Re-render to reset button state
+            }
+        });
+
+        // Initial render on page load
+        renderHistory();
+    </script>
+</body>
+</html>

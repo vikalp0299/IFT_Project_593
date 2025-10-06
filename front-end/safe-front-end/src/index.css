@@ -1,0 +1,310 @@
+:root {
+  font-family: 'Inter', 'SF Pro Display', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.95);
+  background: 
+    radial-gradient(ellipse at top left, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at top right, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom left, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #0a0a0a 100%);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Professional Blockchain Network Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(0, 255, 127, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(0, 191, 255, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.05) 0%, transparent 70%),
+    radial-gradient(circle at 25% 75%, rgba(255, 107, 107, 0.04) 0%, transparent 60%),
+    radial-gradient(circle at 75% 25%, rgba(255, 193, 7, 0.03) 0%, transparent 60%);
+  animation: networkPulse 12s ease-in-out infinite;
+  z-index: -3;
+}
+
+/* Professional IPFS Network Nodes */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(3px 3px at 30px 40px, rgba(0, 255, 127, 0.8), transparent),
+    radial-gradient(2px 2px at 60px 80px, rgba(0, 191, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 120px 50px, rgba(138, 43, 226, 0.6), transparent),
+    radial-gradient(2px 2px at 180px 90px, rgba(255, 107, 107, 0.5), transparent),
+    radial-gradient(1px 1px at 240px 30px, rgba(255, 193, 7, 0.4), transparent),
+    radial-gradient(3px 3px at 300px 70px, rgba(0, 255, 127, 0.6), transparent),
+    radial-gradient(2px 2px at 360px 20px, rgba(0, 191, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 420px 60px, rgba(138, 43, 226, 0.4), transparent),
+    radial-gradient(2px 2px at 480px 100px, rgba(255, 107, 107, 0.3), transparent),
+    radial-gradient(1px 1px at 540px 40px, rgba(255, 193, 7, 0.2), transparent);
+  background-repeat: repeat;
+  background-size: 600px 120px;
+  animation: nodeFloat 25s linear infinite;
+  opacity: 0.4;
+  z-index: -2;
+}
+
+@keyframes networkPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1) rotate(0deg);
+  }
+  33% {
+    opacity: 0.7;
+    transform: scale(1.02) rotate(0.5deg);
+  }
+  66% {
+    opacity: 0.5;
+    transform: scale(1.01) rotate(-0.3deg);
+  }
+}
+
+@keyframes nodeFloat {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translateX(-30px) translateY(-15px) rotate(90deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(-60px) translateY(0) rotate(180deg);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translateX(-30px) translateY(15px) rotate(270deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(360deg);
+    opacity: 0.4;
+  }
+}
+
+/* Professional Blockchain Connection Lines */
+body {
+  background-image: 
+    linear-gradient(45deg, transparent 48%, rgba(0, 255, 127, 0.06) 50%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, rgba(0, 191, 255, 0.06) 50%, transparent 52%),
+    linear-gradient(30deg, transparent 48%, rgba(138, 43, 226, 0.04) 50%, transparent 52%),
+    linear-gradient(-30deg, transparent 48%, rgba(255, 107, 107, 0.03) 50%, transparent 52%);
+  background-size: 120px 120px;
+  animation: connectionFlow 18s linear infinite;
+}
+
+@keyframes connectionFlow {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  25% {
+    background-position: 30px 30px, -30px 30px, 20px -20px, -20px -20px;
+  }
+  50% {
+    background-position: 60px 60px, -60px 60px, 40px -40px, -40px -40px;
+  }
+  75% {
+    background-position: 90px 90px, -90px 90px, 60px -60px, -60px -60px;
+  }
+  100% {
+    background-position: 120px 120px, -120px 120px, 80px -80px, -80px -80px;
+  }
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Professional Tech Icons Overlay */
+body {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50' font-size='16' fill='%2300ff7f' opacity='0.08'%3E🔗%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50' font-size='14' fill='%2300bfff' opacity='0.06'%3E⚡%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50' font-size='18' fill='%238a2be2' opacity='0.05'%3E📊%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50' font-size='12' fill='%23ff6b6b' opacity='0.04'%3E🔒%3C/text%3E%3C/svg%3E");
+  background-size: 250px 250px, 200px 200px, 300px 300px, 180px 180px;
+  background-position: 0 0, 150px 150px, 300px 100px, 450px 200px;
+  animation: iconFloat 30s linear infinite;
+  z-index: -1;
+}
+
+@keyframes iconFloat {
+  0% {
+    background-position: 0 0, 150px 150px, 300px 100px, 450px 200px;
+  }
+  25% {
+    background-position: 62px 62px, 200px 200px, 350px 150px, 500px 250px;
+  }
+  50% {
+    background-position: 125px 125px, 250px 250px, 400px 200px, 550px 300px;
+  }
+  75% {
+    background-position: 187px 187px, 300px 300px, 450px 250px, 600px 350px;
+  }
+  100% {
+    background-position: 250px 250px, 350px 350px, 500px 300px, 650px 400px;
+  }
+}
+
+/* Professional Tech Grid Pattern */
+body::before {
+  background-image: 
+    linear-gradient(rgba(0, 255, 127, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 191, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(45deg, rgba(138, 43, 226, 0.01) 1px, transparent 1px),
+    linear-gradient(-45deg, rgba(255, 107, 107, 0.01) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridMove 35s linear infinite;
+}
+
+@keyframes gridMove {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: 60px 60px, 60px 60px, 30px 30px, -30px 30px;
+  }
+}
+
+/* Professional Button Styling */
+button {
+  border-radius: 16px;
+  border: 1px solid rgba(0, 255, 127, 0.4);
+  padding: 1em 2em;
+  font-size: 1.1em;
+  font-weight: 600;
+  font-family: inherit;
+  background: linear-gradient(135deg, rgba(0, 255, 127, 0.12) 0%, rgba(0, 191, 255, 0.12) 50%, rgba(138, 43, 226, 0.08) 100%);
+  color: #00ff7f;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 8px 32px rgba(0, 255, 127, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+
+button:hover {
+  border-color: #00ff7f;
+  background: linear-gradient(135deg, rgba(0, 255, 127, 0.2) 0%, rgba(0, 191, 255, 0.2) 50%, rgba(138, 43, 226, 0.15) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 127, 0.2);
+}
+
+button:active {
+  transform: translateY(-1px);
+  transition: all 0.1s;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid rgba(0, 255, 127, 0.5);
+  outline-offset: 3px;
+}
+
+/* Professional Link Styling */
+a {
+  font-weight: 600;
+  color: #00ff7f;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  padding: 0.2em 0;
+}
+
+a:hover {
+  color: #00bfff;
+  text-shadow: 
+    0 0 8px rgba(0, 255, 127, 0.6),
+    0 0 16px rgba(0, 191, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 3px;
+  bottom: -1px;
+  left: 0;
+  background: linear-gradient(90deg, #00ff7f, #00bfff, #8a2be2);
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 8px rgba(0, 255, 127, 0.4);
+}
+
+a:hover::after {
+  width: 100%;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #e0e0e0;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #0f0f23 100%);
+  }
+  a:hover {
+    color: #00bfff;
+  }
+  button {
+    background: linear-gradient(135deg, rgba(0, 255, 127, 0.15) 0%, rgba(0, 191, 255, 0.15) 100%);
+    color: #00ff7f;
+  }
+}
