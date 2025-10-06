@@ -1,0 +1,17 @@
+This is a demo text file for testing the file encryption system.
+
+The file contains:
+- Multiple lines of text
+- Special characters: !@#$%^&*()
+- Numbers: 1234567890
+- Unicode: 🚀 🔐 📁
+
+This file can be used to test:
+1. File upload functionality
+2. Encryption process
+3. Decryption process
+4. File preview feature
+
+The encryption system uses RSA-OAEP with 2048-bit keys and stores private keys securely in IndexedDB with password-based encryption using PBKDF2 and AES-GCM.
+
+This ensures maximum security for your files while maintaining ease of use.
