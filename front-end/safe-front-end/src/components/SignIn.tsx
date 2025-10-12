@@ -12,9 +12,9 @@ export const SignIn: React.FC<SignInProps> = ({
   onSignUp 
 }) => {
   const navigate = useNavigate();
-  const [organizationName, setOrganizationName] = useState('Test_Org_01');
+  const [organizationName, setOrganizationName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('Organization not found. Please check the organization name and try again.');
+  const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOrganizationName(e.target.value);
@@ -31,26 +31,34 @@ export const SignIn: React.FC<SignInProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Validate organization name - only allow "Test_Org" for demo
-      if (organizationName.toLowerCase() !== 'test_org') {
-        setError('Organization not found. Please check the organization name and try again.');
-        setIsLoading(false);
-        return;
-      }
+      // Call the actual backend API
+      const response = await fetch('http://localhost:8000/validate-signin-organization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          organizationName: organizationName
+        })
+      });
 
-      // Always navigate to credentials page with organization name
-      navigate('/signin-credentials', { state: { organizationName } });
+      const data = await response.json();
       
-      // Also call the callback if provided
-      if (onSignIn) {
-        onSignIn(organizationName);
+      if (data.success) {
+        // Navigate to credentials page with organization name
+        navigate('/signin-credentials', { state: { organizationName } });
+        
+        // Also call the callback if provided
+        if (onSignIn) {
+          onSignIn(organizationName);
+        }
+      } else {
+        setError(data.message || 'Organization validation failed');
       }
     } catch (err) {
       console.error('Sign in failed:', err);
       setError('An error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -58,6 +66,13 @@ export const SignIn: React.FC<SignInProps> = ({
   return (
     <div className="signin-container">
       <div className="signin-card">
+        {/* Home Navigation */}
+        <div className="signin-nav">
+          <Link to="/" className="signin-home">
+            🏠 Landing
+          </Link>
+        </div>
+        
         <h1 className="signin-title">Sign In</h1>
         <p className="signin-subtitle">Enter your organization name to continue</p>
         
@@ -77,7 +92,7 @@ export const SignIn: React.FC<SignInProps> = ({
               required
             />
             <p className="signin-helper">
-              Use "Test_Org" for demo purposes
+              Enter your organization name to continue
             </p>
           </div>
 

@@ -10,3 +10,6 @@ IPFS/node_app/uploads/
 npm-debug.log*
 .env
 .DS_Store
+node_modules
+.env
+dbtest.js

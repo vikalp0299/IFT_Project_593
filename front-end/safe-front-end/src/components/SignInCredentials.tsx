@@ -24,6 +24,8 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -44,32 +46,37 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Validate credentials - only allow demo users for testing
-      const validCredentials = [
-        { username: 'john_doe', password: 'password123' },
-        { username: 'jane_smith', password: 'mypassword' },
-        { username: 'admin', password: 'admin123' }
-      ];
-      
-      const isValid = validCredentials.some(
-        cred => cred.username === credentials.username && cred.password === credentials.password
-      );
-      
-      if (!isValid) {
-        setError('Invalid username or password. Please try again.');
-        setIsLoading(false);
-        return;
-      }
+      // Call your existing server's login endpoint
+      const response = await fetch(`http://localhost:8000/login?username=${credentials.username}&password=${credentials.password}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
 
-      if (onSignIn) {
-        onSignIn(credentials);
+      const data = await response.json();
+      
+      // Log the response to console
+      console.log('Login response:', data);
+      
+      if (data.success) {
+        console.log('✅ Login successful!', data.data);
+        if (onSignIn) {
+          onSignIn(credentials);
+        }
+        
+        // Show success state instead of redirecting
+        setError(''); // Clear any previous errors
+        setLoginSuccess(true);
+        setUserData(data.data);
+      } else {
+        console.error('❌ Login failed:', data.message);
+        setError(data.message || 'Login failed. Please try again.');
       }
     } catch (err) {
       console.error('Sign in failed:', err);
       setError('An error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -82,13 +89,65 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
     }
   };
 
+  // Show success message if login was successful
+  if (loginSuccess && userData) {
+    return (
+      <div className="signin-credentials-container">
+        <div className="signin-credentials-card">
+          {/* Success Icon */}
+          <div className="success-icon" style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ fontSize: '48px', color: '#10B981' }}>✅</div>
+          </div>
+
+          {/* Success Messages */}
+          <h1 className="signin-credentials-title" style={{ color: '#10B981' }}>Login Successful!</h1>
+          <p className="signin-credentials-subtitle">Welcome back to <span className="signin-credentials-org">{orgName}</span></p>
+
+          {/* User Details */}
+          <div className="success-details" style={{ marginBottom: '30px' }}>
+            <p><strong>Username:</strong> {userData.username}</p>
+            <p><strong>Email:</strong> {userData.email}</p>
+            <p><strong>Login Time:</strong> {new Date(userData.loginTime).toLocaleString()}</p>
+            <p><strong>User ID:</strong> {userData.userId}</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="success-buttons">
+            <button
+              onClick={() => {
+                setLoginSuccess(false);
+                setUserData(null);
+                setCredentials({ username: '', password: '' });
+              }}
+              className="signin-credentials-button"
+            >
+              Sign In Again
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="signin-credentials-button"
+              style={{ marginTop: '10px', backgroundColor: '#6B7280' }}
+            >
+              Go to Homepage
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="signin-credentials-container">
       <div className="signin-credentials-card">
-        {/* Back Arrow */}
-        <button onClick={handleBack} className="signin-credentials-back">
-          ←
-        </button>
+                {/* Navigation */}
+                <div className="signin-credentials-nav">
+                  <button onClick={handleBack} className="signin-credentials-back">
+                    ←
+                  </button>
+                  <Link to="/" className="signin-credentials-home">
+                    🏠 Landing
+                  </Link>
+                </div>
 
         {/* Header */}
         <div className="signin-credentials-header">
@@ -132,10 +191,13 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
             />
           </div>
 
-          {/* Demo Users Helper Text */}
+          {/* Helper Text */}
           <div className="signin-credentials-demo">
             <p className="signin-credentials-demo-text">
-              Demo users: john_doe/password123, jane_smith/mypassword, admin/admin123
+              Enter your username and password to sign in
+            </p>
+            <p className="signin-credentials-demo-text" style={{ marginTop: '8px', fontSize: '12px', color: '#6B7280' }}>
+              Working credentials: <strong>testuser123</strong> / <strong>Password123</strong>
             </p>
           </div>
 

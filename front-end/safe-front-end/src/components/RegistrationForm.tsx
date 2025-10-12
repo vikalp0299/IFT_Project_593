@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import './RegistrationForm.css';
 
 interface RegistrationFormProps {
@@ -10,8 +11,8 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   onRegistrationSuccess, 
   onBack 
 }) => {
-  const [organizationName, setOrganizationName] = useState('Test_org');
-  const [error, setError] = useState('This organization name already exists. Please choose a different name.');
+  const [organizationName, setOrganizationName] = useState('');
+  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,19 +21,28 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate duplicate name error for demonstration
-      if (organizationName.toLowerCase() === 'test_org') {
-        setError('This organization name already exists. Please choose a different name.');
-        setIsLoading(false);
-        return;
-      }
+      // Call the actual backend API
+      const response = await fetch('http://localhost:8000/validate-organization', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          organizationName: organizationName
+        })
+      });
 
-      onRegistrationSuccess(organizationName);
+      const data = await response.json();
+      
+      if (data.success) {
+        onRegistrationSuccess(organizationName);
+      } else {
+        setError(data.message || 'Organization validation failed');
+      }
     } catch (err) {
+      console.error('Organization validation failed:', err);
       setError('An error occurred. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -40,6 +50,13 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
   return (
     <div className="registration-container">
       <div className="registration-card">
+        {/* Home Navigation */}
+        <div className="registration-nav">
+          <Link to="/" className="registration-home">
+            🏠 Landing
+          </Link>
+        </div>
+        
         <h1 className="registration-title">Organization Registration</h1>
         <p className="registration-subtitle">Enter your organization name to get started.</p>
         

@@ -1,6 +1,10 @@
 import multer from 'multer';
 import fss from 'fs';
-function displayAllFiles (req,res){
+import { v4 as uuidv4 } from 'uuid';
+import path from 'path';
+import fs from 'fs/promises';
+
+export function displayAllFiles (req,res){
 //Dummy files list
     const headers = new Headers({
         'Content-Type': 'application/json',
@@ -14,20 +18,6 @@ function displayAllFiles (req,res){
 
 }
 
-
-
-// function uploadFile (req,res){
-//     upload.single('file');
-//     res.end('File uploaded successfully');
-// }
-
-//TEST ZONE
-
-// uploadsController.js
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
-import fs from 'fs/promises';
-
 const UPLOAD_DIR = path.resolve('temp_uploads');
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -39,16 +29,6 @@ export async function initUpload(req, res) {
   await fs.mkdir(dir, { recursive: true });
   res.json({ uploadId });
 }
-
-
-// export async function uploadChunk(req, res) {
-//   const { uploadId, chunkIndex } = JSON.parse(req.body);
-//   const chunk = req.file.buffer; // binary data
-
-//   const chunkPath = path.join(UPLOAD_DIR, uploadId, `chunk_${chunkIndex}`);
-//   await fs.writeFile(chunkPath, chunk);
-//   res.json({ received: chunkIndex });
-// }
 
 export const uploadChunk = [
   // Multer middleware to parse the multipart form
@@ -97,9 +77,7 @@ export async function completeUpload(req, res) {
   res.json({ fileUrl: `/uploads/${uploadId}` });
 }
 
-//TEST ZONE END
 
 
 
 
-export {displayAllFiles};

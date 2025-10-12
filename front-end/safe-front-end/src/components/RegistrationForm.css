@@ -1,80 +1,111 @@
 .registration-container {
   height: 100vh;
-  /* background-color: #FFFFFF; */
+  width: 75vw;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  overflow: hidden;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
 .registration-card {
   background-color: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  padding: 48px 32px;
-  max-width: 1200px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 48px 40px;
   width: 100%;
+  max-width: 480px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.registration-nav {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.registration-home {
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 8px 16px;
+  color: #374151;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.registration-home:hover {
+  background-color: #E5E7EB;
+  color: #1F2937;
+  transform: translateY(-1px);
 }
 
 .registration-title {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
-  color: #1A1A1A;
-  margin: 0 0 8px 0;
+  color: #1F2937;
+  margin: 0 0 12px 0;
   line-height: 1.2;
-  text-align: left;
+  text-align: center;
+  letter-spacing: -0.025em;
 }
 
 .registration-subtitle {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  color: #555555;
-  margin: 0 0 32px 0;
+  color: #6B7280;
+  margin: 0 0 40px 0;
   line-height: 1.5;
-  text-align: left;
+  text-align: center;
 }
 
 .registration-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .registration-field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .registration-label {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: #374151;
   line-height: 1.4;
   text-align: left;
+  margin-bottom: 2px;
 }
 
 .registration-input {
   width: 100%;
+  height: 48px;
   padding: 12px 16px;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  background-color: #F9FAFB;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  background-color: #FFFFFF;
   font-size: 16px;
-  color: black;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  color: #1F2937;
+  transition: all 0.2s ease;
   box-sizing: border-box;
+  outline: none;
 }
 
 .registration-input:focus {
-  outline: none;
   border-color: #3B82F6;
-  background-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .registration-input::placeholder {
@@ -85,42 +116,65 @@
   background-color: #1A1A2E;
   color: #FFFFFF;
   border: none;
-  border-radius: 8px;
-  padding: 16px 24px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  border-radius: 12px;
+  height: 52px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   width: 100%;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+  margin-top: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .registration-button:hover {
-  background-color: #0A0A1A;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 .registration-button:active {
-  background-color: #000000;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 .registration-button:disabled {
-  background-color: #9CA3AF;
+  background: #9CA3AF;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .registration-error {
-  background-color: #F9FAFB;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-top: 8px;
+  background-color: #FEF2F2;
+  border: 2px solid #FECACA;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .registration-error-text {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: #DC2626;
   margin: 0;
   line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .registration-container {
+    padding: 16px;
+  }
+  
+  .registration-card {
+    padding: 32px 24px;
+    max-width: 100%;
+  }
+  
+  .registration-title {
+    font-size: 24px;
+  }
 }

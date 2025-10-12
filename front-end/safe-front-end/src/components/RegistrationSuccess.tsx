@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './RegistrationSuccess.css';
 
 interface RegistrationSuccessProps {
@@ -10,6 +11,17 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   organizationName, 
   onRegisterAnother 
 }) => {
+  const navigate = useNavigate();
+
+  // Automatically navigate to signin after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/signin-credentials', { state: { organizationName } });
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [navigate, organizationName]);
+
   return (
     <div className="success-container">
       <div className="success-card">
@@ -23,6 +35,7 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
         {/* Success Messages */}
         <h1 className="success-title">Registration Successful!</h1>
         <p className="success-message">Your organization has been successfully registered</p>
+        <p className="success-redirect">Redirecting to sign in page...</p>
 
         {/* Organization Details */}
         <div className="success-details">
@@ -30,10 +43,10 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
           <p className="success-db-message">Database has been updated successfully</p>
         </div>
 
-        {/* Action Button */}
+        {/* Optional Action Button */}
         <button
           onClick={onRegisterAnother}
-          className="success-button"
+          className="success-button secondary"
         >
           Register Another Organization
         </button>
