@@ -52,6 +52,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.3",
     "multer": "^2.0.2",
+    "prompt-sync": "^4.2.0",
     "uuid": "^13.0.0"
   }
 }
