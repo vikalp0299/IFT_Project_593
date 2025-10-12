@@ -221,6 +221,29 @@
   line-height: 1.4;
 }
 
+/* Key Generation Status Styles */
+.key-generation-status {
+  background-color: #F0F9FF;
+  border: 2px solid #BAE6FD;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.key-generation-status-text {
+  color: #0369A1;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Password Requirements Styles */
 .password-requirements {
   margin-top: 12px;

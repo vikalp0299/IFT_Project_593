@@ -249,3 +249,98 @@ export const validateRegistrationData = (data) => {
     }
   };
 };
+
+/**
+ * Validate public key upload data
+ * @param {Object} keyData - Key data to validate
+ * @returns {Object} Validation result
+ */
+export const validateKeyUpload = (keyData) => {
+  const errors = [];
+
+  // Validate public key PEM format
+  if (!keyData.publicKeyPem) {
+    errors.push('Public key is required');
+  } else if (typeof keyData.publicKeyPem !== 'string') {
+    errors.push('Public key must be a string');
+  } else {
+    const pem = keyData.publicKeyPem.trim();
+    
+    // Check PEM format
+    if (!pem.includes('-----BEGIN PUBLIC KEY-----') || !pem.includes('-----END PUBLIC KEY-----')) {
+      errors.push('Public key must be in valid PEM format');
+    }
+    
+    // Check minimum length (RSA 2048-bit key should be at least 400 characters in PEM format)
+    if (pem.length < 400) {
+      errors.push(`Public key appears to be too short for a valid RSA key (${pem.length} characters, expected at least 400)`);
+    }
+    
+    // Check maximum length (reasonable limit for very large keys)
+    if (pem.length > 10000) {
+      errors.push('Public key is too large');
+    }
+  }
+
+  // Validate organization name
+  if (!keyData.organizationName) {
+    errors.push('Organization name is required');
+  } else if (typeof keyData.organizationName !== 'string') {
+    errors.push('Organization name must be a string');
+  } else if (keyData.organizationName.trim().length === 0) {
+    errors.push('Organization name cannot be empty');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    sanitized: {
+      publicKeyPem: keyData.publicKeyPem?.trim(),
+      organizationName: keyData.organizationName?.trim()
+    }
+  };
+};
+
+/**
+ * Validate key query parameters
+ * @param {Object} queryData - Query data to validate
+ * @returns {Object} Validation result
+ */
+export const validateKeyQuery = (queryData) => {
+  const errors = [];
+
+  // Validate organization ID if provided
+  if (queryData.organizationId) {
+    if (typeof queryData.organizationId !== 'string') {
+      errors.push('Organization ID must be a string');
+    } else if (!queryData.organizationId.match(/^[0-9a-fA-F]{24}$/)) {
+      errors.push('Invalid organization ID format');
+    }
+  }
+
+  // Validate user ID if provided
+  if (queryData.userId) {
+    if (typeof queryData.userId !== 'string') {
+      errors.push('User ID must be a string');
+    } else if (!queryData.userId.match(/^[0-9a-fA-F]{24}$/)) {
+      errors.push('Invalid user ID format');
+    }
+  }
+
+  // Validate key ID if provided
+  if (queryData.keyId) {
+    if (typeof queryData.keyId !== 'string') {
+      errors.push('Key ID must be a string');
+    } else {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(queryData.keyId)) {
+        errors.push('Invalid key ID format');
+      }
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};

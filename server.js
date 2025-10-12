@@ -17,6 +17,7 @@ import { connectDB, disconnectDB, createOrganization, findOrganization } from '.
 import User from './models/User.js';
 import loginRouter from './router/loginRouter.js';
 import router from './router/fileRouter.js';
+import keyRouter from './router/keyRouter.js';
 import { 
   authenticateToken, 
   optionalAuth, 
@@ -109,12 +110,13 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Static file serving (before API routes to avoid conflicts)
-app.use(express.static(path.join(__dirpath, 'public')));
-
 // API routes
 app.use('/api', router);
 app.use('/auth', loginRouter);
+app.use('/api/keys', keyRouter);
+
+// Static file serving (after API routes to avoid conflicts)
+app.use(express.static(path.join(__dirpath, 'public')));
 
 // Authentication routes
 app.post('/auth/refresh', refreshToken);

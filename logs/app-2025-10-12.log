@@ -643,3 +643,76 @@
 [2025-10-12T08:44:13.349Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
 [2025-10-12T08:44:13.368Z] INFO: MongoDB connected successfully {"host":"localhost"}
 [2025-10-12T08:44:17.697Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T09:16:03.918Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:16:03.935Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:16:26.980Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:16:26.992Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:16:47.948Z] INFO: GET / 200 - 5ms {"method":"GET","path":"/","statusCode":200,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T09:17:22.253Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T09:17:27.425Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:17:27.441Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:17:32.892Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:17:32.906Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:18:09.775Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T09:18:09.815Z] INFO: Organization created successfully {"organizationName":"greenapp","organizationId":"68eb72510759cfb017ce7c1e","email":"greenapp@ga.com"}
+[2025-10-12T09:18:09.821Z] INFO: POST /validate-organization 201 - 48ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":48,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:19:23.823Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:19:23.825Z] INFO: POST /register 201 - 165ms {"method":"POST","path":"/register","statusCode":201,"responseTime":165,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:20:50.494Z] ERROR: POST /public 401 - 1ms {"method":"POST","path":"/public","statusCode":401,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T09:21:09.876Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:21:09.892Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:21:48.709Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:21:48.723Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:22:48.304Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:22:48.309Z] INFO: POST /register 201 - 193ms {"method":"POST","path":"/register","statusCode":201,"responseTime":193,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:29:46.177Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:29:46.180Z] INFO: POST /register 201 - 77ms {"method":"POST","path":"/register","statusCode":201,"responseTime":77,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:29:46.198Z] WARN: Key upload validation failed {"userId":"68eb750aac487921a8b36260","errors":["Public key appears to be too short for a valid RSA key"]}
+[2025-10-12T09:29:46.200Z] ERROR: POST /public 400 - 15ms {"method":"POST","path":"/public","statusCode":400,"responseTime":15,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:31:09.694Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:31:09.708Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:31:31.811Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:31:31.825Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:31:52.568Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:31:52.582Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:32:11.460Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:32:11.476Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:32:42.466Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:32:42.470Z] INFO: POST /register 201 - 114ms {"method":"POST","path":"/register","statusCode":201,"responseTime":114,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:32:42.510Z] ERROR: Key upload error {"error":"PublicKey validation failed: keyFingerprint: Path `keyFingerprint` is required.","stack":"ValidationError: PublicKey validation failed: keyFingerprint: Path `keyFingerprint` is required.\n    at Document.invalidate (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\document.js:3358:32)\n    at C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\document.js:3119:17\n    at C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\schemaType.js:1416:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","userId":"68eb75ba3048c542915dfb49"}
+[2025-10-12T09:32:42.512Z] ERROR: POST /public 500 - 37ms {"method":"POST","path":"/public","statusCode":500,"responseTime":37,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:33:46.068Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:33:46.082Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:10.510Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:10.526Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:25.257Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:25.272Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:32.860Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:32.875Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:47.470Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:47.484Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:35:00.394Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:35:00.411Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:35:18.865Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T09:35:22.366Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:35:22.384Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:35:42.929Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:35:42.933Z] INFO: POST /register 201 - 198ms {"method":"POST","path":"/register","statusCode":201,"responseTime":198,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:35:42.968Z] INFO: Attempting to save public key {"userId":"68eb766e9c596bff38101163","organizationName":"greenapp","publicKeyLength":450}
+[2025-10-12T09:35:42.973Z] INFO: Public key uploaded successfully {"keyId":"61aa1522-0913-4a0a-9055-eababd87f82a","userId":"68eb766e9c596bff38101163","organizationId":"68eb72510759cfb017ce7c1e","organizationName":"greenapp"}
+[2025-10-12T09:35:42.975Z] INFO: POST /public 201 - 36ms {"method":"POST","path":"/public","statusCode":201,"responseTime":36,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:36:45.035Z] INFO: POST /validate-signin-organization 200 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:36:56.056Z] INFO: Auth attempt: sunilg
+[2025-10-12T09:36:56.127Z] INFO: Auth success: sunilg
+[2025-10-12T09:36:56.129Z] INFO: POST /login 200 - 72ms {"method":"POST","path":"/login","statusCode":200,"responseTime":72,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:41:09.624Z] WARN: Registration failed - user already exists {"username":"sunilg","email":"sunilg@ga.com"}
+[2025-10-12T09:41:09.626Z] ERROR: POST /register 409 - 7ms {"method":"POST","path":"/register","statusCode":409,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:41:52.912Z] WARN: Registration failed - user already exists {"username":"sunilgu","email":"sunilg@ga.com"}
+[2025-10-12T09:41:52.914Z] ERROR: POST /register 409 - 5ms {"method":"POST","path":"/register","statusCode":409,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:42:46.313Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T09:42:46.321Z] ERROR: POST /validate-organization 409 - 9ms {"method":"POST","path":"/validate-organization","statusCode":409,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:43:23.655Z] INFO: POST /validate-signin-organization 200 - 3ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:43:33.588Z] INFO: Auth attempt: sunilg
+[2025-10-12T09:43:33.663Z] INFO: Auth success: sunilg
+[2025-10-12T09:43:33.664Z] INFO: POST /login 200 - 76ms {"method":"POST","path":"/login","statusCode":200,"responseTime":76,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:45:33.368Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}

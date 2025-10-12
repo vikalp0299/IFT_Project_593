@@ -1,6 +1,8 @@
 // Authentication Service for Frontend
 // Handles JWT tokens, API calls with authentication, and user session management
 
+const API_BASE_URL = 'http://localhost:8000';
+
 interface AuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -254,7 +256,8 @@ class AuthService {
     }
 
     try {
-      const response = await fetch(url, {
+      const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+      const response = await fetch(fullUrl, {
         ...options,
         headers,
       });
@@ -266,7 +269,7 @@ class AuthService {
         if (refreshed && this.accessToken) {
           // Retry the request with new token
           headers['Authorization'] = `Bearer ${this.accessToken}`;
-          const retryResponse = await fetch(url, {
+          const retryResponse = await fetch(fullUrl, {
             ...options,
             headers,
           });
@@ -306,6 +309,140 @@ class AuthService {
   // Test user management route
   public async testUserManagementRoute(): Promise<ApiResponse> {
     return this.authenticatedRequest('http://localhost:8000/api/user-management');
+  }
+
+  // Key Management Methods
+
+  /**
+   * Upload public key to backend
+   */
+  public async uploadPublicKey(publicKeyPem: string, organizationName: string): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest('/api/keys/public', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          publicKeyPem,
+          organizationName
+        }),
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Public key upload failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during key upload'
+      };
+    }
+  }
+
+  /**
+   * Get public keys for an organization
+   */
+  public async getOrganizationKeys(organizationId: string): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest(`/api/keys/organization/${organizationId}`);
+      return response;
+    } catch (error) {
+      console.error('Organization keys query failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during keys query'
+      };
+    }
+  }
+
+  /**
+   * Get specific user's public key in organization
+   */
+  public async getUserKeyInOrganization(userId: string, organizationId: string): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest(`/api/keys/user/${userId}/org/${organizationId}`);
+      return response;
+    } catch (error) {
+      console.error('User key query failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during key query'
+      };
+    }
+  }
+
+  /**
+   * Get public key by ID
+   */
+  public async getPublicKeyById(keyId: string): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest(`/api/keys/public/${keyId}`);
+      return response;
+    } catch (error) {
+      console.error('Key query failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during key query'
+      };
+    }
+  }
+
+  /**
+   * Get current user's keys across all organizations
+   */
+  public async getMyKeys(): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest('/api/keys/my-keys');
+      return response;
+    } catch (error) {
+      console.error('User keys query failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during user keys query'
+      };
+    }
+  }
+
+  /**
+   * Update public key
+   */
+  public async updatePublicKey(keyId: string, updateData: { publicKeyPem?: string; keyType?: string; keySize?: number }): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest(`/api/keys/public/${keyId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Key update failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during key update'
+      };
+    }
+  }
+
+  /**
+   * Deactivate public key
+   */
+  public async deactivatePublicKey(keyId: string): Promise<ApiResponse> {
+    try {
+      const response = await this.authenticatedRequest(`/api/keys/public/${keyId}`, {
+        method: 'DELETE',
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Key deactivation failed:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Network error during key deactivation'
+      };
+    }
   }
 }
 
