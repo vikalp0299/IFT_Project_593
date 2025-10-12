@@ -13,14 +13,14 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // Automatically navigate to signin after 2 seconds
+  // Automatically navigate to signin after 3 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/signin-credentials', { state: { organizationName } });
-    }, 2000);
+      navigate('/signin');
+    }, 3000);
 
     return () => clearTimeout(timer);
-  }, [navigate, organizationName]);
+  }, [navigate]);
 
   return (
     <div className="success-container">
@@ -39,17 +39,26 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
 
         {/* Organization Details */}
         <div className="success-details">
-          <p className="success-org-name">Organization Name: {organizationName}</p>
+          <p className="success-org-name">Organization: {organizationName}</p>
           <p className="success-db-message">Database has been updated successfully</p>
+          <p className="success-next-step">You can now create accounts and sign in</p>
         </div>
 
-        {/* Optional Action Button */}
-        <button
-          onClick={onRegisterAnother}
-          className="success-button secondary"
-        >
-          Register Another Organization
-        </button>
+        {/* Action Buttons */}
+        <div className="success-buttons">
+          <button
+            onClick={() => navigate('/signin')}
+            className="success-button primary"
+          >
+            Go to Sign In
+          </button>
+          <button
+            onClick={onRegisterAnother}
+            className="success-button secondary"
+          >
+            Register Another Organization
+          </button>
+        </div>
       </div>
     </div>
   );

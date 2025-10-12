@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './CreateAccount.css';
 import { AccountCreatedSuccess } from './AccountCreatedSuccess';
+import { authService } from '../services/authService';
 
 interface CreateAccountProps {
   onAccountCreated?: (accountData: { organizationName: string; username: string; password: string }) => void;
@@ -15,11 +16,32 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
+    // Basic Authentication
     organizationName: '',
     username: '',
+    email: '',
     password: '',
-    email: ''
+    confirmPassword: '',
+    
+    // Personal Information
+    firstName: '',
+    lastName: '',
+    phone: '',
+    jobTitle: '',
+    department: '',
+    
+    // Role and Preferences
+    role: 'Employee',
+    bio: '',
+    timezone: 'UTC',
+    language: 'en',
+    
+    // Contact Preferences
+    emailNotifications: true,
+    smsNotifications: false,
+    marketingEmails: false
   });
+  
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -31,30 +53,43 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
     const errors: string[] = [];
     
     if (password.length < 8) {
-      errors.push('At least 8 characters long');
+      errors.push('Password must be at least 8 characters long');
     }
     
     if (!/[A-Z]/.test(password)) {
-      errors.push('At least one uppercase letter');
+      errors.push('Password must contain at least one uppercase letter');
     }
     
     if (!/[a-z]/.test(password)) {
-      errors.push('At least one lowercase letter');
+      errors.push('Password must contain at least one lowercase letter');
     }
     
     if (!/\d/.test(password)) {
-      errors.push('At least one number');
+      errors.push('Password must contain at least one number');
+    }
+    
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      errors.push('Password must contain at least one special character');
     }
     
     return errors;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
     
     // Clear error when user starts typing
     if (error) {
@@ -74,31 +109,65 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
     setIsLoading(true);
 
     try {
-      // Frontend password validation
+      // Frontend validation
+      const errors = [];
+      
+      // Basic validation
+      if (!formData.username.trim()) errors.push('Username is required');
+      if (!formData.email.trim()) errors.push('Email is required');
+      if (!formData.firstName.trim()) errors.push('First name is required');
+      if (!formData.lastName.trim()) errors.push('Last name is required');
+      if (!formData.phone.trim()) errors.push('Phone number is required');
+      if (!formData.jobTitle.trim()) errors.push('Job title is required');
+      if (!formData.department.trim()) errors.push('Department is required');
+      if (!formData.organizationName.trim()) errors.push('Organization name is required');
+      
+      // Password validation
       const passwordValidationErrors = validatePassword(formData.password);
       if (passwordValidationErrors.length > 0) {
-        setError('Password does not meet requirements. Please check the password requirements below.');
+        errors.push('Password does not meet requirements');
+      }
+      
+      // Password confirmation
+      if (formData.password !== formData.confirmPassword) {
+        errors.push('Password confirmation does not match');
+      }
+      
+      if (errors.length > 0) {
+        setError(errors.join('. '));
         setIsLoading(false);
         return;
       }
 
-      // Organization validation will be handled by the backend
-
-      // Call your existing server's register endpoint
-      const response = await fetch('http://localhost:8000/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          email: formData.email,
-          organizationName: formData.organizationName
-        })
+      // Use the new authentication service for registration
+      const data = await authService.register({
+        // Basic Authentication
+        username: formData.username,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        email: formData.email,
+        
+        // Personal Information
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        jobTitle: formData.jobTitle,
+        department: formData.department,
+        
+        // Role and Organization
+        role: formData.role,
+        organizationName: formData.organizationName,
+        
+        // Contact Preferences
+        emailNotifications: formData.emailNotifications,
+        smsNotifications: formData.smsNotifications,
+        marketingEmails: formData.marketingEmails,
+        
+        // Optional fields
+        bio: formData.bio,
+        timezone: formData.timezone,
+        language: formData.language
       });
-
-      const data = await response.json();
       
       if (data.success) {
         if (onAccountCreated) {
@@ -106,7 +175,11 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
         }
         setShowSuccess(true);
       } else {
-        setError(data.message || 'Registration failed');
+        if (data.errors && Array.isArray(data.errors)) {
+          setError(data.errors.join('. '));
+        } else {
+          setError(data.message || 'Registration failed');
+        }
       }
     } catch (err) {
       console.error('Account creation failed:', err);
@@ -116,100 +189,112 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
     }
   };
 
-  const handleRedirect = () => {
-    if (onSignIn) {
-      onSignIn();
-    }
-  };
-
   if (showSuccess) {
     return <AccountCreatedSuccess />;
   }
 
-        return (
-            <div className="create-account-container">
-              <div className="create-account-card">
-                {/* Home Navigation */}
-                <div className="create-account-nav">
-                  <Link to="/" className="create-account-home">
-                    🏠 Landing
-                  </Link>
-                </div>
-                
-                <h1 className="create-account-title">Create Account</h1>
-        <p className="create-account-subtitle">Sign up with your organization credentials</p>
+  return (
+    <div className="create-account-container">
+      <div className="create-account-card">
+        {/* Home Navigation */}
+        <div className="create-account-nav">
+          <Link to="/" className="create-account-home">
+            🏠 Landing
+          </Link>
+        </div>
+        
+        <h1 className="create-account-title">Create Account</h1>
+        <p className="create-account-subtitle">Complete your profile to get started</p>
         
         <form onSubmit={handleSubmit} className="create-account-form">
-          <div className="create-account-field">
-            <label htmlFor="organizationName" className="create-account-label">
-              Organization Name
-            </label>
-            <input
-              id="organizationName"
-              name="organizationName"
-              type="text"
-              value={formData.organizationName}
-              onChange={handleInputChange}
-              placeholder="Enter your organization name"
-              className="create-account-input"
-              required
-            />
-                    <p className="create-account-helper">
-                      Enter your organization name to register
-                    </p>
-                    <p className="create-account-helper" style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
-                      Available organizations: <strong>test_org</strong>, <strong>demo_org</strong>, <strong>test_organization</strong>
-                    </p>
-          </div>
+          {/* Basic Authentication Section */}
+          <div className="form-section">
+            <h3 className="section-title">Authentication</h3>
+            
+            <div className="create-account-field">
+              <label htmlFor="organizationName" className="create-account-label">
+                Organization Name *
+              </label>
+              <input
+                id="organizationName"
+                name="organizationName"
+                type="text"
+                value={formData.organizationName}
+                onChange={handleInputChange}
+                placeholder="Enter your organization name"
+                className="create-account-input"
+                required
+              />
+              <p className="create-account-helper">
+                Enter the organization name you want to join
+              </p>
+            </div>
 
-          <div className="create-account-field">
-            <label htmlFor="email" className="create-account-label">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email"
-              className="create-account-input"
-              required
-            />
-          </div>
+            <div className="create-account-field">
+              <label htmlFor="username" className="create-account-label">
+                Username *
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                value={formData.username}
+                onChange={handleInputChange}
+                placeholder="Choose a username"
+                className="create-account-input"
+                required
+              />
+            </div>
 
-          <div className="create-account-field">
-            <label htmlFor="username" className="create-account-label">
-              Username
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              value={formData.username}
-              onChange={handleInputChange}
-              placeholder="Choose a username"
-              className="create-account-input"
-              required
-            />
-          </div>
+            <div className="create-account-field">
+              <label htmlFor="email" className="create-account-label">
+                Email *
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="Enter your email"
+                className="create-account-input"
+                required
+              />
+            </div>
 
-          <div className="create-account-field">
-            <label htmlFor="password" className="create-account-label">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              onFocus={() => setShowPasswordRequirements(true)}
-              onBlur={() => setShowPasswordRequirements(false)}
-              placeholder="Create a password"
-              className={`create-account-input ${passwordErrors.length > 0 ? 'error' : ''}`}
-              required
-            />
+            <div className="create-account-field">
+              <label htmlFor="password" className="create-account-label">
+                Password *
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                onFocus={() => setShowPasswordRequirements(true)}
+                onBlur={() => setShowPasswordRequirements(false)}
+                placeholder="Create a password"
+                className={`create-account-input ${passwordErrors.length > 0 ? 'error' : ''}`}
+                required
+              />
+            </div>
+
+            <div className="create-account-field">
+              <label htmlFor="confirmPassword" className="create-account-label">
+                Confirm Password *
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm your password"
+                className={`create-account-input ${formData.password !== formData.confirmPassword && formData.confirmPassword ? 'error' : ''}`}
+                required
+              />
+            </div>
             
             {/* Password Requirements */}
             {(showPasswordRequirements || passwordErrors.length > 0) && (
@@ -228,42 +313,193 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
                   <li className={/\d/.test(formData.password) ? 'valid' : 'invalid'}>
                     ✓ At least one number (0-9)
                   </li>
+                  <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'valid' : 'invalid'}>
+                    ✓ At least one special character (!@#$%^&*...)
+                  </li>
                 </ul>
               </div>
             )}
           </div>
 
+          {/* Personal Information Section */}
+          <div className="form-section">
+            <h3 className="section-title">Personal Information</h3>
+            
+            <div className="name-row">
+              <div className="create-account-field">
+                <label htmlFor="firstName" className="create-account-label">
+                  First Name *
+                </label>
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={handleInputChange}
+                  placeholder="John"
+                  className="create-account-input"
+                  required
+                />
+              </div>
+
+              <div className="create-account-field">
+                <label htmlFor="lastName" className="create-account-label">
+                  Last Name *
+                </label>
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  placeholder="Doe"
+                  className="create-account-input"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="create-account-field">
+              <label htmlFor="phone" className="create-account-label">
+                Phone Number *
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleInputChange}
+                placeholder="+1 (555) 123-4567"
+                className="create-account-input"
+                required
+              />
+            </div>
+
+            <div className="job-row">
+              <div className="create-account-field">
+                <label htmlFor="jobTitle" className="create-account-label">
+                  Job Title *
+                </label>
+                <input
+                  id="jobTitle"
+                  name="jobTitle"
+                  type="text"
+                  value={formData.jobTitle}
+                  onChange={handleInputChange}
+                  placeholder="Software Engineer"
+                  className="create-account-input"
+                  required
+                />
+              </div>
+
+              <div className="create-account-field">
+                <label htmlFor="department" className="create-account-label">
+                  Department *
+                </label>
+                <input
+                  id="department"
+                  name="department"
+                  type="text"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  placeholder="Engineering"
+                  className="create-account-input"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Role and Preferences Section */}
+          <div className="form-section">
+            <h3 className="section-title">Role & Preferences</h3>
+            
+            <div className="create-account-field">
+              <label htmlFor="role" className="create-account-label">
+                Role *
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                className="create-account-input"
+                required
+              >
+                <option value="Employee">Employee</option>
+                <option value="Manager">Manager</option>
+                <option value="Admin">Admin</option>
+                <option value="Guest">Guest</option>
+              </select>
+            </div>
+
+            <div className="create-account-field">
+              <label htmlFor="bio" className="create-account-label">
+                Bio (Optional)
+              </label>
+              <textarea
+                id="bio"
+                name="bio"
+                value={formData.bio}
+                onChange={handleInputChange}
+                placeholder="Tell us about yourself..."
+                className="create-account-input"
+                rows={3}
+              />
+            </div>
+          </div>
+
+          {/* Contact Preferences Section */}
+          <div className="form-section">
+            <h3 className="section-title">Contact Preferences</h3>
+            
+            <div className="preferences-row">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="emailNotifications"
+                  checked={formData.emailNotifications}
+                  onChange={handleInputChange}
+                />
+                <span className="checkbox-text">Email Notifications</span>
+              </label>
+
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="smsNotifications"
+                  checked={formData.smsNotifications}
+                  onChange={handleInputChange}
+                />
+                <span className="checkbox-text">SMS Notifications</span>
+              </label>
+
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="marketingEmails"
+                  checked={formData.marketingEmails}
+                  onChange={handleInputChange}
+                />
+                <span className="checkbox-text">Marketing Emails</span>
+              </label>
+            </div>
+          </div>
+
           {error && (
             <div className="create-account-error">
-              <div className="create-account-error-icon"></div>
               <p className="create-account-error-text">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
-            disabled={
-              isLoading || 
-              !formData.organizationName.trim() || 
-              !formData.username.trim() || 
-              !formData.password.trim() || 
-              !formData.email.trim() ||
-              passwordErrors.length > 0
-            }
+            disabled={isLoading}
             className="create-account-button"
           >
-            {isLoading ? 'Creating Account...' : 'Sign Up'}
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
-
-        <div className="create-account-footer">
-          <p className="create-account-footer-text">
-            Already have an account?{' '}
-            <a href="/signin" className="create-account-link">
-              Sign in
-            </a>
-          </p>
-        </div>
       </div>
     </div>
   );

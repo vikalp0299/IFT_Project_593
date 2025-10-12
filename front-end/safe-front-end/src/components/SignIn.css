@@ -1,7 +1,7 @@
 /* CACHE BUST - Updated SignIn for consistent container width */
 .signin-container {
   height: 100vh;
-  width: 75vw;
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: center;

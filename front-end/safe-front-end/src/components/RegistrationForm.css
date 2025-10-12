@@ -1,6 +1,6 @@
 .registration-container {
   height: 100vh;
-  width: 75vw;
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,12 +14,14 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   padding: 48px 40px;
   width: 100%;
-  max-width: 480px;
-  min-height: 300px;
+  max-width: 800px;
+  min-height: 600px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .registration-nav {
@@ -176,5 +178,66 @@
   
   .registration-title {
     font-size: 24px;
+  }
+}
+
+/* Form Sections */
+.form-section {
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 24px;
+  background-color: #F9FAFB;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 20px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+/* Address Row Layout */
+.address-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Error List Styling */
+.error-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #DC2626;
+  margin: 0 0 12px 0;
+}
+
+.error-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.error-item {
+  color: #DC2626;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* Responsive adjustments for new layout */
+@media (max-width: 768px) {
+  .address-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .form-section {
+    padding: 20px 16px;
+  }
+  
+  .registration-card {
+    max-width: 100%;
+    margin: 0 16px;
   }
 }

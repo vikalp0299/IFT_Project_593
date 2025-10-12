@@ -455,3 +455,191 @@
 [2025-10-12T07:31:12.333Z] ERROR: POST /validate-signin-organization 404 - 9ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
 [2025-10-12T07:47:10.475Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
 [2025-10-12T07:47:10.477Z] INFO: HTTP server closed
+[2025-10-12T07:52:05.647Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.647Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.648Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.649Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.654Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.664Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.663Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.664Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.664Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.669Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.825Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.825Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.838Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.842Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.844Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.848Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.857Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.863Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.870Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.886Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.821Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.825Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.826Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.829Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.830Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.841Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.845Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.849Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.849Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.853Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.119Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.122Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.132Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.133Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.141Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.141Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.144Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.150Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.153Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.162Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.189Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.191Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.199Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.199Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.211Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:14.508Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:14.525Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:14.564Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:57:29.685Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T07:57:29.706Z] INFO: Organization created successfully {"organizationName":"greenapp","organizationId":"68eb5f692dd06786688c5445","email":"greenapp@ga.com"}
+[2025-10-12T07:57:29.711Z] INFO: POST /validate-organization 201 - 27ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":27,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:00:19.035Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T08:00:19.047Z] INFO: Organization created successfully {"organizationName":"greenapp","organizationId":"68eb60132dd06786688c5449","email":"greenapp@ga.com"}
+[2025-10-12T08:00:19.049Z] INFO: POST /validate-organization 201 - 14ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":14,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:00:29.589Z] INFO: POST /validate-signin-organization 200 - 7ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:01:13.081Z] INFO: User registered successfully {"username":"testuser","email":"test@ga.com"}
+[2025-10-12T08:01:13.083Z] INFO: POST /register 201 - 139ms {"method":"POST","path":"/register","statusCode":201,"responseTime":139,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:01:20.458Z] INFO: POST /validate-signin-organization 200 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:01:31.394Z] INFO: Auth attempt: testuser
+[2025-10-12T08:01:31.519Z] INFO: Auth success: testuser
+[2025-10-12T08:01:31.522Z] INFO: POST /login 200 - 129ms {"method":"POST","path":"/login","statusCode":200,"responseTime":129,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:03:20.645Z] WARN: Registration failed - organization not found {"organizationName":"test_organization","username":"test"}
+[2025-10-12T08:03:20.646Z] ERROR: POST /register 400 - 6ms {"method":"POST","path":"/register","statusCode":400,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:06:36.365Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.369Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.377Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.380Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.380Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.383Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.391Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.393Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.400Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.404Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.405Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.406Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.453Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.456Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.463Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.466Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.467Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.470Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.661Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.661Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.674Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.676Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.677Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.679Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.680Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.682Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.696Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.696Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.699Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.704Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.741Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.741Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.757Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.761Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.762Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.765Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.185Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.187Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.187Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.188Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.188Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.207Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.206Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.208Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.207Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.208Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.233Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.254Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.261Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.260Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.261Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.261Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.265Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.302Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:22:53.928Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T08:22:53.935Z] INFO: POST /register 201 - 182ms {"method":"POST","path":"/register","statusCode":201,"responseTime":182,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:23:02.292Z] INFO: POST /validate-signin-organization 200 - 5ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:23:10.994Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:23:11.120Z] INFO: Auth success: sunilg
+[2025-10-12T08:23:11.122Z] INFO: POST /login 200 - 129ms {"method":"POST","path":"/login","statusCode":200,"responseTime":129,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:24:02.723Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T08:24:19.281Z] INFO: POST /validate-signin-organization 200 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:24:35.156Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:24:35.271Z] INFO: Auth success: sunilg
+[2025-10-12T08:24:35.274Z] INFO: POST /login 200 - 119ms {"method":"POST","path":"/login","statusCode":200,"responseTime":119,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:25:20.889Z] INFO: GET / 200 - 3ms {"method":"GET","path":"/","statusCode":200,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T08:26:11.843Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.844Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.849Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.856Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.862Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.863Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.868Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.871Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.877Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.888Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.914Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.915Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.917Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.928Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.947Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:29:35.304Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:29:35.323Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:29:35.368Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:29:43.160Z] INFO: POST /validate-signin-organization 200 - 11ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":11,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:30:46.417Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:30:46.431Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:30:46.466Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: phone: Please enter a valid phone number"}
+[2025-10-12T08:30:56.678Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:30:56.690Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:30:56.728Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: phone: Please enter a valid phone number"}
+[2025-10-12T08:31:27.490Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:31:27.506Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:31:37.024Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:31:37.038Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:31:46.000Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:31:46.013Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:32:03.823Z] INFO: POST /validate-signin-organization 200 - 23ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":23,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:32:13.039Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:32:13.201Z] INFO: Auth success: sunilg
+[2025-10-12T08:32:13.203Z] INFO: POST /login 200 - 165ms {"method":"POST","path":"/login","statusCode":200,"responseTime":165,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:34:12.361Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:34:12.376Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:34:30.901Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:34:30.914Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:34:58.313Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:34:58.327Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:13.083Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:13.097Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:27.776Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:27.790Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:41.071Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:41.085Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:54.956Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:54.971Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:37:26.662Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:37:26.678Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:40:27.131Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:40:27.145Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:43:19.442Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:43:19.549Z] INFO: Auth success: sunilg
+[2025-10-12T08:43:19.552Z] INFO: POST /login 200 - 110ms {"method":"POST","path":"/login","statusCode":200,"responseTime":110,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:44:13.349Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:44:13.368Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:44:17.697Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}

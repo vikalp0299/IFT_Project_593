@@ -1,5 +1,6 @@
 .success-container {
   height: 100vh;
+  width: auto;
   /* background-color: #FFFFFF; */
   display: flex;
   align-items: center;
@@ -101,4 +102,65 @@
 
 .success-button:active {
   background-color: #F3F4F6;
+}
+
+/* Success redirect message */
+.success-redirect {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  margin: 0 0 24px 0;
+  line-height: 1.4;
+}
+
+.success-next-step {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #059669;
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+/* Button layout */
+.success-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.success-button.primary {
+  background-color: #10B981;
+  color: #FFFFFF;
+  border-color: #10B981;
+}
+
+.success-button.primary:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.success-button.secondary {
+  background-color: #FFFFFF;
+  color: #374151;
+  border-color: #D1D5DB;
+}
+
+.success-button.secondary:hover {
+  background-color: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .success-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .success-button {
+    max-width: 300px;
+  }
 }

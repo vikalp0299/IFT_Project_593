@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import './SignInCredentials.css';
+import { authService } from '../services/authService';
 
 interface SignInCredentialsProps {
   organizationName?: string;
@@ -46,15 +47,12 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
     setIsLoading(true);
 
     try {
-      // Call your existing server's login endpoint
-      const response = await fetch(`http://localhost:8000/login?username=${credentials.username}&password=${credentials.password}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      const data = await response.json();
+      // Use the new authentication service
+      const data = await authService.login(
+        credentials.username,
+        credentials.password,
+        organizationName || 'default_org'
+      );
       
       // Log the response to console
       console.log('Login response:', data);
@@ -105,10 +103,12 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
 
           {/* User Details */}
           <div className="success-details" style={{ marginBottom: '30px' }}>
+            <p><strong>Welcome:</strong> {userData.firstName} {userData.lastName}</p>
             <p><strong>Username:</strong> {userData.username}</p>
             <p><strong>Email:</strong> {userData.email}</p>
-            <p><strong>Login Time:</strong> {new Date(userData.loginTime).toLocaleString()}</p>
-            <p><strong>User ID:</strong> {userData.userId}</p>
+            <p><strong>Role:</strong> {userData.role}</p>
+            <p><strong>Organization:</strong> {userData.organizationName}</p>
+            <p><strong>Login Time:</strong> {new Date().toLocaleString()}</p>
           </div>
 
           {/* Action Buttons */}
@@ -129,6 +129,27 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
               style={{ marginTop: '10px', backgroundColor: '#6B7280' }}
             >
               Go to Homepage
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await authService.logout();
+                  setLoginSuccess(false);
+                  setUserData(null);
+                  setCredentials({ username: '', password: '' });
+                  console.log('✅ Logged out successfully');
+                } catch (error) {
+                  console.error('❌ Logout failed:', error);
+                }
+              }}
+              className="signin-credentials-button"
+              style={{ 
+                marginTop: '10px', 
+                backgroundColor: '#DC2626',
+                color: 'white'
+              }}
+            >
+              Logout
             </button>
           </div>
         </div>

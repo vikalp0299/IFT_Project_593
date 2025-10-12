@@ -13,7 +13,9 @@ export const OrganizationRegistration: React.FC = () => {
     setCurrentStep('form');
   };
 
-  const handleRegistrationSuccess = (orgName: string) => {
+  const handleRegistrationSuccess = (orgData: any) => {
+    // Handle the new comprehensive organization data structure
+    const orgName = orgData.displayName || orgData.name || 'Unknown Organization';
     setRegisteredOrganization(orgName);
     setCurrentStep('success');
   };

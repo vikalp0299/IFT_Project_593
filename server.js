@@ -17,6 +17,15 @@ import { connectDB, disconnectDB, createOrganization, findOrganization } from '.
 import User from './models/User.js';
 import loginRouter from './router/loginRouter.js';
 import router from './router/fileRouter.js';
+import { 
+  authenticateToken, 
+  optionalAuth, 
+  requireRole, 
+  requirePermission,
+  refreshToken,
+  logout,
+  getCurrentUser
+} from './middleware/auth.js';
 
 // Utilities
 import { logger } from './utils/logger.js';
@@ -106,6 +115,11 @@ app.use(express.static(path.join(__dirpath, 'public')));
 // API routes
 app.use('/api', router);
 app.use('/auth', loginRouter);
+
+// Authentication routes
+app.post('/auth/refresh', refreshToken);
+app.post('/auth/logout', authenticateToken, logout);
+app.get('/auth/me', authenticateToken, getCurrentUser);
 
 // User Authentication Endpoints
 /**
@@ -198,56 +212,134 @@ app.post('/login', async (req, res) => {
  */
 app.post('/validate-organization', async (req, res) => {
   try {
-    const { organizationName } = req.body;
+    const {
+      name,
+      displayName,
+      email,
+      phone,
+      address,
+      businessType,
+      industry,
+      website,
+      maxUsers
+    } = req.body;
     
-    // Validate input
-    const validation = validateOrganizationName(organizationName);
-    if (!validation.isValid) {
-      logger.warn('Organization validation failed', { organizationName, errors: validation.errors });
+    // Validate required fields
+    const errors = [];
+    
+    if (!name || name.trim().length < 2) {
+      errors.push('Organization name is required and must be at least 2 characters');
+    }
+    if (!displayName || displayName.trim().length < 2) {
+      errors.push('Display name is required and must be at least 2 characters');
+    }
+    if (!email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+      errors.push('Valid email is required');
+    }
+    if (!phone || !/^[\+]?[1-9][\d]{0,15}$/.test(phone)) {
+      errors.push('Valid phone number is required');
+    }
+    if (!address || !address.street || !address.city || !address.state || !address.zipCode || !address.country) {
+      errors.push('Complete address information is required');
+    }
+    if (!businessType || !['Corporation', 'LLC', 'Partnership', 'Sole Proprietorship', 'Non-Profit', 'Government', 'Other'].includes(businessType)) {
+      errors.push('Valid business type is required');
+    }
+    if (!industry || industry.trim().length < 2) {
+      errors.push('Industry is required and must be at least 2 characters');
+    }
+    
+    if (errors.length > 0) {
+      logger.warn('Organization validation failed', { errors });
       return res.status(400).json({
         success: false,
-        message: 'Invalid organization name',
-        errors: validation.errors
+        message: 'Validation failed',
+        errors
       });
     }
-
-    const sanitizedOrgName = validation.sanitized;
     
-    logger.info('Organization validation request', { organizationName: sanitizedOrgName });
+    logger.info('Organization registration request', { 
+      name: name.toLowerCase(), 
+      email,
+      businessType,
+      industry 
+    });
 
-    // Check if organization already exists
-    const existingOrg = await findOrganization(sanitizedOrgName);
+    // Check if organization already exists (by name or email)
+    const { Organization } = await import('./db.js');
+    const existingOrgByName = await Organization.findOne({ 
+      name: name.toLowerCase().trim() 
+    });
+    const existingOrgByEmail = await Organization.findOne({ 
+      email: email.toLowerCase().trim() 
+    });
     
-    if (existingOrg) {
+    if (existingOrgByName) {
       return res.status(409).json({
         success: false,
-        message: 'This organization name already exists. Please choose a different name.'
+        message: 'Organization name already exists. Please choose a different name.'
+      });
+    }
+    
+    if (existingOrgByEmail) {
+      return res.status(409).json({
+        success: false,
+        message: 'Organization email already exists. Please use a different email address.'
       });
     }
 
-    // Create the organization
-    const result = await createOrganization(sanitizedOrgName);
+    // Create the organization with comprehensive data
+    const organizationData = {
+      name: name.toLowerCase().trim(),
+      displayName: displayName.trim(),
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      address: {
+        street: address.street.trim(),
+        city: address.city.trim(),
+        state: address.state.trim(),
+        zipCode: address.zipCode.trim(),
+        country: address.country.trim()
+      },
+      businessType: businessType,
+      industry: industry.trim(),
+      website: website ? website.trim() : '',
+      maxUsers: maxUsers || 50
+    };
+    
+    const result = await createOrganization(organizationData);
     
     if (result.success) {
-      logger.info('Organization created successfully', { organizationName: sanitizedOrgName });
+      logger.info('Organization created successfully', { 
+        organizationName: organizationData.name,
+        organizationId: result.organization._id,
+        email: organizationData.email
+      });
       res.status(201).json({
         success: true,
         message: 'Organization registered successfully',
         data: {
-          organizationName: sanitizedOrgName,
           organizationId: result.organization._id,
-          registeredAt: new Date().toISOString()
+          name: result.organization.name,
+          displayName: result.organization.displayName,
+          email: result.organization.email,
+          status: result.organization.status,
+          createdAt: result.organization.createdAt
         }
       });
     } else {
-      res.status(409).json({
+      logger.error('Failed to create organization', { 
+        organizationName: organizationData.name, 
+        error: result.message 
+      });
+      res.status(500).json({
         success: false,
-        message: result.message
+        message: result.message || 'Failed to create organization'
       });
     }
 
   } catch (error) {
-    logger.error('Organization validation error', { error: error.message, stack: error.stack });
+    logger.error('Organization registration error', { error: error.message, stack: error.stack });
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -373,6 +465,51 @@ if (serverConfig.nodeEnv === 'development') {
     }
   });
 }
+
+// Protected routes - require authentication
+/**
+ * @route GET /api/protected
+ * @desc Protected route example
+ * @access Private
+ */
+app.get('/api/protected', authenticateToken, (req, res) => {
+  res.json({
+    success: true,
+    message: 'Access granted to protected resource',
+    user: {
+      id: req.user.id,
+      username: req.user.username,
+      role: req.user.role,
+      organizationName: req.user.organizationName
+    }
+  });
+});
+
+/**
+ * @route GET /api/admin
+ * @desc Admin only route
+ * @access Private (Admin only)
+ */
+app.get('/api/admin', authenticateToken, requireRole(['Admin']), (req, res) => {
+  res.json({
+    success: true,
+    message: 'Admin access granted',
+    user: req.user
+  });
+});
+
+/**
+ * @route GET /api/user-management
+ * @desc User management route (requires specific permissions)
+ * @access Private (requires manage_users permission)
+ */
+app.get('/api/user-management', authenticateToken, requirePermission(['manage_users']), (req, res) => {
+  res.json({
+    success: true,
+    message: 'User management access granted',
+    user: req.user
+  });
+});
 
 // 404 handler
 app.use((req, res) => {
