@@ -131,10 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const fileHTML = files.map(file => {
-            const fileName = file.originalName || file.fileName || 'Unnamed File';
+            // Use correct schema field names
+            const fileName = file.originalname || file.filename || 'Unnamed File';
             const fileSize = formatFileSize(file.size);
-            const uploadDate = formatDate(file.uploadDate);
-            const uploadId = file.uploadId || 'N/A';
+            const uploadDate = formatDate(file.uploadedAt);
+            const fileType = file.mimetype || 'Unknown type';
             const accessLevel = file.access && file.access.length > 0 
                 ? `Shared with ${file.access.length} user(s)` 
                 : 'Private';
@@ -146,10 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>${escapeHtml(fileName)}</span>
                     </div>
                     <div class="file-meta">
-                        <span><strong>💾 Size:</strong> ${fileSize}</span>
-                        <span><strong>📅 Uploaded:</strong> ${uploadDate}</span>
-                        <span><strong>🔑 ID:</strong> ${escapeHtml(uploadId)}</span>
-                        <span><strong>🔒 Access:</strong> ${accessLevel}</span>
+                        <span>💾 <strong>Size:</strong> ${fileSize}</span>
+                        <span>📅 <strong>Uploaded:</strong> ${uploadDate}</span>
+                        <span>📋 <strong>Type:</strong> ${escapeHtml(fileType)}</span>
+                        <span>🔒 <strong>Access:</strong> ${accessLevel}</span>
                     </div>
                 </div>
             `;

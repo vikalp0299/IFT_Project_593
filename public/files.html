@@ -278,6 +278,33 @@
     </header>
 
     <div class="container">
+        <!-- File Upload Section -->
+        <div class="files-section" style="margin-bottom: 30px;">
+            <div class="section-header">
+                <h2>Upload File</h2>
+            </div>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div style="display: flex; gap: 15px; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <input 
+                            type="file" 
+                            id="fileInput" 
+                            name="file" 
+                            required
+                            style="width: 100%; padding: 10px; border: 2px solid #e1e1e1; border-radius: 6px; cursor: pointer;"
+                        >
+                        <div id="fileInfo" style="margin-top: 8px; font-size: 14px; color: #666;"></div>
+                    </div>
+                    <button type="submit" class="btn-refresh" id="uploadBtn" style="min-width: 120px;">
+                        <span>📤</span>
+                        <span>Upload</span>
+                    </button>
+                </div>
+            </form>
+            <div id="uploadMessage" style="margin-top: 15px;"></div>
+        </div>
+
+        <!-- File List Section -->
         <div class="files-section">
             <div class="section-header">
                 <h2>Your Files</h2>
@@ -298,5 +325,6 @@
     </div>
 
     <script src="js/fileDisplay.js"></script>
+    <script src="js/filesPage.js"></script>
 </body>
 </html>

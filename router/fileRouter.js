@@ -8,10 +8,10 @@ const router = express.Router();
 // Get user's files (protected route)
 router.get('/files', authenticateToken, displayAllFiles);
 
-// Chunked upload endpoints
-router.post('/uploads/init', initUpload);
-router.post('/uploads/chunk', uploadChunk);
-router.post('/uploads/complete', completeUpload);
+// Chunked upload endpoints (protected - require authentication)
+router.post('/uploads/init', authenticateToken, initUpload);
+router.post('/uploads/chunk', authenticateToken, uploadChunk);
+router.post('/uploads/complete', authenticateToken, completeUpload);
 
 //exporting the router
 export default router;
