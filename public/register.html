@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Create a secure account for file sharing">
+    <title>Create Account - Secure File Sharing System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 480px;
+            padding: 40px;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .register-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .register-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input.invalid {
+            border-color: #dc3545;
+        }
+
+        .form-group input.valid {
+            border-color: #28a745;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 13px;
+            padding: 5px 8px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .validation-message {
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
+        .validation-message.error {
+            color: #dc3545;
+            background: #fee;
+            border-left: 3px solid #dc3545;
+            display: block;
+        }
+
+        .validation-message.success {
+            color: #28a745;
+            background: #efe;
+            border-left: 3px solid #28a745;
+            display: block;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #e1e1e1;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .password-strength.show {
+            display: block;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .password-strength-bar.weak {
+            width: 33%;
+            background: #dc3545;
+        }
+
+        .password-strength-bar.medium {
+            width: 66%;
+            background: #ffc107;
+        }
+
+        .password-strength-bar.strong {
+            width: 100%;
+            background: #28a745;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-register:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-register:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-register:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+            display: block;
+        }
+
+        .message.success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+            display: block;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .form-footer a:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .requirements-list {
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .requirements-list.show {
+            display: block;
+        }
+
+        .requirement-item {
+            font-size: 12px;
+            color: #666;
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .requirement-item::before {
+            content: '○';
+            color: #999;
+        }
+
+        .requirement-item.met::before {
+            content: '✓';
+            color: #28a745;
+        }
+
+        .requirement-item.met {
+            color: #28a745;
+        }
+
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 30px 24px;
+            }
+
+            .register-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>✨ Create Account</h1>
+            <p>Join our secure file sharing platform</p>
+        </div>
+
+        <div id="messageArea" class="message" role="alert" aria-live="polite"></div>
+
+        <form id="registerForm" novalidate>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="Choose a unique username"
+                    required
+                    autocomplete="username"
+                    aria-required="true"
+                    aria-describedby="usernameHint usernameValidation"
+                    autofocus
+                >
+                <span id="usernameHint" class="form-hint">3-20 characters, letters, numbers, and underscores only</span>
+                <div id="usernameValidation" class="validation-message" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="your.email@example.com"
+                    required
+                    autocomplete="email"
+                    aria-required="true"
+                    aria-describedby="emailHint emailValidation"
+                >
+                <span id="emailHint" class="form-hint">We'll never share your email with anyone</span>
+                <div id="emailValidation" class="validation-message" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Create a strong password"
+                        required
+                        autocomplete="new-password"
+                        aria-required="true"
+                        aria-describedby="passwordHint passwordValidation passwordRequirements"
+                    >
+                    <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+                        Show
+                    </button>
+                </div>
+                <span id="passwordHint" class="form-hint">Minimum 6 characters with mixed case and numbers</span>
+                <div class="password-strength">
+                    <div class="password-strength-bar"></div>
+                </div>
+                <div id="passwordRequirements" class="requirements-list" aria-live="polite">
+                    <div class="requirement-item" data-requirement="length">At least 6 characters</div>
+                    <div class="requirement-item" data-requirement="uppercase">One uppercase letter</div>
+                    <div class="requirement-item" data-requirement="lowercase">One lowercase letter</div>
+                    <div class="requirement-item" data-requirement="number">One number</div>
+                </div>
+                <div id="passwordValidation" class="validation-message" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="password-wrapper">
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        placeholder="Re-enter your password"
+                        required
+                        autocomplete="new-password"
+                        aria-required="true"
+                        aria-describedby="confirmPasswordValidation"
+                    >
+                    <button type="button" class="password-toggle" id="toggleConfirmPassword" aria-label="Toggle confirm password visibility">
+                        Show
+                    </button>
+                </div>
+                <div id="confirmPasswordValidation" class="validation-message" aria-live="polite"></div>
+            </div>
+
+            <button type="submit" class="btn-register" id="registerBtn">
+                Create Account
+            </button>
+        </form>
+
+        <div class="form-footer">
+            Already have an account? <a href="/index.html">Sign In</a>
+        </div>
+    </div>
+
+    <script src="js/registerUser.js"></script>
+</body>
+</html>
