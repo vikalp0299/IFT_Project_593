@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './RegistrationSuccess.css';
 
 interface RegistrationSuccessProps {
@@ -10,6 +11,17 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
   organizationName, 
   onRegisterAnother 
 }) => {
+  const navigate = useNavigate();
+
+  // Automatically navigate to signin after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/signin');
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <div className="success-container">
       <div className="success-card">
@@ -23,20 +35,30 @@ export const RegistrationSuccess: React.FC<RegistrationSuccessProps> = ({
         {/* Success Messages */}
         <h1 className="success-title">Registration Successful!</h1>
         <p className="success-message">Your organization has been successfully registered</p>
+        <p className="success-redirect">Redirecting to sign in page...</p>
 
         {/* Organization Details */}
         <div className="success-details">
-          <p className="success-org-name">Organization Name: {organizationName}</p>
+          <p className="success-org-name">Organization: {organizationName}</p>
           <p className="success-db-message">Database has been updated successfully</p>
+          <p className="success-next-step">You can now create accounts and sign in</p>
         </div>
 
-        {/* Action Button */}
-        <button
-          onClick={onRegisterAnother}
-          className="success-button"
-        >
-          Register Another Organization
-        </button>
+        {/* Action Buttons */}
+        <div className="success-buttons">
+          <button
+            onClick={() => navigate('/signin')}
+            className="success-button primary"
+          >
+            Go to Sign In
+          </button>
+          <button
+            onClick={onRegisterAnother}
+            className="success-button secondary"
+          >
+            Register Another Organization
+          </button>
+        </div>
       </div>
     </div>
   );

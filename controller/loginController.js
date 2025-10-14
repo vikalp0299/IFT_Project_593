@@ -2,7 +2,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
-import User  from '../models/User.js'; // In-memory user store (replace with DB in production)
+import User  from '../models/User.js';
+import { validateRegistrationData } from '../utils/validation.js';
+import { logger } from '../utils/logger.js';
+import { generateTokens } from '../middleware/auth.js';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'SUPERSECRETKEY-CHANGE-IN-PRODUCTION-PLEASE-AND-KEEP-SECRET';
@@ -80,7 +83,15 @@ async function loginFunction(req, res) {
     user.lastLogin = new Date();
     await user.save();
 
-    const token = generateToken(user._id, user.username);
+    // Generate tokens
+    const tokens = generateTokens(user);
+
+    logger.info('User logged in successfully', { 
+        username: user.username,
+        userId: user._id,
+        role: user.role,
+        organizationName: user.organizationName
+    });
 
     res.json({
       success: true,
@@ -89,7 +100,13 @@ async function loginFunction(req, res) {
         userId: user._id,
         username: user.username,
         email: user.email,
-        token,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        organizationName: user.organizationName,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: '24h',
         lastLogin: user.lastLogin,
       },
     });
@@ -105,72 +122,205 @@ async function loginFunction(req, res) {
 
 
 async function registerFunction(req, res) {
-    // Implement registration logic here
+    // Implement comprehensive registration logic here
     try {
-        const { username, password, email } = req.body;
+        const {
+            // Basic Authentication
+            username,
+            password,
+            confirmPassword,
+            email,
+            
+            // Personal Information
+            firstName,
+            lastName,
+            phone,
+            jobTitle,
+            department,
+            
+            // Role and Organization
+            role,
+            organizationName,
+            
+            // Contact Preferences
+            emailNotifications,
+            smsNotifications,
+            marketingEmails,
+            
+            // Optional fields
+            bio,
+            timezone,
+            language
+        } = req.body;
 
+        // Comprehensive validation
+        const errors = [];
+        
         // Basic validation
-        if (!username || !password || !email) {
-            return res.status(400).json({
-                success: false,
-                message: 'Username, password, and email are required'
-            });
+        if (!username || username.trim().length < 3) {
+            errors.push('Username is required and must be at least 3 characters');
         }
-
-        if (password.length < 6) {
+        if (!email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            errors.push('Valid email is required');
+        }
+        if (!password || password.length < 8) {
+            errors.push('Password must be at least 8 characters');
+        }
+        if (password !== confirmPassword) {
+            errors.push('Password confirmation does not match');
+        }
+        
+        // Personal information validation
+        if (!firstName || firstName.trim().length < 2) {
+            errors.push('First name is required and must be at least 2 characters');
+        }
+        if (!lastName || lastName.trim().length < 2) {
+            errors.push('Last name is required and must be at least 2 characters');
+        }
+        if (!phone || !/^[\+]?[1-9][\d]{0,15}$/.test(phone)) {
+            errors.push('Valid phone number is required');
+        }
+        if (!jobTitle || jobTitle.trim().length < 2) {
+            errors.push('Job title is required and must be at least 2 characters');
+        }
+        if (!department || department.trim().length < 2) {
+            errors.push('Department is required and must be at least 2 characters');
+        }
+        
+        // Role validation
+        if (!role || !['Admin', 'Manager', 'Employee', 'Guest'].includes(role)) {
+            errors.push('Valid role is required (Admin, Manager, Employee, Guest)');
+        }
+        
+        // Organization validation
+        if (!organizationName || organizationName.trim().length === 0) {
+            errors.push('Organization name is required for registration');
+        }
+        
+        if (errors.length > 0) {
+            logger.warn('Registration validation failed', { username, email, errors });
             return res.status(400).json({
                 success: false,
-                message: 'Password must be at least 6 characters long'
+                message: 'Validation failed',
+                errors
             });
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ $or: [{ username }, { email }] });    
+        const existingUser = await User.findOne({ 
+            $or: [{ username: username.toLowerCase().trim() }, { email: email.toLowerCase().trim() }] 
+        });    
 
         if (existingUser) {
+            logger.warn('Registration failed - user already exists', { username, email });
             return res.status(409).json({
                 success: false,
                 message: 'User with this username or email already exists'
             });
         }
 
-        //Check email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        // Find organization (must exist)
+        const { findOrganization } = await import('../db.js');
+        const organization = await findOrganization(organizationName.trim());
+        
+        if (!organization) {
+            logger.warn('Registration failed - organization not found', { organizationName, username });
             return res.status(400).json({
                 success: false,
-                message: 'Invalid email format'
+                message: `Organization '${organizationName}' does not exist. Please contact your administrator to create this organization first.`
             });
         }
 
-        // Hash password and create user
+        // Set default permissions based on role
+        let defaultPermissions = [];
+        switch (role) {
+            case 'Admin':
+                defaultPermissions = ['read', 'write', 'delete', 'admin', 'manage_users', 'manage_organization'];
+                break;
+            case 'Manager':
+                defaultPermissions = ['read', 'write', 'manage_users'];
+                break;
+            case 'Employee':
+                defaultPermissions = ['read', 'write'];
+                break;
+            case 'Guest':
+                defaultPermissions = ['read'];
+                break;
+        }
+
+        // Hash password and create comprehensive user
         const hashedPassword = await hashPassword(password);
-        const newUser = {
-            id: crypto.randomUUID(), // Simple ID generation (use UUID in production)
-            username,
-            email,
+        const newUser = new User({
+            // Basic Authentication
+            username: username.toLowerCase().trim(),
+            email: email.toLowerCase().trim(),
             password: hashedPassword,
-            createdAt: new Date().toISOString()
-        };
+            
+            // Personal Information
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            phone: phone.trim(),
+            jobTitle: jobTitle.trim(),
+            department: department.trim(),
+            
+            // Role and Permissions
+            role: role,
+            permissions: defaultPermissions,
+            isActive: true,
+            
+            // Organization Association
+            organization: organization._id,
+            organizationName: organizationName.trim(),
+            
+            // Contact Preferences
+            contactPreferences: {
+                emailNotifications: emailNotifications !== false,
+                smsNotifications: smsNotifications === true,
+                marketingEmails: marketingEmails === true
+            },
+            
+            // Optional Profile Information
+            bio: bio ? bio.trim() : '',
+            timezone: timezone || 'UTC',
+            language: language || 'en',
+            
+            // Security
+            lastPasswordChange: new Date()
+        });
 
-        User.create(newUser);
+        await newUser.save();
 
-        // Generate token
-        const token = generateToken(newUser.id, newUser.username);
+        // Generate tokens
+        const tokens = generateTokens(newUser);
+
+        logger.info('User registered successfully', { 
+            username: newUser.username, 
+            email: newUser.email,
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            role: newUser.role,
+            organizationName: newUser.organizationName
+        });
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
             data: {
-                userId: newUser.id,
+                userId: newUser._id,
                 username: newUser.username,
                 email: newUser.email,
-                token
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                role: newUser.role,
+                organizationName: newUser.organizationName,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                expiresIn: '24h'
             }
         });
 
     } catch (error) {
-        console.error('Registration error:', error);
+        logger.error('Registration error', { error: error.message, stack: error.stack });
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -180,8 +330,12 @@ async function registerFunction(req, res) {
 }
 
 async function logoutFunction(req, res) {
-    // Implement logout logic here
-    
+    // Logout logic is now handled by the auth middleware
+    // This function is kept for backward compatibility
+    res.json({
+        success: true,
+        message: 'Logged out successfully'
+    });
 }
 
 export { loginFunction, registerFunction, logoutFunction };

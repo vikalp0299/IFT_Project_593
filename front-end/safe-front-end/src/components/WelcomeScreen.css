@@ -1,6 +1,7 @@
 /* CACHE BUST - Updated for wider containers */
 .welcome-container {
   height: 100vh;
+  width: auto;
   /* background-color: #FFFFFF; */
   display: flex;
   align-items: center;

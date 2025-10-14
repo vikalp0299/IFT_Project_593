@@ -1,3 +1,16 @@
+# Ignore Node.js dependencies folder
+node_modules/
+ipfs_data/
+ipfs_data_local/
+ipfs_data_remote/
+minio_data/
+uploads/
+IPFS/node_app/uploads/
+# Optional: ignore npm debug logs and environment files
+npm-debug.log*
+.env
+.DS_Store
 node_modules
 .env
+dbtest.js
 dbtest.js

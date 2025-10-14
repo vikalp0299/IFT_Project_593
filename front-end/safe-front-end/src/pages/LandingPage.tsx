@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import './HomePage.css';
+import './LandingPage.css';
 
-export const HomePage = () => {
+export const LandingPage = () => {
   return (
     <div className="landing-page-container">
       {/* Hero Section */}

@@ -1,0 +1,718 @@
+[2025-10-12T06:19:56.459Z] ERROR: MongoDB connection failed {"error":"option buffermaxentries is not supported","stack":"MongoParseError: option buffermaxentries is not supported\n    at parseOptions (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\connection_string.js:273:15)\n    at new MongoClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\mongo_client.js:66:61)\n    at NativeConnection.createClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\connection.js:343:14)\n    at NativeConnection.openUri (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\connection.js:1071:34)\n    at Mongoose.connect (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\mongoose.js:450:15)\n    at connectDB (file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/db.js:37:33)\n    at file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/server.js:349:1\n    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)"}
+[2025-10-12T06:19:56.459Z] ERROR: MongoDB connection failed {"error":"option buffermaxentries is not supported","stack":"MongoParseError: option buffermaxentries is not supported\n    at parseOptions (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\connection_string.js:273:15)\n    at new MongoClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\mongo_client.js:66:61)\n    at NativeConnection.createClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\connection.js:343:14)\n    at NativeConnection.openUri (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\connection.js:1071:34)\n    at Mongoose.connect (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\mongoose.js:450:15)\n    at connectDB (file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/db.js:37:33)\n    at file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/server.js:349:1\n    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)"}
+[2025-10-12T06:19:56.460Z] ERROR: MongoDB connection failed {"error":"option buffermaxentries is not supported","stack":"MongoParseError: option buffermaxentries is not supported\n    at parseOptions (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\connection_string.js:273:15)\n    at new MongoClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\mongo_client.js:66:61)\n    at NativeConnection.createClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\connection.js:343:14)\n    at NativeConnection.openUri (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\connection.js:1071:34)\n    at Mongoose.connect (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\mongoose.js:450:15)\n    at connectDB (file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/db.js:37:33)\n    at file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/server.js:349:1\n    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)"}
+[2025-10-12T06:19:56.462Z] ERROR: MongoDB connection failed {"error":"option buffermaxentries is not supported","stack":"MongoParseError: option buffermaxentries is not supported\n    at parseOptions (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\connection_string.js:273:15)\n    at new MongoClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\mongo_client.js:66:61)\n    at NativeConnection.createClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\connection.js:343:14)\n    at NativeConnection.openUri (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\connection.js:1071:34)\n    at Mongoose.connect (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\mongoose.js:450:15)\n    at connectDB (file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/db.js:37:33)\n    at file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/server.js:349:1\n    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)"}
+[2025-10-12T06:19:56.466Z] ERROR: MongoDB connection failed {"error":"option buffermaxentries is not supported","stack":"MongoParseError: option buffermaxentries is not supported\n    at parseOptions (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\connection_string.js:273:15)\n    at new MongoClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\mongo_client.js:66:61)\n    at NativeConnection.createClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\connection.js:343:14)\n    at NativeConnection.openUri (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\connection.js:1071:34)\n    at Mongoose.connect (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\mongoose.js:450:15)\n    at connectDB (file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/db.js:37:33)\n    at file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/server.js:349:1\n    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)"}
+[2025-10-12T06:20:09.625Z] ERROR: MongoDB connection failed {"error":"option buffermaxentries is not supported","stack":"MongoParseError: option buffermaxentries is not supported\n    at parseOptions (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\connection_string.js:273:15)\n    at new MongoClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongodb\\lib\\mongo_client.js:66:61)\n    at NativeConnection.createClient (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\drivers\\node-mongodb-native\\connection.js:343:14)\n    at NativeConnection.openUri (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\connection.js:1071:34)\n    at Mongoose.connect (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\mongoose.js:450:15)\n    at connectDB (file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/db.js:37:33)\n    at file:///C:/Users/sunil/OneDrive/Desktop/Final-Project/code_base/server.js:349:1\n    at ModuleJob.run (node:internal/modules/esm/module_job:271:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:578:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:116:5)"}
+[2025-10-12T06:20:21.367Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:20:21.383Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:20:21.390Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:20:21.395Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:20:21.401Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:20:21.408Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:20:21.406Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:20:21.417Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:20:21.422Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:20:21.427Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:20:21.485Z] INFO: Created default organization {"organizationName":"Test Organization"}
+[2025-10-12T06:20:21.492Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-frontend-backend.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:20:21.493Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-frontend-backend.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:20:21.492Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-frontend-backend.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:20:21.494Z] INFO: Created default organization {"organizationName":"Demo Organization"}
+[2025-10-12T06:20:21.494Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-frontend-backend.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:20:36.173Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:20:36.186Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:20:54.479Z] INFO: GET /health 200 - 4ms {"method":"GET","path":"/health","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:21:19.323Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:21:19.325Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:21:19.343Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:21:19.349Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:21:19.353Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:21:19.364Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:21:19.373Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:21:19.375Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:21:19.400Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:21:19.401Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:21:53.708Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:21:53.724Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:22:16.900Z] ERROR: POST /validate-signin-organization 404 - 10ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":10,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:22:27.189Z] ERROR: POST /validate-signin-organization 404 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:22:30.473Z] ERROR: POST /validate-signin-organization 404 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:23:13.211Z] INFO: POST /validate-signin-organization 200 - 2ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:24:10.617Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:10.617Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:10.620Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:10.620Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:10.620Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:10.639Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:10.638Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:10.640Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:10.641Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:10.647Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:10.647Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:10.668Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:16.213Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:16.215Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:16.214Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:16.215Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:16.216Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:16.222Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:24:16.234Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:16.235Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:16.236Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:16.239Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:16.239Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:16.245Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:24:24.333Z] INFO: POST /validate-signin-organization 200 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:24:36.689Z] INFO: Organization validation request {"organizationName":"new_test_org"}
+[2025-10-12T06:24:36.703Z] INFO: Organization created successfully {"organizationName":"new_test_org"}
+[2025-10-12T06:24:36.705Z] INFO: POST /validate-organization 201 - 16ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":16,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:24:50.203Z] WARN: Login validation failed {"username":"test2","errors":["Password must contain at least one uppercase letter"]}
+[2025-10-12T06:24:50.205Z] ERROR: POST /login 400 - 1ms {"method":"POST","path":"/login","statusCode":400,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:25:07.035Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:25:07.053Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:25:07.058Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:25:07.063Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:25:07.078Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:25:07.082Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:25:07.086Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:25:07.088Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:25:07.099Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:25:07.109Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:25:07.119Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:25:07.120Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:25:07.161Z] ERROR: POST /validate-signin-organization 404 - 40ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":40,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:25:22.371Z] INFO: POST /validate-signin-organization 200 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":6,"ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:25:28.755Z] ERROR: POST /validate-signin-organization 404 - 2ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:25:57.473Z] INFO: Organization validation request {"organizationName":"test2_org"}
+[2025-10-12T06:25:57.493Z] INFO: Organization created successfully {"organizationName":"test2_org"}
+[2025-10-12T06:25:57.495Z] INFO: POST /validate-organization 201 - 22ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":22,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:26:11.174Z] INFO: POST /validate-signin-organization 200 - 5ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:26:28.208Z] ERROR: POST /register 404 - 1ms {"method":"POST","path":"/register","statusCode":404,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:27:09.468Z] INFO: POST /register 201 - 87ms {"method":"POST","path":"/register","statusCode":201,"responseTime":87,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:27:40.038Z] INFO: POST /register 201 - 75ms {"method":"POST","path":"/register","statusCode":201,"responseTime":75,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:27:45.881Z] INFO: POST /validate-signin-organization 200 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:27:52.702Z] WARN: Login validation failed {"errors":["Username is required","Password is required"]}
+[2025-10-12T06:27:52.705Z] ERROR: POST /login 400 - 3ms {"method":"POST","path":"/login","statusCode":400,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:28:04.591Z] WARN: Login validation failed {"errors":["Username is required","Password is required"]}
+[2025-10-12T06:28:04.593Z] ERROR: POST /login 400 - 2ms {"method":"POST","path":"/login","statusCode":400,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:29:27.005Z] WARN: Login validation failed {"username":"test2","errors":["Password must contain at least one uppercase letter"]}
+[2025-10-12T06:29:27.007Z] ERROR: POST /login 400 - 2ms {"method":"POST","path":"/login","statusCode":400,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:29:47.218Z] INFO: Auth attempt: test2
+[2025-10-12T06:29:47.284Z] INFO: Auth failed: test2 {"reason":"invalid_password"}
+[2025-10-12T06:29:47.285Z] ERROR: POST /login 401 - 67ms {"method":"POST","path":"/login","statusCode":401,"responseTime":67,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:30:06.311Z] INFO: GET /debug/users 200 - 7ms {"method":"GET","path":"/debug/users","statusCode":200,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:30:20.322Z] ERROR: POST /register 409 - 2ms {"method":"POST","path":"/register","statusCode":409,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:30:37.365Z] INFO: Auth attempt: testuser123
+[2025-10-12T06:30:37.433Z] INFO: Auth success: testuser123
+[2025-10-12T06:30:37.435Z] INFO: POST /login 200 - 70ms {"method":"POST","path":"/login","statusCode":200,"responseTime":70,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:35:28.978Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:28.977Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:28.978Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:28.979Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:28.979Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:28.992Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:29.000Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:29.000Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:29.000Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:29.004Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:29.007Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:29.014Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:40.664Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:40.672Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:40.673Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:40.682Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:40.686Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:40.692Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:40.694Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:40.700Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:40.704Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:40.708Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:35:40.727Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:35:40.731Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:11.406Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:11.406Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:11.416Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:11.417Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:11.420Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:11.421Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:11.426Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:11.427Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:11.435Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:11.437Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:11.440Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:11.440Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:19.017Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:19.019Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:19.028Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:19.030Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:19.035Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:19.040Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:19.042Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:19.043Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:19.050Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:19.054Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:19.060Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:19.067Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:35.083Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:35.088Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:35.089Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:35.094Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:35.095Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:35.101Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:35.107Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:35.107Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:35.113Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:35.113Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:35.122Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:35.140Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:44.199Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:44.208Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:44.214Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:44.217Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:44.219Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:44.221Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:44.231Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:44.235Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:44.236Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:44.241Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:44.245Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:36:44.266Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:36:56.118Z] WARN: Registration validation failed {"username":"testuser456","email":"test456@example.com","errors":["Password must be at least 8 characters long","Password must contain at least one uppercase letter","Password must contain at least one number"]}
+[2025-10-12T06:36:56.123Z] ERROR: POST /register 400 - 6ms {"method":"POST","path":"/register","statusCode":400,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:37:09.861Z] INFO: User registered successfully {"username":"testuser789","email":"test789@example.com"}
+[2025-10-12T06:37:09.862Z] INFO: POST /register 201 - 90ms {"method":"POST","path":"/register","statusCode":201,"responseTime":90,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:37:22.136Z] INFO: Auth attempt: testuser789
+[2025-10-12T06:37:22.210Z] INFO: Auth success: testuser789
+[2025-10-12T06:37:22.212Z] INFO: POST /login 200 - 76ms {"method":"POST","path":"/login","statusCode":200,"responseTime":76,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:37:43.901Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:37:43.902Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:37:43.906Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:37:43.909Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:37:43.911Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:37:43.921Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:37:43.924Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:37:43.925Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:37:43.929Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:37:43.930Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:37:43.963Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:37:43.978Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:38:27.096Z] INFO: User registered successfully {"username":"test2user","email":"test2user@gmail.com"}
+[2025-10-12T06:38:27.102Z] INFO: POST /register 201 - 162ms {"method":"POST","path":"/register","statusCode":201,"responseTime":162,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:38:34.012Z] INFO: POST /validate-signin-organization 200 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:38:46.881Z] WARN: Login validation failed {"errors":["Username is required","Password is required"]}
+[2025-10-12T06:38:46.883Z] ERROR: POST /login 400 - 2ms {"method":"POST","path":"/login","statusCode":400,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:39:42.271Z] WARN: Login validation failed {"errors":["Username is required","Password is required"]}
+[2025-10-12T06:39:42.274Z] ERROR: POST /login 400 - 3ms {"method":"POST","path":"/login","statusCode":400,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:40:50.855Z] WARN: Registration failed - user already exists {"username":"test2user","email":"test2user@gmail.com"}
+[2025-10-12T06:40:50.857Z] ERROR: POST /register 409 - 6ms {"method":"POST","path":"/register","statusCode":409,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:42:25.967Z] INFO: Organization validation request {"organizationName":"test_organization"}
+[2025-10-12T06:42:25.973Z] INFO: Organization created successfully {"organizationName":"test_organization"}
+[2025-10-12T06:42:25.975Z] INFO: POST /validate-organization 201 - 9ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:43:02.820Z] INFO: User registered successfully {"username":"test1","email":"test1@gmail.com"}
+[2025-10-12T06:43:02.822Z] INFO: POST /register 201 - 118ms {"method":"POST","path":"/register","statusCode":201,"responseTime":118,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:43:09.609Z] INFO: POST /validate-signin-organization 200 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:43:19.149Z] WARN: Login validation failed {"errors":["Username is required","Password is required"]}
+[2025-10-12T06:43:19.151Z] ERROR: POST /login 400 - 2ms {"method":"POST","path":"/login","statusCode":400,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:44:23.020Z] INFO: GET /debug/users 200 - 6ms {"method":"GET","path":"/debug/users","statusCode":200,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:44:41.959Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:44:41.963Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:44:41.970Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:44:41.977Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:44:41.979Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:44:41.984Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:44:41.986Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:44:41.987Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:44:41.992Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:44:42.000Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:44:42.008Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:44:42.009Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:44:49.761Z] INFO: GET /debug/organizations 200 - 9ms {"method":"GET","path":"/debug/organizations","statusCode":200,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:45:07.582Z] INFO: GET /debug/all 200 - 7ms {"method":"GET","path":"/debug/all","statusCode":200,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:45:29.690Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:45:29.693Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:45:29.693Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:45:29.696Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:45:29.698Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:45:29.713Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:45:29.713Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:45:29.716Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:45:29.717Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:45:29.721Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:45:29.733Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:45:29.752Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:44.879Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:44.880Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:44.882Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:44.887Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:44.892Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:44.899Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:44.901Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:44.903Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:44.907Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:44.911Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:44.913Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:44.927Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:51.842Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:51.843Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:51.858Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:51.860Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:51.865Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:51.865Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:51.866Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:51.872Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:51.881Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:51.885Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:51.892Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:51.895Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:58.202Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:58.200Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:58.202Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:58.203Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:58.214Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:58.221Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:58.222Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:58.226Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:58.227Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:58.241Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:46:58.241Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:46:58.264Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:47:06.872Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:47:06.876Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:47:06.877Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:47:06.878Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:47:06.897Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:47:06.897Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:47:06.898Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:47:06.899Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:47:06.896Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:47:06.922Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:47:06.925Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:47:06.948Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:14.936Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:14.943Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:14.945Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:14.953Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:14.959Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:14.965Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:14.970Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:14.968Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:14.974Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:14.973Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:14.988Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:14.996Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:15.023Z] INFO: Created default organization {"organizationName":"Test Organization"}
+[2025-10-12T06:49:15.028Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-app.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:49:15.030Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-app.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:49:15.030Z] ERROR: Error initializing default organizations {"error":"E11000 duplicate key error collection: safe-app.organizations index: name_1 dup key: { name: \"test_org\" }"}
+[2025-10-12T06:49:15.031Z] INFO: Created default organization {"organizationName":"Demo Organization"}
+[2025-10-12T06:49:26.993Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:27.016Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:27.015Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:27.031Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:27.038Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:27.040Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:27.059Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:27.067Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:27.081Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:27.105Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:27.122Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:27.136Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:40.238Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:40.238Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:40.240Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:40.251Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:40.251Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:40.256Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:40.260Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:40.260Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:40.271Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:49:40.273Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:40.274Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:40.291Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:49:56.330Z] INFO: Organization validation request {"organizationName":"test_organization"}
+[2025-10-12T06:49:56.353Z] INFO: Organization created successfully {"organizationName":"test_organization"}
+[2025-10-12T06:49:56.360Z] INFO: POST /validate-organization 201 - 30ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":30,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:50:11.478Z] INFO: User registered successfully {"username":"test1","email":"test1@gmail.com"}
+[2025-10-12T06:50:11.481Z] INFO: POST /register 201 - 150ms {"method":"POST","path":"/register","statusCode":201,"responseTime":150,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:50:17.162Z] INFO: POST /validate-signin-organization 200 - 5ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:50:26.751Z] WARN: Login validation failed {"errors":["Username is required","Password is required"]}
+[2025-10-12T06:50:26.753Z] ERROR: POST /login 400 - 3ms {"method":"POST","path":"/login","statusCode":400,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:51:51.161Z] INFO: Auth attempt: test1
+[2025-10-12T06:51:51.229Z] INFO: Auth success: test1
+[2025-10-12T06:51:51.231Z] INFO: POST /login 200 - 70ms {"method":"POST","path":"/login","statusCode":200,"responseTime":70,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:52:08.444Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:08.445Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:08.447Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:08.449Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:08.458Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:08.466Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:08.470Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:08.470Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:08.476Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:08.482Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:08.523Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:08.544Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:18.187Z] INFO: Auth attempt: test1
+[2025-10-12T06:52:18.273Z] INFO: Auth success: test1
+[2025-10-12T06:52:18.278Z] INFO: POST /login 200 - 92ms {"method":"POST","path":"/login","statusCode":200,"responseTime":92,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:52:47.679Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:47.682Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:47.691Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:47.693Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:47.695Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:47.703Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:47.704Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:47.710Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:52:47.712Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:47.716Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:47.719Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:47.733Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:52:58.128Z] INFO: Auth attempt: test1
+[2025-10-12T06:52:58.216Z] INFO: Auth success: test1
+[2025-10-12T06:52:58.221Z] INFO: POST /login 200 - 93ms {"method":"POST","path":"/login","statusCode":200,"responseTime":93,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:53:08.872Z] INFO: Auth attempt: test1
+[2025-10-12T06:53:08.940Z] INFO: Auth success: test1
+[2025-10-12T06:53:08.942Z] INFO: POST /login 200 - 70ms {"method":"POST","path":"/login","statusCode":200,"responseTime":70,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:53:18.167Z] INFO: GET /debug/all 200 - 11ms {"method":"GET","path":"/debug/all","statusCode":200,"responseTime":11,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:53:33.809Z] INFO: Auth attempt: test1
+[2025-10-12T06:53:34.055Z] INFO: Auth success: test1
+[2025-10-12T06:53:34.057Z] INFO: POST /login 200 - 248ms {"method":"POST","path":"/login","statusCode":200,"responseTime":248,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:53:35.560Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:53:35.582Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:53:35.602Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:53:35.609Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:53:35.610Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:53:35.612Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:53:35.636Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:53:35.638Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:53:35.653Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:53:35.671Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:53:35.677Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:53:35.703Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:53:56.041Z] INFO: User registered successfully {"username":"test2","email":"test2@gmail.com"}
+[2025-10-12T06:53:56.045Z] INFO: POST /register 201 - 158ms {"method":"POST","path":"/register","statusCode":201,"responseTime":158,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:54:46.791Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:46.793Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:46.792Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:46.800Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:46.808Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:46.813Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:46.815Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:46.815Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:46.823Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:46.829Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:46.836Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:46.859Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:53.134Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:53.140Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:53.150Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:53.156Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:53.154Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:53.166Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:53.172Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:53.171Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:53.178Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:53.186Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:53.217Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:54:53.237Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:54:59.229Z] WARN: Registration failed - organization not found {"organizationName":"nonexistent_org","username":"testuser999"}
+[2025-10-12T06:54:59.235Z] ERROR: POST /register 400 - 12ms {"method":"POST","path":"/register","statusCode":400,"responseTime":12,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:55:17.321Z] INFO: User registered successfully {"username":"testuser999","email":"test999@example.com"}
+[2025-10-12T06:55:17.323Z] INFO: POST /register 201 - 92ms {"method":"POST","path":"/register","statusCode":201,"responseTime":92,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:55:31.447Z] WARN: Registration failed - organization name required {"username":"testuser888"}
+[2025-10-12T06:55:31.449Z] ERROR: POST /register 400 - 2ms {"method":"POST","path":"/register","statusCode":400,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:55:41.181Z] INFO: GET /debug/all 200 - 24ms {"method":"GET","path":"/debug/all","statusCode":200,"responseTime":24,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T06:56:09.185Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:56:09.186Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:56:09.186Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:56:09.192Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:56:09.192Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:56:09.211Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:56:09.212Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:56:09.212Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:56:09.212Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:56:09.215Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:56:09.308Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T06:56:09.321Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T06:56:17.820Z] WARN: Registration failed - user already exists {"username":"test2","email":"test2@gmail.com"}
+[2025-10-12T06:56:17.825Z] ERROR: POST /register 409 - 11ms {"method":"POST","path":"/register","statusCode":409,"responseTime":11,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T06:56:51.772Z] WARN: Registration failed - organization not found {"organizationName":"test3_org","username":"test3"}
+[2025-10-12T06:56:51.775Z] ERROR: POST /register 400 - 9ms {"method":"POST","path":"/register","statusCode":400,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T07:10:56.453Z] INFO: GET / 200 - 4ms {"method":"GET","path":"/","statusCode":200,"responseTime":4,"ip":"::ffff:192.168.1.1"}
+[2025-10-12T07:12:12.539Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:12:12.542Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:12:12.548Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:12:12.549Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:12:12.554Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:12:12.558Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:12:12.564Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:12:12.567Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:12:12.570Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:12:12.572Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:12:12.577Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:12:12.581Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:31:12.333Z] ERROR: POST /validate-signin-organization 404 - 9ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T07:47:10.475Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T07:47:10.477Z] INFO: HTTP server closed
+[2025-10-12T07:52:05.647Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.647Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.648Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.649Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.654Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:05.664Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.663Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.664Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.664Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:05.669Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.825Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.825Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.838Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.842Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.844Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.848Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.857Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.863Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:52:13.870Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:52:13.886Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.821Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.825Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.826Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.829Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.830Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:53:08.841Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.845Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.849Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.849Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:53:08.853Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.119Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.122Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.132Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.133Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.141Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.141Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:00.144Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.150Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.153Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.162Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:00.189Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.191Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.199Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.199Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:00.211Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:55:14.508Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T07:55:14.525Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T07:55:14.564Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T07:57:29.685Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T07:57:29.706Z] INFO: Organization created successfully {"organizationName":"greenapp","organizationId":"68eb5f692dd06786688c5445","email":"greenapp@ga.com"}
+[2025-10-12T07:57:29.711Z] INFO: POST /validate-organization 201 - 27ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":27,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:00:19.035Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T08:00:19.047Z] INFO: Organization created successfully {"organizationName":"greenapp","organizationId":"68eb60132dd06786688c5449","email":"greenapp@ga.com"}
+[2025-10-12T08:00:19.049Z] INFO: POST /validate-organization 201 - 14ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":14,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:00:29.589Z] INFO: POST /validate-signin-organization 200 - 7ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:01:13.081Z] INFO: User registered successfully {"username":"testuser","email":"test@ga.com"}
+[2025-10-12T08:01:13.083Z] INFO: POST /register 201 - 139ms {"method":"POST","path":"/register","statusCode":201,"responseTime":139,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:01:20.458Z] INFO: POST /validate-signin-organization 200 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:01:31.394Z] INFO: Auth attempt: testuser
+[2025-10-12T08:01:31.519Z] INFO: Auth success: testuser
+[2025-10-12T08:01:31.522Z] INFO: POST /login 200 - 129ms {"method":"POST","path":"/login","statusCode":200,"responseTime":129,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:03:20.645Z] WARN: Registration failed - organization not found {"organizationName":"test_organization","username":"test"}
+[2025-10-12T08:03:20.646Z] ERROR: POST /register 400 - 6ms {"method":"POST","path":"/register","statusCode":400,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:06:36.365Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.369Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.377Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.380Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.380Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.383Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:06:36.391Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.393Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.400Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.404Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.405Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.406Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:06:36.453Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.456Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.463Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.466Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.467Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:06:36.470Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.661Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.661Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.674Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.676Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.677Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.679Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.680Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:08:05.682Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.696Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.696Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.699Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.704Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:08:05.741Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.741Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.757Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.761Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.762Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:08:05.765Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.185Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.187Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.187Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.188Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.188Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.207Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.206Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.208Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.207Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.208Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.233Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:16:19.254Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:16:19.261Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.260Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.261Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.261Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.265Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:16:19.302Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:22:53.928Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T08:22:53.935Z] INFO: POST /register 201 - 182ms {"method":"POST","path":"/register","statusCode":201,"responseTime":182,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:23:02.292Z] INFO: POST /validate-signin-organization 200 - 5ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:23:10.994Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:23:11.120Z] INFO: Auth success: sunilg
+[2025-10-12T08:23:11.122Z] INFO: POST /login 200 - 129ms {"method":"POST","path":"/login","statusCode":200,"responseTime":129,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:24:02.723Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T08:24:19.281Z] INFO: POST /validate-signin-organization 200 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:24:35.156Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:24:35.271Z] INFO: Auth success: sunilg
+[2025-10-12T08:24:35.274Z] INFO: POST /login 200 - 119ms {"method":"POST","path":"/login","statusCode":200,"responseTime":119,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:25:20.889Z] INFO: GET / 200 - 3ms {"method":"GET","path":"/","statusCode":200,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T08:26:11.843Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.844Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.849Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.856Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.862Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.863Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.868Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:26:11.871Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.877Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.888Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:26:11.914Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.915Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.917Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.928Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:26:11.947Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:29:35.304Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:29:35.323Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:29:35.368Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: industry: Path `industry` is required., businessType: Path `businessType` is required., address.country: Path `address.country` is required., address.zipCode: Path `address.zipCode` is required., address.state: Path `address.state` is required., address.city: Path `address.city` is required., address.street: Path `address.street` is required., phone: Path `phone` is required., email: Path `email` is required."}
+[2025-10-12T08:29:43.160Z] INFO: POST /validate-signin-organization 200 - 11ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":11,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T08:30:46.417Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:30:46.431Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:30:46.466Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: phone: Please enter a valid phone number"}
+[2025-10-12T08:30:56.678Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:30:56.690Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:30:56.728Z] ERROR: Error initializing default organizations {"error":"Organization validation failed: phone: Please enter a valid phone number"}
+[2025-10-12T08:31:27.490Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:31:27.506Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:31:37.024Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:31:37.038Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:31:46.000Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:31:46.013Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:32:03.823Z] INFO: POST /validate-signin-organization 200 - 23ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":23,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:32:13.039Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:32:13.201Z] INFO: Auth success: sunilg
+[2025-10-12T08:32:13.203Z] INFO: POST /login 200 - 165ms {"method":"POST","path":"/login","statusCode":200,"responseTime":165,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:34:12.361Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:34:12.376Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:34:30.901Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:34:30.914Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:34:58.313Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:34:58.327Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:13.083Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:13.097Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:27.776Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:27.790Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:41.071Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:41.085Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:35:54.956Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:35:54.971Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:37:26.662Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:37:26.678Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:40:27.131Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:40:27.145Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:43:19.442Z] INFO: Auth attempt: sunilg
+[2025-10-12T08:43:19.549Z] INFO: Auth success: sunilg
+[2025-10-12T08:43:19.552Z] INFO: POST /login 200 - 110ms {"method":"POST","path":"/login","statusCode":200,"responseTime":110,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-12T08:44:13.349Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T08:44:13.368Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T08:44:17.697Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T09:16:03.918Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:16:03.935Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:16:26.980Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:16:26.992Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:16:47.948Z] INFO: GET / 200 - 5ms {"method":"GET","path":"/","statusCode":200,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T09:17:22.253Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T09:17:27.425Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:17:27.441Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:17:32.892Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:17:32.906Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:18:09.775Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T09:18:09.815Z] INFO: Organization created successfully {"organizationName":"greenapp","organizationId":"68eb72510759cfb017ce7c1e","email":"greenapp@ga.com"}
+[2025-10-12T09:18:09.821Z] INFO: POST /validate-organization 201 - 48ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":48,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:19:23.823Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:19:23.825Z] INFO: POST /register 201 - 165ms {"method":"POST","path":"/register","statusCode":201,"responseTime":165,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:20:50.494Z] ERROR: POST /public 401 - 1ms {"method":"POST","path":"/public","statusCode":401,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.6584"}
+[2025-10-12T09:21:09.876Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:21:09.892Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:21:48.709Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:21:48.723Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:22:48.304Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:22:48.309Z] INFO: POST /register 201 - 193ms {"method":"POST","path":"/register","statusCode":201,"responseTime":193,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:29:46.177Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:29:46.180Z] INFO: POST /register 201 - 77ms {"method":"POST","path":"/register","statusCode":201,"responseTime":77,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:29:46.198Z] WARN: Key upload validation failed {"userId":"68eb750aac487921a8b36260","errors":["Public key appears to be too short for a valid RSA key"]}
+[2025-10-12T09:29:46.200Z] ERROR: POST /public 400 - 15ms {"method":"POST","path":"/public","statusCode":400,"responseTime":15,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:31:09.694Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:31:09.708Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:31:31.811Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:31:31.825Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:31:52.568Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:31:52.582Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:32:11.460Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:32:11.476Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:32:42.466Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:32:42.470Z] INFO: POST /register 201 - 114ms {"method":"POST","path":"/register","statusCode":201,"responseTime":114,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:32:42.510Z] ERROR: Key upload error {"error":"PublicKey validation failed: keyFingerprint: Path `keyFingerprint` is required.","stack":"ValidationError: PublicKey validation failed: keyFingerprint: Path `keyFingerprint` is required.\n    at Document.invalidate (C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\document.js:3358:32)\n    at C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\document.js:3119:17\n    at C:\\Users\\sunil\\OneDrive\\Desktop\\Final-Project\\code_base\\node_modules\\mongoose\\lib\\schemaType.js:1416:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)","userId":"68eb75ba3048c542915dfb49"}
+[2025-10-12T09:32:42.512Z] ERROR: POST /public 500 - 37ms {"method":"POST","path":"/public","statusCode":500,"responseTime":37,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:33:46.068Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:33:46.082Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:10.510Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:10.526Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:25.257Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:25.272Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:32.860Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:32.875Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:34:47.470Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:34:47.484Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:35:00.394Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:35:00.411Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:35:18.865Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-12T09:35:22.366Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-12T09:35:22.384Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-12T09:35:42.929Z] INFO: User registered successfully {"username":"sunilg","email":"sunilg@ga.com","firstName":"Sunil","lastName":"Gundala","role":"Employee","organizationName":"GreenApp"}
+[2025-10-12T09:35:42.933Z] INFO: POST /register 201 - 198ms {"method":"POST","path":"/register","statusCode":201,"responseTime":198,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:35:42.968Z] INFO: Attempting to save public key {"userId":"68eb766e9c596bff38101163","organizationName":"greenapp","publicKeyLength":450}
+[2025-10-12T09:35:42.973Z] INFO: Public key uploaded successfully {"keyId":"61aa1522-0913-4a0a-9055-eababd87f82a","userId":"68eb766e9c596bff38101163","organizationId":"68eb72510759cfb017ce7c1e","organizationName":"greenapp"}
+[2025-10-12T09:35:42.975Z] INFO: POST /public 201 - 36ms {"method":"POST","path":"/public","statusCode":201,"responseTime":36,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:36:45.035Z] INFO: POST /validate-signin-organization 200 - 4ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":4,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:36:56.056Z] INFO: Auth attempt: sunilg
+[2025-10-12T09:36:56.127Z] INFO: Auth success: sunilg
+[2025-10-12T09:36:56.129Z] INFO: POST /login 200 - 72ms {"method":"POST","path":"/login","statusCode":200,"responseTime":72,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:41:09.624Z] WARN: Registration failed - user already exists {"username":"sunilg","email":"sunilg@ga.com"}
+[2025-10-12T09:41:09.626Z] ERROR: POST /register 409 - 7ms {"method":"POST","path":"/register","statusCode":409,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:41:52.912Z] WARN: Registration failed - user already exists {"username":"sunilgu","email":"sunilg@ga.com"}
+[2025-10-12T09:41:52.914Z] ERROR: POST /register 409 - 5ms {"method":"POST","path":"/register","statusCode":409,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:42:46.313Z] INFO: Organization registration request {"name":"greenapp","email":"greenapp@ga.com","businessType":"Corporation","industry":"Technology"}
+[2025-10-12T09:42:46.321Z] ERROR: POST /validate-organization 409 - 9ms {"method":"POST","path":"/validate-organization","statusCode":409,"responseTime":9,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:43:23.655Z] INFO: POST /validate-signin-organization 200 - 3ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:43:33.588Z] INFO: Auth attempt: sunilg
+[2025-10-12T09:43:33.663Z] INFO: Auth success: sunilg
+[2025-10-12T09:43:33.664Z] INFO: POST /login 200 - 76ms {"method":"POST","path":"/login","statusCode":200,"responseTime":76,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"}
+[2025-10-12T09:45:33.368Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}

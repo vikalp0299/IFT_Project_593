@@ -1,5 +1,6 @@
 .account-success-container {
   height: 100vh;
+  width: auto;
   /* background-color: white; */
   display: flex;
   align-items: center;
