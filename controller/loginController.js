@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
-import User  from '../models/User.js'; // In-memory user store (replace with DB in production)
+import User  from '../models/User.js';
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'SUPERSECRETKEY-CHANGE-IN-PRODUCTION-PLEASE-AND-KEEP-SECRET';
@@ -26,80 +25,112 @@ const verifyPassword = async (password, hashedPassword) => {
 
 //Middleware to verify JWT
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) {
-        return res.sendStatus(401).json({
+    try {
+        // Extract token from Authorization header
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; // Format: "Bearer <token>"
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Access token required'
+            });
+        }
+
+        // Verify token using JWT_SECRET from .env
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Invalid or expired token'
+                });
+            }
+
+            // Add user info to request object
+            req.user = {
+                userId: decoded.userId,
+                username: decoded.username
+            };
+
+            next();
+        });
+
+    } catch (error) {
+        console.error('Authentication error:', error);
+        res.status(500).json({
             success: false,
-            message: 'No token provided'
+            message: 'Authentication failed'
         });
     }
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403).json({
-            success: false,
-            message: 'Invalid token or expired'
-        });
-   
-        req.user = user;
-        next();
-    });
-}
+};
 
 async function loginFunction(req, res) {
-    // Implement login logic here
-     try {
-    const { username, password } = req.body;
+    try {
+        // Accept either 'identity' (new) or 'username' (backward compatibility)
+        const identity = req.body.identity || req.body.username;
+        const { password } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username and password are required',
-      });
+        // Validate required fields
+        if (!identity || !password) {
+            return res.status(400).json({
+                success: false,
+                message: 'Identity and password are required'
+            });
+        }
+
+        // Allow login by username or email (case-insensitive)
+        // The identity field can contain either username or email
+        const user = await User.findOne({
+            $or: [
+                { username: identity.toLowerCase() }, 
+                { email: identity.toLowerCase() }
+            ]
+        });
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
+
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid credentials'
+            });
+        }
+
+        // Update last login
+        user.lastLogin = new Date();
+        await user.save();
+
+        // Generate JWT token
+        const token = generateToken(user._id, user.username);
+
+        // Return response with token at root level (for frontend compatibility)
+        res.status(200).json({
+            success: true,
+            message: 'Login successful',
+            token: token,  // Token at root level
+            username: user.username,  // Username at root level
+            data: {
+                userId: user._id,
+                username: user.username,
+                email: user.email,
+                lastLogin: user.lastLogin
+            }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
     }
-
-    // Allow login by username or email (case-insensitive)
-    const user = await User.findOne({
-      $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }],
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
-    }
-
-    user.lastLogin = new Date();
-    await user.save();
-
-    const token = generateToken(user._id, user.username);
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        userId: user._id,
-        username: user.username,
-        email: user.email,
-        token,
-        lastLogin: user.lastLogin,
-      },
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-    });
-  }
 };
 
 
@@ -125,7 +156,12 @@ async function registerFunction(req, res) {
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ $or: [{ username }, { email }] });    
+        const existingUser = await User.findOne({ 
+            $or: [
+                { username: username.toLowerCase() }, 
+                { email: email.toLowerCase() }
+            ] 
+        });
 
         if (existingUser) {
             return res.status(409).json({
@@ -145,24 +181,22 @@ async function registerFunction(req, res) {
 
         // Hash password and create user
         const hashedPassword = await hashPassword(password);
-        const newUser = {
-            id: crypto.randomUUID(), // Simple ID generation (use UUID in production)
-            username,
-            email,
+        
+        const newUser = await User.create({
+            username: username.toLowerCase(),
+            email: email.toLowerCase(),
             password: hashedPassword,
-            createdAt: new Date().toISOString()
-        };
+            createdAt: new Date()
+        });
 
-        User.create(newUser);
-
-        // Generate token
-        const token = generateToken(newUser.id, newUser.username);
+        // Generate token using MongoDB's _id
+        const token = generateToken(newUser._id, newUser.username);
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
             data: {
-                userId: newUser.id,
+                userId: newUser._id,
                 username: newUser.username,
                 email: newUser.email,
                 token
@@ -184,4 +218,4 @@ async function logoutFunction(req, res) {
     
 }
 
-export { loginFunction, registerFunction, logoutFunction };
+export { loginFunction, registerFunction, logoutFunction, authenticateToken };

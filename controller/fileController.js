@@ -3,20 +3,45 @@ import fss from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
+import File from '../models/File.js';
 
-export function displayAllFiles (req,res){
-//Dummy files list
-    const headers = new Headers({
-        'Content-Type': 'application/json',
-        'Allow-Control-Allow-Origin': '*'   
-    });   
+/**
+ * Display all files for the authenticated user
+ * Uses JWT token (via authenticateToken middleware) to identify user
+ * Queries using both userId and uploader fields per File model convention
+ */
+export const displayAllFiles = async (req, res) => {
+    try {
+        // User ID extracted from JWT by authenticateToken middleware
+        const userId = req.user.userId;
 
-    res.setHeaders(headers)
-    const files = [{'name': 'file1.txt'},{'name': 'file2.txt'},{'name': 'file3.txt'}];
-    res.send(JSON.stringify(files));
+        // Query MongoDB for files belonging to this user
+        // Using $or with both userId and uploader for backward compatibility
+        const userFiles = await File.find({ 
+            $or: [
+                { userId: userId },
+                { uploader: userId }
+            ]
+        })
+        .select('fileName originalName size uploadDate uploadId access')
+        .sort({ uploadDate: -1 }); // Most recent first
 
+        // Return files as JSON
+        res.status(200).json({
+            success: true,
+            count: userFiles.length,
+            files: userFiles
+        });
 
-}
+    } catch (error) {
+        console.error('Error fetching user files:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving files',
+            error: error.message
+        });
+    }
+};
 
 const UPLOAD_DIR = path.resolve('temp_uploads');
 const upload = multer({ storage: multer.memoryStorage() });
@@ -24,7 +49,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 export async function initUpload(req, res) {
   const { filename } = req.body;
   console.log(req.body);
+
+
   const uploadId = uuidv4();
+  
   const dir = path.join(UPLOAD_DIR, uploadId);
   await fs.mkdir(dir, { recursive: true });
   res.json({ uploadId });

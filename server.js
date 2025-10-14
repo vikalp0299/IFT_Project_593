@@ -15,9 +15,6 @@ dotenv.config();
 //Database connection
 connectDB();
 
-let loginName;
-let loginPass;
-
 //Get Port from .env
 const PORT =process.env.PORT || 8000;
 
@@ -36,20 +33,6 @@ app.use(loginRouter);
 
 //Static webpage for now
 app.use(express.static(path.join(__dirpath,'public')));
-
-//Basic login
-app.post('/login',(req,res) => {
-    console.log(req.query);
-    loginName = req.query.username;
-    loginPass = req.query.password;
-    console.log(loginName,loginPass);
-    res.end('Login Successful');
-});
-
-
-
-
-
 
 //Start the listener
 app.listen(PORT,() => console.log(`The server started at ${PORT}`));
