@@ -1,0 +1,132 @@
+[2025-10-17T14:13:35.170Z] INFO: 🚀 Server started successfully! {"port":8000,"environment":"development","version":"1.0.0"}
+[2025-10-17T14:13:40.156Z] ERROR: MongoDB connection failed {"error":"connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017","stack":"MongooseServerSelectionError: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017\n    at _handleConnectionErrors (E:\\Project_IFT\\IFT_Project_593\\node_modules\\mongoose\\lib\\connection.js:1165:11)\n    at NativeConnection.openUri (E:\\Project_IFT\\IFT_Project_593\\node_modules\\mongoose\\lib\\connection.js:1096:11)\n    at async connectDB (file:///E:/Project_IFT/IFT_Project_593/db.js:139:18)"}
+[2025-10-17T15:27:11.708Z] INFO: 🚀 Server started successfully! {"port":"5000","environment":"development","version":"1.0.0"}
+[2025-10-17T15:27:11.738Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T15:27:37.650Z] ERROR: GET /login 404 - 67ms {"method":"GET","path":"/login","statusCode":404,"responseTime":67,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T15:27:38.129Z] ERROR: GET /favicon.ico 404 - 3ms {"method":"GET","path":"/favicon.ico","statusCode":404,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T15:27:54.885Z] ERROR: GET /auth/register 404 - 2ms {"method":"GET","path":"/auth/register","statusCode":404,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T18:06:50.629Z] WARN: MongoDB disconnected
+[2025-10-17T18:07:00.657Z] INFO: MongoDB reconnected
+[2025-10-17T18:21:25.516Z] WARN: MongoDB disconnected
+[2025-10-17T18:21:35.531Z] INFO: MongoDB reconnected
+[2025-10-17T18:26:57.916Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-17T18:26:57.922Z] INFO: HTTP server closed
+[2025-10-17T18:26:57.953Z] WARN: MongoDB disconnected
+[2025-10-17T18:26:57.957Z] INFO: MongoDB connection closed
+[2025-10-17T18:26:57.960Z] INFO: Database disconnected
+[2025-10-17T18:27:07.376Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T18:27:07.426Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T18:27:23.943Z] INFO: Organization registration request {"name":"vikalp llc","email":"Org.Vikalp@vikalp.com","businessType":"LLC","industry":"tech"}
+[2025-10-17T18:27:24.031Z] INFO: Organization created successfully {"organizationName":"vikalp llc","organizationId":"68f28a8be74bbdd3e902f872","email":"org.vikalp@vikalp.com"}
+[2025-10-17T18:27:24.043Z] INFO: POST /validate-organization 201 - 102ms {"method":"POST","path":"/validate-organization","statusCode":201,"responseTime":102,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T18:48:36.625Z] WARN: MongoDB disconnected
+[2025-10-17T18:48:46.654Z] INFO: MongoDB reconnected
+[2025-10-17T19:06:36.866Z] INFO: User registered successfully {"username":"warlord","email":"warlord@vikalp.com","firstName":"Warlord","lastName":"Dasher","role":"Employee","organizationName":"Vikalp llc"}
+[2025-10-17T19:06:36.870Z] INFO: POST /register 201 - 292ms {"method":"POST","path":"/register","statusCode":201,"responseTime":292,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:06:36.969Z] INFO: Attempting to save public key {"userId":"68f293bce74bbdd3e902f876","organizationName":"vikalp llc","publicKeyLength":450}
+[2025-10-17T19:06:36.978Z] INFO: Public key uploaded successfully {"keyId":"04f8f5cf-946a-4ec6-ab8c-b94fc7538b7f","userId":"68f293bce74bbdd3e902f876","organizationId":"68f28a8be74bbdd3e902f872","organizationName":"vikalp llc"}
+[2025-10-17T19:06:36.983Z] INFO: POST /public 201 - 92ms {"method":"POST","path":"/public","statusCode":201,"responseTime":92,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:07:29.412Z] ERROR: POST /validate-signin-organization 404 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:07:45.950Z] ERROR: POST /validate-signin-organization 404 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:07:52.958Z] INFO: POST /validate-signin-organization 200 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:08:09.367Z] ERROR: POST /login 404 - 1ms {"method":"POST","path":"/login","statusCode":404,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:24:58.613Z] WARN: MongoDB disconnected
+[2025-10-17T19:25:08.624Z] INFO: MongoDB reconnected
+[2025-10-17T19:26:08.424Z] ERROR: Login error {"error":"validateLoginCredentials is not defined","stack":"ReferenceError: validateLoginCredentials is not defined\n    at loginFunction (file:///E:/Project_IFT/IFT_Project_593/controller/loginController.js:69:28)\n    at Layer.handleRequest (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\layer.js:152:17)\n    at E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:295:15\n    at processParams (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:582:12)\n    at next (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:291:5)\n    at Function.handle (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:186:3)"}
+[2025-10-17T19:26:08.427Z] ERROR: POST /login 500 - 3ms {"method":"POST","path":"/login","statusCode":500,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:27:43.112Z] ERROR: Login error {"error":"validateLoginCredentials is not defined","stack":"ReferenceError: validateLoginCredentials is not defined\n    at loginFunction (file:///E:/Project_IFT/IFT_Project_593/controller/loginController.js:69:28)\n    at Layer.handleRequest (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\layer.js:152:17)\n    at E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:295:15\n    at processParams (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:582:12)\n    at next (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:291:5)\n    at Function.handle (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:186:3)"}
+[2025-10-17T19:27:43.119Z] ERROR: POST /login 500 - 7ms {"method":"POST","path":"/login","statusCode":500,"responseTime":7,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:27:54.251Z] ERROR: Login error {"error":"validateLoginCredentials is not defined","stack":"ReferenceError: validateLoginCredentials is not defined\n    at loginFunction (file:///E:/Project_IFT/IFT_Project_593/controller/loginController.js:69:28)\n    at Layer.handleRequest (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\layer.js:152:17)\n    at next (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\route.js:157:13)\n    at Route.dispatch (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\route.js:117:3)\n    at handle (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:435:11)\n    at Layer.handleRequest (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\lib\\layer.js:152:17)\n    at E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:295:15\n    at processParams (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:582:12)\n    at next (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:291:5)\n    at Function.handle (E:\\Project_IFT\\IFT_Project_593\\node_modules\\router\\index.js:186:3)"}
+[2025-10-17T19:27:54.253Z] ERROR: POST /login 500 - 3ms {"method":"POST","path":"/login","statusCode":500,"responseTime":3,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:27:56.049Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-17T19:27:56.054Z] INFO: HTTP server closed
+[2025-10-17T19:27:56.078Z] WARN: MongoDB disconnected
+[2025-10-17T19:27:56.079Z] INFO: MongoDB connection closed
+[2025-10-17T19:27:56.081Z] INFO: Database disconnected
+[2025-10-17T19:28:03.684Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:28:03.736Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:28:05.721Z] INFO: Auth attempt: warlord
+[2025-10-17T19:28:06.168Z] INFO: Auth success: warlord
+[2025-10-17T19:28:06.173Z] INFO: POST /login 200 - 454ms {"method":"POST","path":"/login","statusCode":200,"responseTime":454,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:37:40.650Z] WARN: MongoDB disconnected
+[2025-10-17T19:37:50.671Z] INFO: MongoDB reconnected
+[2025-10-17T19:39:30.206Z] INFO: Auth attempt: warlord
+[2025-10-17T19:39:30.364Z] INFO: Auth success: warlord
+[2025-10-17T19:39:30.367Z] INFO: POST /login 200 - 161ms {"method":"POST","path":"/login","statusCode":200,"responseTime":161,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T19:39:39.710Z] INFO: Auth attempt: warlord
+[2025-10-17T19:39:40.046Z] INFO: Auth success: warlord
+[2025-10-17T19:39:40.048Z] INFO: POST /login 200 - 339ms {"method":"POST","path":"/login","statusCode":200,"responseTime":339,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:40:13.840Z] ERROR: POST /validate-signin-organization 404 - 1ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:40:17.136Z] ERROR: POST /validate-signin-organization 404 - 1ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:41:47.866Z] ERROR: POST /validate-signin-organization 404 - 1ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":1,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:42:39.221Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-17T19:42:39.225Z] INFO: HTTP server closed
+[2025-10-17T19:42:39.243Z] WARN: MongoDB disconnected
+[2025-10-17T19:42:39.256Z] INFO: MongoDB connection closed
+[2025-10-17T19:42:39.263Z] INFO: Database disconnected
+[2025-10-17T19:43:20.239Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:43:20.292Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:43:27.935Z] INFO: Graceful shutdown initiated {"signal":"SIGINT"}
+[2025-10-17T19:43:27.938Z] INFO: HTTP server closed
+[2025-10-17T19:43:27.957Z] WARN: MongoDB disconnected
+[2025-10-17T19:43:27.959Z] INFO: MongoDB connection closed
+[2025-10-17T19:43:27.961Z] INFO: Database disconnected
+[2025-10-17T19:43:40.298Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:43:40.349Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:43:56.685Z] ERROR: POST /validate-signin-organization 500 - 25ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":25,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:45:11.337Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:45:11.445Z] ERROR: POST /validate-signin-organization 404 - 6ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":6,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:45:11.523Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:45:14.214Z] ERROR: POST /validate-signin-organization 404 - 2ms {"method":"POST","path":"/validate-signin-organization","statusCode":404,"responseTime":2,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:45:33.288Z] ERROR: POST /validate-signin-organization 500 - 7ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":7,"ip":"::ffff:127.0.0.1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:45:41.523Z] ERROR: POST /validate-signin-organization 500 - 5ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":5,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:46:11.057Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:46:11.109Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:46:23.683Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:46:23.793Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:47:54.588Z] ERROR: POST /validate-signin-organization 500 - 21ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":21,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:48:45.666Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:48:45.781Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:48:53.954Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:48:54.055Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:49:53.219Z] ERROR: POST /org/validate-organization 500 - 58ms {"method":"POST","path":"/org/validate-organization","statusCode":500,"responseTime":58,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T19:50:41.284Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:50:41.426Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:57:52.489Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T19:57:52.571Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T19:57:58.635Z] ERROR: POST /validate-signin-organization 500 - 21ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":21,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T19:58:09.251Z] ERROR: POST /validate-signin-organization 500 - 10ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":10,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T20:01:31.940Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:01:31.967Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:01:54.941Z] WARN: Organization validation failed {"errors":["Organization name is required and must be at least 2 characters","Display name is required and must be at least 2 characters","Valid email is required","Valid phone number is required","Complete address information is required","Valid business type is required","Industry is required and must be at least 2 characters"]}
+[2025-10-17T20:01:54.949Z] ERROR: POST /validate-organization 400 - 9ms {"method":"POST","path":"/validate-organization","statusCode":400,"responseTime":9,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:03:11.178Z] ERROR: POST /validate-signin-organization 500 - 8ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":8,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T20:04:46.360Z] ERROR: POST /validate-signin-organization 400 - 1ms {"method":"POST","path":"/validate-signin-organization","statusCode":400,"responseTime":1,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:05:20.454Z] ERROR: POST /validate-signin-organization 400 - 2ms {"method":"POST","path":"/validate-signin-organization","statusCode":400,"responseTime":2,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:07:01.182Z] ERROR: POST /validate-signin-organization 500 - 13ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":13,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:07:31.636Z] ERROR: POST /validate-signin-organization 500 - 9ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":9,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:07:38.505Z] ERROR: POST /validate-signin-organization 500 - 13ms {"method":"POST","path":"/validate-signin-organization","statusCode":500,"responseTime":13,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:09:26.525Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:09:26.602Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:11:25.791Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:11:25.921Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:11:50.440Z] INFO: POST /validate-signin-organization 200 - 86ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":86,"ip":"::1","userAgent":"PostmanRuntime/7.39.1"}
+[2025-10-17T20:11:57.850Z] INFO: POST /validate-signin-organization 200 - 15ms {"method":"POST","path":"/validate-signin-organization","statusCode":200,"responseTime":15,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T20:13:15.299Z] INFO: Auth attempt: warlord
+[2025-10-17T20:13:15.643Z] INFO: Auth success: warlord
+[2025-10-17T20:13:15.646Z] INFO: POST /login 200 - 348ms {"method":"POST","path":"/login","statusCode":200,"responseTime":348,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T20:16:00.265Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:16:00.325Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:16:17.365Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:16:17.478Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:16:25.721Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:16:25.815Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:17:17.558Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:17:17.660Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:17:24.052Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-17T20:17:24.116Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-17T20:17:32.579Z] INFO: Auth attempt: warlord
+[2025-10-17T20:17:33.028Z] INFO: Auth success: warlord
+[2025-10-17T20:17:33.038Z] INFO: POST /login 200 - 460ms {"method":"POST","path":"/login","statusCode":200,"responseTime":460,"ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"}
+[2025-10-17T21:14:23.699Z] WARN: MongoDB disconnected
+[2025-10-17T21:14:33.916Z] INFO: MongoDB reconnected

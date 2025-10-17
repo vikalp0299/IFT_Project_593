@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
 import User  from '../models/User.js';
-import { validateRegistrationData } from '../utils/validation.js';
+import { validateRegistrationData,validateLoginCredentials } from '../utils/validation.js';
 import { logger } from '../utils/logger.js';
 import { generateTokens } from '../middleware/auth.js';
 
@@ -48,76 +48,95 @@ const authenticateToken = (req, res, next) => {
     });
 }
 
+
+// User Authentication Endpoints
+/**
+ * @route POST /auth/login
+ * @desc User login with database validation
+ * @access Public
+ */
+
 async function loginFunction(req, res) {
     // Implement login logic here
-     try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username and password are required',
-      });
+    try {
+        // Handle both query parameters and JSON body
+        const { username, password } = {
+          username: req.body.username || req.query.username,
+          password: req.body.password || req.query.password
+        };
+        
+        // Validate input
+        const validation = validateLoginCredentials({ username, password });
+        if (!validation.isValid) {
+          logger.warn('Login validation failed', { username, errors: validation.errors });
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid input',
+            errors: validation.errors
+          });
+        }
+    
+        const { username: sanitizedUsername, password: sanitizedPassword } = validation.sanitized;
+        
+        logger.auth('attempt', sanitizedUsername);
+    
+        // Find user in database
+        const user = await User.findOne({
+          $or: [
+            { username: sanitizedUsername }, 
+            { email: sanitizedUsername }
+          ],
+        });
+    
+        if (!user) {
+          logger.auth('failed', sanitizedUsername, { reason: 'user_not_found' });
+          return res.status(401).json({
+            success: false,
+            message: 'Invalid username or password'
+          });
+        }
+    
+        // Verify password
+        const bcrypt = await import('bcryptjs');
+        const isPasswordValid = await bcrypt.compare(sanitizedPassword, user.password);
+        
+        if (!isPasswordValid) {
+          logger.auth('failed', sanitizedUsername, { reason: 'invalid_password' });
+          return res.status(401).json({
+            success: false,
+            message: 'Invalid username or password'
+          });
+        }
+    
+        // Update last login
+        user.lastLogin = new Date();
+        await user.save();
+    
+        logger.auth('success', user.username);
+    
+        res.json({
+          success: true,
+          message: 'Login successful',
+          data: {
+            organizationName: user.organizationName,
+            role: user.role,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+            email: user.email,
+            userId: user._id,
+            loginTime: user.lastLogin
+          }
+        });
+    
+      } catch (error) {
+        logger.error('Login error', { error: error.message, stack: error.stack });
+        res.status(500).json({
+          success: false,
+          message: 'Internal server error'
+        });
     }
-
-    // Allow login by username or email (case-insensitive)
-    const user = await User.findOne({
-      $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }],
-    });
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
-    }
-
-    user.lastLogin = new Date();
-    await user.save();
-
-    // Generate tokens
-    const tokens = generateTokens(user);
-
-    logger.info('User logged in successfully', { 
-        username: user.username,
-        userId: user._id,
-        role: user.role,
-        organizationName: user.organizationName
-    });
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        userId: user._id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        organizationName: user.organizationName,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        expiresIn: '24h',
-        lastLogin: user.lastLogin,
-      },
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-    });
-  }
-};
+}
 
 
 

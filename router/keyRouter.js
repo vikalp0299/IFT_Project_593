@@ -2,7 +2,7 @@ import express from 'express';
 import { authenticateToken, requirePermission } from '../middleware/auth.js';
 import PublicKey from '../models/PublicKey.js';
 import User from '../models/User.js';
-import { Organization } from '../db.js';
+import  Organization  from '../models/organization.js';
 import { logger } from '../utils/logger.js';
 import { validateKeyUpload, validateKeyQuery } from '../utils/validation.js';
 
