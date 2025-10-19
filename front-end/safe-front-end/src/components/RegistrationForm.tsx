@@ -84,7 +84,7 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/validate-organization', {
+      const response = await fetch('http://localhost:8000/org/validate-organization', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,6 @@ export const RegistrationForm: React.FC<RegistrationFormProps> = ({
         }
       }
     } catch (err) {
-      console.error('Organization registration failed:', err);
       setErrors(['An error occurred. Please try again.']);
     } finally {
       setIsLoading(false);

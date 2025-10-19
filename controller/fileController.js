@@ -23,7 +23,6 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 export async function initUpload(req, res) {
   const { filename } = req.body;
-  console.log(req.body);
   const uploadId = uuidv4();
   const dir = path.join(UPLOAD_DIR, uploadId);
   await fs.mkdir(dir, { recursive: true });
@@ -31,11 +30,8 @@ export async function initUpload(req, res) {
 }
 
 export const uploadChunk = [
-  // Multer middleware to parse the multipart form
   upload.single('chunk'),
-  // Actual request handler
   async (req, res) => {
-    console.log(req.body);
     const { uploadId, chunkIndex } = req.body;
     if (!uploadId || chunkIndex === undefined) {
       return res.status(400).json({ error: 'Missing uploadId or chunkIndex' });
@@ -43,7 +39,6 @@ export const uploadChunk = [
     if (!req.file?.buffer) {
       return res.status(400).json({ error: 'Missing chunk file' });
     }
-    console.log(req.file.buffer)
     const chunkPath = path.join(UPLOAD_DIR, uploadId, `chunk_${chunkIndex}`);
     await fs.writeFile(chunkPath, req.file.buffer);
     res.json({ received: Number(chunkIndex) });
