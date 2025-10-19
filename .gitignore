@@ -14,3 +14,5 @@ node_modules
 .env
 dbtest.js
 dbtest.js
+logs/*.log
+logs/
