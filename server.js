@@ -13,11 +13,12 @@ import path from 'path';
 import dotenv from 'dotenv';
 
 // Application imports
-import { connectDB, disconnectDB, createOrganization, findOrganization } from './db.js';
+import { connectDB, disconnectDB } from './db.js';
 import User from './models/User.js';
 import loginRouter from './router/loginRouter.js';
 import router from './router/fileRouter.js';
 import keyRouter from './router/keyRouter.js';
+import orgRouter from './router/organizationRouter.js';
 import { 
   authenticateToken, 
   optionalAuth, 
@@ -27,10 +28,9 @@ import {
   logout,
   getCurrentUser
 } from './middleware/auth.js';
+import { requestLogger, errorLogger, log } from './middleware/logger.js';
 
 // Utilities
-import { logger } from './utils/logger.js';
-import { validateLoginCredentials, validateOrganizationName } from './utils/validation.js';
 import { serverConfig, securityConfig, rateLimitConfig, appConfig } from './config/index.js';
 
 // Load environment variables
@@ -87,16 +87,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware
-app.use((req, res, next) => {
-  const start = Date.now();
-  
-  res.on('finish', () => {
-    const responseTime = Date.now() - start;
-    logger.http(req, res, responseTime);
-  });
-  
-  next();
-});
+app.use(requestLogger);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -114,6 +105,7 @@ app.get('/health', (req, res) => {
 app.use('/api', router);
 app.use('/auth', loginRouter);
 app.use('/api/keys', keyRouter);
+app.use('/org', orgRouter);
 
 // Static file serving (after API routes to avoid conflicts)
 app.use(express.static(path.join(__dirpath, 'public')));
@@ -122,284 +114,6 @@ app.use(express.static(path.join(__dirpath, 'public')));
 app.post('/auth/refresh', refreshToken);
 app.post('/auth/logout', authenticateToken, logout);
 app.get('/auth/me', authenticateToken, getCurrentUser);
-
-// User Authentication Endpoints
-/**
- * @route POST /login
- * @desc User login with database validation
- * @access Public
- */
-app.post('/login', async (req, res) => {
-  try {
-    // Handle both query parameters and JSON body
-    const { username, password } = {
-      username: req.body.username || req.query.username,
-      password: req.body.password || req.query.password
-    };
-    
-    // Validate input
-    const validation = validateLoginCredentials({ username, password });
-    if (!validation.isValid) {
-      logger.warn('Login validation failed', { username, errors: validation.errors });
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid input',
-        errors: validation.errors
-      });
-    }
-
-    const { username: sanitizedUsername, password: sanitizedPassword } = validation.sanitized;
-    
-    logger.auth('attempt', sanitizedUsername);
-
-    // Find user in database
-    const user = await User.findOne({
-      $or: [
-        { username: sanitizedUsername }, 
-        { email: sanitizedUsername }
-      ],
-    });
-
-    if (!user) {
-      logger.auth('failed', sanitizedUsername, { reason: 'user_not_found' });
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid username or password'
-      });
-    }
-
-    // Verify password
-    const bcrypt = await import('bcryptjs');
-    const isPasswordValid = await bcrypt.compare(sanitizedPassword, user.password);
-    
-    if (!isPasswordValid) {
-      logger.auth('failed', sanitizedUsername, { reason: 'invalid_password' });
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid username or password'
-      });
-    }
-
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
-
-    logger.auth('success', user.username);
-
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        username: user.username,
-        email: user.email,
-        userId: user._id,
-        loginTime: user.lastLogin
-      }
-    });
-
-  } catch (error) {
-    logger.error('Login error', { error: error.message, stack: error.stack });
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
-
-// Organization Management Endpoints
-/**
- * @route POST /validate-organization
- * @desc Validate and create new organization
- * @access Public
- */
-app.post('/validate-organization', async (req, res) => {
-  try {
-    const {
-      name,
-      displayName,
-      email,
-      phone,
-      address,
-      businessType,
-      industry,
-      website,
-      maxUsers
-    } = req.body;
-    
-    // Validate required fields
-    const errors = [];
-    
-    if (!name || name.trim().length < 2) {
-      errors.push('Organization name is required and must be at least 2 characters');
-    }
-    if (!displayName || displayName.trim().length < 2) {
-      errors.push('Display name is required and must be at least 2 characters');
-    }
-    if (!email || !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-      errors.push('Valid email is required');
-    }
-    if (!phone || !/^[\+]?[1-9][\d]{0,15}$/.test(phone)) {
-      errors.push('Valid phone number is required');
-    }
-    if (!address || !address.street || !address.city || !address.state || !address.zipCode || !address.country) {
-      errors.push('Complete address information is required');
-    }
-    if (!businessType || !['Corporation', 'LLC', 'Partnership', 'Sole Proprietorship', 'Non-Profit', 'Government', 'Other'].includes(businessType)) {
-      errors.push('Valid business type is required');
-    }
-    if (!industry || industry.trim().length < 2) {
-      errors.push('Industry is required and must be at least 2 characters');
-    }
-    
-    if (errors.length > 0) {
-      logger.warn('Organization validation failed', { errors });
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed',
-        errors
-      });
-    }
-    
-    logger.info('Organization registration request', { 
-      name: name.toLowerCase(), 
-      email,
-      businessType,
-      industry 
-    });
-
-    // Check if organization already exists (by name or email)
-    const { Organization } = await import('./db.js');
-    const existingOrgByName = await Organization.findOne({ 
-      name: name.toLowerCase().trim() 
-    });
-    const existingOrgByEmail = await Organization.findOne({ 
-      email: email.toLowerCase().trim() 
-    });
-    
-    if (existingOrgByName) {
-      return res.status(409).json({
-        success: false,
-        message: 'Organization name already exists. Please choose a different name.'
-      });
-    }
-    
-    if (existingOrgByEmail) {
-      return res.status(409).json({
-        success: false,
-        message: 'Organization email already exists. Please use a different email address.'
-      });
-    }
-
-    // Create the organization with comprehensive data
-    const organizationData = {
-      name: name.toLowerCase().trim(),
-      displayName: displayName.trim(),
-      email: email.toLowerCase().trim(),
-      phone: phone.trim(),
-      address: {
-        street: address.street.trim(),
-        city: address.city.trim(),
-        state: address.state.trim(),
-        zipCode: address.zipCode.trim(),
-        country: address.country.trim()
-      },
-      businessType: businessType,
-      industry: industry.trim(),
-      website: website ? website.trim() : '',
-      maxUsers: maxUsers || 50
-    };
-    
-    const result = await createOrganization(organizationData);
-    
-    if (result.success) {
-      logger.info('Organization created successfully', { 
-        organizationName: organizationData.name,
-        organizationId: result.organization._id,
-        email: organizationData.email
-      });
-      res.status(201).json({
-        success: true,
-        message: 'Organization registered successfully',
-        data: {
-          organizationId: result.organization._id,
-          name: result.organization.name,
-          displayName: result.organization.displayName,
-          email: result.organization.email,
-          status: result.organization.status,
-          createdAt: result.organization.createdAt
-        }
-      });
-    } else {
-      logger.error('Failed to create organization', { 
-        organizationName: organizationData.name, 
-        error: result.message 
-      });
-      res.status(500).json({
-        success: false,
-        message: result.message || 'Failed to create organization'
-      });
-    }
-
-  } catch (error) {
-    logger.error('Organization registration error', { error: error.message, stack: error.stack });
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
-
-/**
- * @route POST /validate-signin-organization
- * @desc Validate existing organization for sign-in
- * @access Public
- */
-app.post('/validate-signin-organization', async (req, res) => {
-  try {
-    const { organizationName } = req.body;
-    
-    // Input validation
-    if (!organizationName || typeof organizationName !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'Organization name is required and must be a string'
-      });
-    }
-
-    const sanitizedOrgName = organizationName.trim();
-    
-    console.log(`SignIn organization validation: ${sanitizedOrgName}`);
-
-    // Check if organization exists
-    const organization = await findOrganization(sanitizedOrgName);
-    
-    if (!organization) {
-      return res.status(404).json({
-        success: false,
-        message: 'Organization not found. Please check the organization name and try again.'
-      });
-    }
-
-    console.log(`Organization found: ${organization.displayName}`);
-    
-    res.json({
-      success: true,
-      message: 'Organization found',
-      data: {
-        organizationName: organization.displayName,
-        organizationId: organization._id,
-        validatedAt: new Date().toISOString()
-      }
-    });
-
-  } catch (error) {
-    console.error('SignIn organization validation error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
-  }
-});
 
 // Debug endpoint (only in development)
 if (serverConfig.nodeEnv === 'development') {
@@ -522,9 +236,8 @@ app.use((req, res) => {
 });
 
 // Global error handler
+app.use(errorLogger);
 app.use((err, req, res, next) => {
-  console.error('Global error handler:', err);
-  
   // Don't leak error details in production
   const message = serverConfig.nodeEnv === 'production' 
     ? 'Something went wrong' 
@@ -541,7 +254,7 @@ connectDB();
 
 // Start server
 const server = app.listen(serverConfig.port, () => {
-  logger.info(`🚀 Server started successfully!`, {
+  log.info('Server started successfully', {
     port: serverConfig.port,
     environment: serverConfig.nodeEnv,
     version: appConfig.version
@@ -550,31 +263,31 @@ const server = app.listen(serverConfig.port, () => {
   console.log(`🚀 Server started successfully!`);
   console.log(`📍 Environment: ${serverConfig.nodeEnv}`);
   console.log(`🌐 Server URL: http://localhost:${serverConfig.port}`);
-  console.log(`🔐 Login endpoint: http://localhost:${serverConfig.port}/login`);
+  console.log(`🔐 Login endpoint: http://localhost:${serverConfig.port}/auth/login`);
   console.log(`📝 Register endpoint: http://localhost:${serverConfig.port}/auth/register`);
-  console.log(`🏢 Organization validation: http://localhost:${serverConfig.port}/validate-organization`);
-  console.log(`🔍 SignIn organization validation: http://localhost:${serverConfig.port}/validate-signin-organization`);
+  console.log(`🏢 Organization validation: http://localhost:${serverConfig.port}/org/validate-organization`);
+  console.log(`🔍 SignIn organization validation: http://localhost:${serverConfig.port}/org/validate-signin-organization`);
   console.log(`💚 Health check: http://localhost:${serverConfig.port}/health`);
   console.log(`🎨 Frontend: ${securityConfig.corsOrigins.join(', ')}`);
 });
 
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
-  logger.info(`Graceful shutdown initiated`, { signal });
+  log.info('Graceful shutdown initiated', { signal });
   console.log(`\n🛑 ${signal} received. Starting graceful shutdown...`);
   
   server.close(async () => {
-    logger.info('HTTP server closed');
+    log.info('HTTP server closed');
     console.log('✅ HTTP server closed');
     
     try {
       await disconnectDB();
-      logger.info('Database disconnected');
+      log.info('Database disconnected');
       console.log('✅ Database disconnected');
       console.log('✅ Graceful shutdown completed');
       process.exit(0);
     } catch (error) {
-      logger.error('Error during shutdown', { error: error.message });
+      log.error('Error during shutdown', { error: error.message });
       console.error('❌ Error during shutdown:', error);
       process.exit(1);
     }
@@ -586,13 +299,13 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  logger.error('Uncaught Exception', { error: err.message, stack: err.stack });
+  log.error('Uncaught Exception', { error: err.message, stack: err.stack });
   console.error('❌ Uncaught Exception:', err);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection', { reason, promise });
+  log.error('Unhandled Rejection', { reason, promise });
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
 });

@@ -1,0 +1,11 @@
+[2025-10-19T07:31:19.210Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-19T07:31:19.897Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-19T07:31:56.493Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-19T07:31:56.749Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-19T07:35:46.582Z] INFO: 🚀 Server started successfully! {"port":"8000","environment":"development","version":"1.0.0"}
+[2025-10-19T07:35:46.699Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-19T07:39:11.327Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-19T07:43:39.315Z] INFO: MongoDB connected successfully {"host":"localhost"}
+[2025-10-19T07:49:14.238Z] INFO: Attempting to save public key {"userId":"68f497fa50efc004da77e877","organizationName":"atul","publicKeyLength":450}
+[2025-10-19T07:49:14.250Z] INFO: Public key uploaded successfully {"keyId":"49ff4173-1cb4-43e7-9c42-6ba45b5f70e8","userId":"68f497fa50efc004da77e877","organizationId":"68f4960dfaebce0c72fdb719","organizationName":"atul"}
+[2025-10-19T07:52:42.395Z] INFO: MongoDB connected successfully {"host":"localhost"}

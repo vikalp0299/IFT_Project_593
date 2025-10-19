@@ -1,10 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
 import User  from '../models/User.js';
-import { validateRegistrationData } from '../utils/validation.js';
-import { logger } from '../utils/logger.js';
 import { generateTokens } from '../middleware/auth.js';
 
 dotenv.config();
@@ -85,13 +82,6 @@ async function loginFunction(req, res) {
 
     // Generate tokens
     const tokens = generateTokens(user);
-
-    logger.info('User logged in successfully', { 
-        username: user.username,
-        userId: user._id,
-        role: user.role,
-        organizationName: user.organizationName
-    });
 
     res.json({
       success: true,
@@ -198,7 +188,6 @@ async function registerFunction(req, res) {
         }
         
         if (errors.length > 0) {
-            logger.warn('Registration validation failed', { username, email, errors });
             return res.status(400).json({
                 success: false,
                 message: 'Validation failed',
@@ -212,7 +201,6 @@ async function registerFunction(req, res) {
         });    
 
         if (existingUser) {
-            logger.warn('Registration failed - user already exists', { username, email });
             return res.status(409).json({
                 success: false,
                 message: 'User with this username or email already exists'
@@ -224,7 +212,6 @@ async function registerFunction(req, res) {
         const organization = await findOrganization(organizationName.trim());
         
         if (!organization) {
-            logger.warn('Registration failed - organization not found', { organizationName, username });
             return res.status(400).json({
                 success: false,
                 message: `Organization '${organizationName}' does not exist. Please contact your administrator to create this organization first.`
@@ -293,15 +280,6 @@ async function registerFunction(req, res) {
         // Generate tokens
         const tokens = generateTokens(newUser);
 
-        logger.info('User registered successfully', { 
-            username: newUser.username, 
-            email: newUser.email,
-            firstName: newUser.firstName,
-            lastName: newUser.lastName,
-            role: newUser.role,
-            organizationName: newUser.organizationName
-        });
-
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
@@ -320,7 +298,6 @@ async function registerFunction(req, res) {
         });
 
     } catch (error) {
-        logger.error('Registration error', { error: error.message, stack: error.stack });
         res.status(500).json({
             success: false,
             message: 'Internal server error'

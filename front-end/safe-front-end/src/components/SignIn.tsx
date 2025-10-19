@@ -32,7 +32,7 @@ export const SignIn: React.FC<SignInProps> = ({
 
     try {
       // Call the actual backend API
-      const response = await fetch('http://localhost:8000/validate-signin-organization', {
+      const response = await fetch('http://localhost:8000/org/validate-signin-organization', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
