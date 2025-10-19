@@ -1,0 +1,383 @@
+/* HomePage Styles */
+.homepage-container {
+  height: 100vh;
+  width: 100vw;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: #1F2937;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Header Styles */
+.homepage-header {
+  background: rgba(59, 130, 246, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+}
+
+.header-content h1 {
+  margin: 0;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.organization-name {
+  margin: 0;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  flex: 1;
+}
+
+.logout-button {
+  background: #EF4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.logout-button:hover {
+  background: #DC2626;
+  transform: translateY(-1px);
+}
+
+/* Main Content */
+.homepage-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.channels-section h2 {
+  color: white;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.channels-description {
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 1.125rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Channels Grid */
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+/* Channel Card */
+.channel-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #E5E7EB;
+  position: relative;
+  overflow: hidden;
+}
+
+.channel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Channel Header */
+.channel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.channel-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1F2937;
+  flex: 1;
+}
+
+.access-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.access-indicator.has-access {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.access-indicator.no-access {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+/* Channel Organizations */
+.channel-organizations {
+  margin-bottom: 1rem;
+}
+
+.organizations-label {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.organizations-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.organization-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.organization-tag.current-org {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.organization-tag.partner-org {
+  background: #E0E7FF;
+  color: #3730A3;
+}
+
+/* Channel Footer */
+.channel-footer {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.access-text {
+  color: #10B981;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.request-text {
+  color: #F59E0B;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: white;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: white;
+  text-align: center;
+}
+
+.error-message h2 {
+  margin-bottom: 1rem;
+  color: #fed7d7;
+}
+
+.retry-button {
+  background: #4299e1;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background: #3182ce;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .homepage-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .header-content h1 {
+    font-size: 1.125rem;
+  }
+
+  .organization-name {
+    font-size: 1.25rem;
+  }
+
+  .homepage-main {
+    padding: 1rem;
+  }
+
+  .channels-section h2 {
+    font-size: 2rem;
+  }
+
+  .channels-description {
+    font-size: 1rem;
+  }
+
+  .channels-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .channel-card {
+    padding: 1.25rem;
+  }
+
+  .channel-name {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .homepage-header {
+    padding: 0.75rem;
+  }
+
+  .header-content h1 {
+    font-size: 1rem;
+  }
+
+  .organization-name {
+    font-size: 1.125rem;
+  }
+
+  .homepage-main {
+    padding: 0.75rem;
+  }
+
+  .channels-section h2 {
+    font-size: 1.75rem;
+  }
+
+  .channels-description {
+    font-size: 0.875rem;
+  }
+
+  .channels-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .channel-card {
+    padding: 1rem;
+  }
+
+  .channel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .access-indicator {
+    align-self: flex-start;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .channel-name {
+    font-size: 1.125rem;
+  }
+
+  .organization-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
