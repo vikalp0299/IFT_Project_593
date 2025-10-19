@@ -91,6 +91,13 @@ const organizationSchema = new mongoose.Schema({
     match: [/^https?:\/\/.+/, 'Please enter a valid website URL']
   },
   
+  // Channel Information
+  organizationChannels: {
+    type: [String],
+    default: [],
+    lowercase: true
+  },
+  
   // Administrative Information
   adminUser: {
     type: mongoose.Schema.Types.ObjectId,
