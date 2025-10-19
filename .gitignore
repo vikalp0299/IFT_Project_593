@@ -6,6 +6,7 @@ ipfs_data_remote/
 minio_data/
 uploads/
 IPFS/node_app/uploads/
+logs/
 # Optional: ignore npm debug logs and environment files
 npm-debug.log*
 .env

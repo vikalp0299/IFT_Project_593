@@ -63,10 +63,8 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
           onSignIn(credentials);
         }
         
-        // Show success state instead of redirecting
-        setError(''); // Clear any previous errors
-        setLoginSuccess(true);
-        setUserData(data.data);
+        // Redirect to homepage after successful login
+        window.location.href = '/home';
       } else {
         console.error('❌ Login failed:', data.message);
         setError(data.message || 'Login failed. Please try again.');
