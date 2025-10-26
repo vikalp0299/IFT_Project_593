@@ -7,10 +7,10 @@ import { generateTokens } from '../middleware/auth.js';
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET || 'SUPERSECRETKEY-CHANGE-IN-PRODUCTION-PLEASE-AND-KEEP-SECRET';
 
-//Function to generate JWT
-const generateToken = (userId,username) =>{
-    return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: '1h' });
-};
+// //Function to generate JWT
+// const generateToken = (userId,username) =>{
+//     return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: '1h' });
+// };
 
 //Paswsword hashing
 const hashPassword = async (password) => {
@@ -24,26 +24,26 @@ const verifyPassword = async (password, hashedPassword) => {
     return await bcrypt.compare(password, hashedPassword);
 };
 
-//Middleware to verify JWT
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) {
-        return res.sendStatus(401).json({
-            success: false,
-            message: 'No token provided'
-        });
-    }
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403).json({
-            success: false,
-            message: 'Invalid token or expired'
-        });
+// //Middleware to verify JWT
+// const authenticateToken = (req, res, next) => {
+//     const authHeader = req.headers['authorization'];
+//     const token = authHeader && authHeader.split(' ')[1];
+//     if (!token) {
+//         return res.sendStatus(401).json({
+//             success: false,
+//             message: 'No token provided'
+//         });
+//     }
+//     jwt.verify(token, JWT_SECRET, (err, user) => {
+//         if (err) return res.sendStatus(403).json({
+//             success: false,
+//             message: 'Invalid token or expired'
+//         });
    
-        req.user = user;
-        next();
-    });
-}
+//         req.user = user;
+//         next();
+//     });
+// }
 
 async function loginFunction(req, res) {
     // Implement login logic here
@@ -69,7 +69,7 @@ async function loginFunction(req, res) {
       });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await verifyPassword(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -279,7 +279,7 @@ async function registerFunction(req, res) {
 
         // Generate tokens
         const tokens = generateTokens(newUser);
-
+        console.log('Registration successful for user:', newUser.username, tokens.accessToken);
         res.status(201).json({
             success: true,
             message: 'User registered successfully',

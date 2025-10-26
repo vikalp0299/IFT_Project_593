@@ -5,16 +5,24 @@ import path from 'path';
 import fs from 'fs/promises';
 import File from '../models/File.js';
 import mime from 'mime-types';
+import { getUserIdfromToken } from '../middleware/auth.js';
+
+
+
 
 /**
  * Display all files for the authenticated user
  * Uses JWT token (via authenticateToken middleware) to identify user
  * Queries using both userId and uploader fields per File model convention
+ * 
+ * 
  */
 export const displayAllFiles = async (req, res) => {
     try {
         // User ID extracted from JWT by authenticateToken middleware
-        const userId = req.user.userId;
+        const userId = getUserIdfromToken(req);
+        //console.log('Fetching files for userId:', userId);
+        // const userId = req.user.userId;
 
         // Query MongoDB for files belonging to this user
         // Using $or with both userId and uploader for backward compatibility
@@ -55,7 +63,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 export async function initUpload(req, res) {
     try {
         const { filename } = req.body;
-        const userId = req.user?.userId;
+        const userId = getUserIdfromToken(req);
 
         if (!userId) {
             return res.status(401).json({ 

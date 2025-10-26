@@ -417,3 +417,60 @@ export const getCurrentUser = (req, res) => {
     });
   }
 };
+
+export const getUserIdfromToken = (req) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return null;
+    }
+
+    // Verify token
+    const decoded = verifyToken(token);
+    return decoded.userId;
+
+  } catch (error) {
+    logger.warn('Failed to get userId from token', { error: error.message });
+    return null;
+  }
+};
+
+export const getUserRoleFromToken = (req) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return null;
+    }
+
+    // Verify token
+    const decoded = verifyToken(token);
+    return decoded.role;
+
+  } catch (error) {
+    logger.warn('Failed to get user role from token', { error: error.message });
+    return null;
+  }
+};   
+
+export const getOrganizationIdFromToken = (req) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return null;
+    }
+
+    // Verify token
+    const decoded = verifyToken(token);
+    return decoded.organizationId;
+
+  } catch (error) {
+    logger.warn('Failed to get organizationId from token', { error: error.message });
+    return null;
+  }
+};
