@@ -336,8 +336,8 @@ export async function requestAccessToChannel(req, res) {
 
 export async function displayAccessRequestsToAdmin(req, res) {
   try {
-    const userId = getUserIdfromToken(req);
-    if (!userId) {
+    const loggedUserId = getUserIdfromToken(req);
+    if (!loggedUserId) {
       return res.status(401).json({
         success: false,
         message: 'User authentication required'
@@ -345,7 +345,7 @@ export async function displayAccessRequestsToAdmin(req, res) {
     } 
     
     const userRole = getUserRoleFromToken(req);
-    const storedUserRole = await User.findById(userId).select('role');
+    const storedUserRole = await User.findById(loggedUserId).select('role');
     console.log('Stored user role:', storedUserRole.role);
     if (storedUserRole.role !== userRole && storedUserRole.role !== 'admin') {
       return res.status(403).json({
@@ -363,7 +363,7 @@ export async function displayAccessRequestsToAdmin(req, res) {
     const accessRequests = await Access.find({ organizationId: organizationId },{_id:0,userId:1,channelName:1,access:1});
     console.log('Access requests fetched from DB:', accessRequests);
     console.log('Access requests fetched:', accessRequests.channelName);
-    console.log(userId);
+    const userId = accessRequests.length > 0 ? accessRequests[0].userId : null;
     const userName = await User.findById(userId).select('username');
     console.log('User name fetched:', userName.username);
     const payload = accessRequests.map(request => ({
@@ -386,5 +386,50 @@ export async function displayAccessRequestsToAdmin(req, res) {
 }
 
 export async function respondToAccessRequest(req, res) {
-
+  try{
+    const { username, channelName, access } = req.body;
+    if (!username || !channelName || !access) {
+      return res.status(400).json({
+        success: false,
+        message: 'username, channelName, and access status are required'
+      });
+    }
+    if (!['approved', 'denied'].includes(access)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Access status must be either "approved" or "denied"'
+      });
+    }
+    //const organizationId = getOrganizationIdFromToken(req);
+    const userId = await User.findOne({ username: username }).select('_id');
+    if (!userId) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    const organizationId = getOrganizationIdFromToken(req);
+    const updatedRequest = await Access.findOneAndUpdate(
+      { userId: userId, organizationId: organizationId, channelName: channelName },
+      { $set: { access: access } },
+      { new: true }
+    );
+    if (!updatedRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Access request not found'
+      });
+    }
+    res.json({
+      success: true,
+      message: 'Access request updated successfully',
+      data: updatedRequest
+    });
+  }catch(error){
+    console.error('Error responding to access request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  } 
 }

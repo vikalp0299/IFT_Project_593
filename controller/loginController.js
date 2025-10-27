@@ -82,7 +82,7 @@ async function loginFunction(req, res) {
 
     // Generate tokens
     const tokens = generateTokens(user);
-
+    console.log('Login successful for user:', user.username, tokens.accessToken);
     res.json({
       success: true,
       message: 'Login successful',
