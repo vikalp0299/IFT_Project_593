@@ -1,6 +1,6 @@
 /* HomePage Styles */
 .homepage-container {
-  height: 100vh;
+  min-height: 100vh;
   width: 100vw;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   color: #1F2937;
@@ -67,7 +67,7 @@
 }
 
 .logout-button:hover {
-  background: #DC2626;
+  background: #EF4444;
   transform: translateY(-1px);
 }
 
@@ -82,142 +82,152 @@
   box-sizing: border-box;
 }
 
-.channels-section h2 {
+/* Blockchain Section */
+.blockchain-section {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 2rem 0;
+}
+
+.welcome-message {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.welcome-message h2 {
   color: white;
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  text-align: center;
   font-weight: 800;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.channels-description {
+.section-description {
   color: rgba(255, 255, 255, 0.9);
-  text-align: center;
-  margin-bottom: 3rem;
   font-size: 1.125rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-/* Channels Grid */
-.channels-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+/* Blockchain Actions */
+.blockchain-actions {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  margin-top: 2rem;
   width: 100%;
 }
 
-/* Channel Card */
-.channel-card {
+.blockchain-button {
   background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 2rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  border: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  text-align: left;
   position: relative;
   overflow: hidden;
 }
 
-.channel-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+.blockchain-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s;
 }
 
-/* Channel Header */
-.channel-header {
+.blockchain-button:hover::before {
+  left: 100%;
+}
+
+.blockchain-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: #3B82F6;
+}
+
+.create-button:hover {
+  border-color: #10B981;
+  box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2), 0 10px 10px -5px rgba(16, 185, 129, 0.1);
+}
+
+.join-button:hover {
+  border-color: #3B82F6;
+  box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.2), 0 10px 10px -5px rgba(59, 130, 246, 0.1);
+}
+
+.button-icon {
+  font-size: 3rem;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+  border-radius: 12px;
+  transition: transform 0.3s ease;
 }
 
-.channel-name {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1F2937;
+.blockchain-button:hover .button-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.create-button .button-icon {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+}
+
+.join-button .button-icon {
+  background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+}
+
+.button-content {
   flex: 1;
 }
 
-.access-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.access-indicator.has-access {
-  background: #D1FAE5;
-  color: #065F46;
-}
-
-.access-indicator.no-access {
-  background: #FEF3C7;
-  color: #92400E;
-}
-
-/* Channel Organizations */
-.channel-organizations {
-  margin-bottom: 1rem;
-}
-
-.organizations-label {
+.button-content h3 {
   margin: 0 0 0.5rem 0;
-  font-weight: 600;
-  color: #374151;
-  font-size: 0.875rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1F2937;
 }
 
-.organizations-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.button-content p {
+  margin: 0;
+  color: #6B7280;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-.organization-tag {
-  padding: 0.25rem 0.75rem;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.button-arrow {
+  font-size: 2rem;
+  color: #9CA3AF;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
-.organization-tag.current-org {
-  background: #DBEAFE;
-  color: #1E40AF;
+.blockchain-button:hover .button-arrow {
+  color: #3B82F6;
+  transform: translateX(8px);
 }
 
-.organization-tag.partner-org {
-  background: #E0E7FF;
-  color: #3730A3;
-}
-
-/* Channel Footer */
-.channel-footer {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid #E5E7EB;
-}
-
-.access-text {
+.create-button:hover .button-arrow {
   color: #10B981;
-  font-weight: 600;
-  font-size: 0.875rem;
 }
 
-.request-text {
-  color: #F59E0B;
-  font-weight: 600;
-  font-size: 0.875rem;
+.join-button:hover .button-arrow {
+  color: #3B82F6;
 }
 
 /* Loading Spinner */
@@ -274,7 +284,7 @@
 }
 
 .retry-button:hover {
-  background: #3182ce;
+  background: #4299e1;
   transform: translateY(-1px);
 }
 
@@ -304,25 +314,32 @@
     padding: 1rem;
   }
 
-  .channels-section h2 {
+  .welcome-message h2 {
     font-size: 2rem;
   }
 
-  .channels-description {
+  .section-description {
     font-size: 1rem;
   }
 
-  .channels-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .blockchain-button {
+    padding: 1.5rem;
+    flex-direction: column;
+    text-align: center;
   }
 
-  .channel-card {
-    padding: 1.25rem;
+  .button-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
   }
 
-  .channel-name {
+  .button-content h3 {
     font-size: 1.25rem;
+  }
+
+  .button-arrow {
+    display: none;
   }
 }
 
@@ -343,41 +360,29 @@
     padding: 0.75rem;
   }
 
-  .channels-section h2 {
+  .welcome-message h2 {
     font-size: 1.75rem;
   }
 
-  .channels-description {
+  .section-description {
     font-size: 0.875rem;
   }
 
-  .channels-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+  .blockchain-button {
+    padding: 1.25rem;
   }
 
-  .channel-card {
-    padding: 1rem;
+  .button-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
   }
 
-  .channel-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .access-indicator {
-    align-self: flex-start;
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-  }
-
-  .channel-name {
+  .button-content h3 {
     font-size: 1.125rem;
   }
 
-  .organization-tag {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
+  .button-content p {
+    font-size: 0.875rem;
   }
 }

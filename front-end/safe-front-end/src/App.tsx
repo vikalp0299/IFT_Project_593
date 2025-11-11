@@ -6,8 +6,8 @@ import { CreateAccountPage } from './pages/CreateAccountPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignInCredentialsPage } from './pages/SignInCredentialsPage';
 import { HomePage } from './pages/HomePage';
-import { ChannelPage } from './pages/ChannelPage';
-import { ChannelAccessRequestPage } from './pages/ChannelAccessRequestPage';
+import { CreateBlockchain } from './pages/CreateBlockchain';
+import { JoinBlockchain } from './pages/JoinBlockchain';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -31,18 +31,18 @@ function App() {
             } 
           />
           <Route 
-            path="/channel/:channelName" 
+            path="/create-blockchain" 
             element={
               <ProtectedRoute>
-                <ChannelPage />
+                <CreateBlockchain />
               </ProtectedRoute>
             } 
           />
           <Route 
-            path="/channel-access-request/:channelName" 
+            path="/join-blockchain" 
             element={
               <ProtectedRoute>
-                <ChannelAccessRequestPage />
+                <JoinBlockchain />
               </ProtectedRoute>
             } 
           />

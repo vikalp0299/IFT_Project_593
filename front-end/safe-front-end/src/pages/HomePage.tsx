@@ -3,12 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import './HomePage.css';
 
-interface Channel {
-  name: string;
-  organizations: string[];
-  hasAccess: boolean;
-}
-
 interface UserData {
   userId: string;
   username: string;
@@ -22,9 +16,7 @@ interface UserData {
 export const HomePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserData | null>(null);
-  const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -36,70 +28,16 @@ export const HomePage = () => {
     const currentUser = authService.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
-      loadChannels(currentUser.organizationName);
     }
+    setLoading(false);
   }, [navigate]);
 
-  const loadChannels = async (organizationName: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Get organization channels
-      const response = await authService.authenticatedRequest('/org/channels', {
-        method: 'POST',
-        body: JSON.stringify({ organizationName })
-      });
-
-      if (response.success && response.data) {
-        // For now, we'll create mock data since the backend structure needs to be enhanced
-        // In a real implementation, this would come from the backend
-        const mockChannels: Channel[] = [
-          {
-            name: 'General',
-            organizations: [organizationName, 'Partner Org A', 'Partner Org B'],
-            hasAccess: true
-          },
-          {
-            name: 'Project Alpha',
-            organizations: [organizationName, 'Partner Org A'],
-            hasAccess: true
-          },
-          {
-            name: 'Project Beta',
-            organizations: [organizationName, 'Partner Org C'],
-            hasAccess: false
-          },
-          {
-            name: 'Marketing',
-            organizations: [organizationName, 'Partner Org B', 'Partner Org D'],
-            hasAccess: true
-          },
-          {
-            name: 'Finance',
-            organizations: [organizationName],
-            hasAccess: true
-          }
-        ];
-
-        setChannels(mockChannels);
-      } else {
-        setError('Failed to load channels');
-      }
-    } catch (error) {
-      console.error('Error loading channels:', error);
-      setError('Failed to load channels');
-    } finally {
-      setLoading(false);
-    }
+  const handleCreateBlockchain = () => {
+    navigate('/create-blockchain');
   };
 
-  const handleChannelClick = (channel: Channel) => {
-    if (channel.hasAccess) {
-      navigate(`/channel/${encodeURIComponent(channel.name)}`);
-    } else {
-      navigate(`/channel-access-request/${encodeURIComponent(channel.name)}`);
-    }
+  const handleJoinBlockchain = () => {
+    navigate('/join-blockchain');
   };
 
   const handleLogout = async () => {
@@ -118,21 +56,7 @@ export const HomePage = () => {
       <div className="homepage-container">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading channels...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="homepage-container">
-        <div className="error-message">
-          <h2>Error</h2>
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="retry-button">
-            Retry
-          </button>
+          <p>Loading...</p>
         </div>
       </div>
     );
@@ -153,51 +77,38 @@ export const HomePage = () => {
 
       {/* Main Content */}
       <main className="homepage-main">
-        <div className="channels-section">
-          <h2>Available Channels</h2>
-          <p className="channels-description">
-            Click on a channel to access it. Channels you don't have access to will require approval.
-          </p>
+        <div className="blockchain-section">
+          <div className="welcome-message">
+            <h2>Blockchain Management</h2>
+            <p className="section-description">
+              Create a new blockchain network or join an existing one to start collaborating and sharing files securely.
+            </p>
+          </div>
           
-          <div className="channels-grid">
-            {channels.map((channel, index) => (
-              <div
-                key={index}
-                className={`channel-card ${channel.hasAccess ? 'accessible' : 'restricted'}`}
-                onClick={() => handleChannelClick(channel)}
-              >
-                <div className="channel-header">
-                  <h3 className="channel-name">{channel.name}</h3>
-                  <div className={`access-indicator ${channel.hasAccess ? 'has-access' : 'no-access'}`}>
-                    {channel.hasAccess ? '✓ Access' : '⚠ Request Access'}
-                  </div>
-                </div>
-                
-                <div className="channel-organizations">
-                  <p className="organizations-label">Organizations:</p>
-                  <div className="organizations-list">
-                    {channel.organizations.map((org, orgIndex) => (
-                      <span
-                        key={orgIndex}
-                        className={`organization-tag ${
-                          org === user?.organizationName ? 'current-org' : 'partner-org'
-                        }`}
-                      >
-                        {org}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="channel-footer">
-                  {channel.hasAccess ? (
-                    <span className="access-text">Click to enter</span>
-                  ) : (
-                    <span className="request-text">Request access</span>
-                  )}
-                </div>
+          <div className="blockchain-actions">
+            <button 
+              onClick={handleCreateBlockchain}
+              className="blockchain-button create-button"
+            >
+              <div className="button-icon">🔗</div>
+              <div className="button-content">
+                <h3>Create Blockchain</h3>
+                <p>Create a new blockchain network for your organization</p>
               </div>
-            ))}
+              <div className="button-arrow">→</div>
+            </button>
+
+            <button 
+              onClick={handleJoinBlockchain}
+              className="blockchain-button join-button"
+            >
+              <div className="button-icon">➕</div>
+              <div className="button-content">
+                <h3>Join Blockchain</h3>
+                <p>Join an existing blockchain network using an invitation code</p>
+              </div>
+              <div className="button-arrow">→</div>
+            </button>
           </div>
         </div>
       </main>

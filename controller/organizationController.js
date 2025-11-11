@@ -1,3 +1,15 @@
+import { ObjectId } from 'mongodb';
+import User from '../models/User.js';
+import { Organization } from '../db.js';
+import { verifyToken,getOrganizationIdFromToken,getUserIdfromToken,getUserRoleFromToken } from '../middleware/auth.js';
+import  Access  from '../models/access.js';
+import { request } from 'express';
+
+// const getOrganizationIdFromToken = (req) => {
+//     const token = req.headers.authorization.split(' ')[1];
+//     const decodedToken = verifyToken(token);
+//     return decodedToken.organizationId;
+// }
 // Organization Management Endpoints
 /**
  * @route POST /org/validate-organization
@@ -276,4 +288,148 @@ export async function putOrganizationChannels(req, res) {
       message: 'Internal server error'
     });
   }
+}
+
+export async function requestAccessToChannel(req, res) {
+  try {
+    const channelName  = req.body.channelName;
+    console.log('Channel name received for access request:', channelName);
+    const organizationId = getOrganizationIdFromToken(req);
+    console.log('Organization ID from token:', organizationId);
+    if (!organizationId || !channelName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Organization ID and channel name are required'
+      });
+    }
+    const channels = await Organization.findOne({ _id: organizationId }, { organizationChannels: 1, _id: 0 });
+    console.log('Organization channels:', channels.organizationChannels);
+    if (!channels.organizationChannels.includes(channelName)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Channel does not exist in the organization'
+      });
+    }
+    
+    const accessRequest = {
+      userId: getUserIdfromToken(req),
+      organizationId,
+      channelName,
+      access: 'pending'
+    };
+
+    const createdRequest = await Access.create(accessRequest);
+
+    res.json({
+      success: true,
+      message: 'Access request submitted successfully',
+      data: createdRequest
+    });
+  } catch (error) {
+    console.error('Error requesting access to channel:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+}
+
+export async function displayAccessRequestsToAdmin(req, res) {
+  try {
+    const loggedUserId = getUserIdfromToken(req);
+    if (!loggedUserId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required'
+      });
+    } 
+    
+    const userRole = getUserRoleFromToken(req);
+    const storedUserRole = await User.findById(loggedUserId).select('role');
+    console.log('Stored user role:', storedUserRole.role);
+    if (storedUserRole.role !== userRole && storedUserRole.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin access required'
+      });
+    }
+    const organizationId = getOrganizationIdFromToken(req);
+    if (!organizationId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Organization ID is required'
+      });
+    }
+    const accessRequests = await Access.find({ organizationId: organizationId },{_id:0,userId:1,channelName:1,access:1});
+    console.log('Access requests fetched from DB:', accessRequests);
+    console.log('Access requests fetched:', accessRequests.channelName);
+    const userId = accessRequests.length > 0 ? accessRequests[0].userId : null;
+    const userName = await User.findById(userId).select('username');
+    console.log('User name fetched:', userName.username);
+    const payload = accessRequests.map(request => ({
+      username: userName.username,
+      channelName: request.channelName,
+      access: request.access
+    }));
+    console.log('Access requests payload:', payload);
+    res.json({
+      success: true,
+      data: payload
+    });
+  } catch (error) {
+    console.error('Error fetching access requests:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Internal server error'
+    });
+  }
+}
+
+export async function respondToAccessRequest(req, res) {
+  try{
+    const { username, channelName, access } = req.body;
+    if (!username || !channelName || !access) {
+      return res.status(400).json({
+        success: false,
+        message: 'username, channelName, and access status are required'
+      });
+    }
+    if (!['approved', 'denied'].includes(access)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Access status must be either "approved" or "denied"'
+      });
+    }
+    //const organizationId = getOrganizationIdFromToken(req);
+    const userId = await User.findOne({ username: username }).select('_id');
+    if (!userId) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    const organizationId = getOrganizationIdFromToken(req);
+    const updatedRequest = await Access.findOneAndUpdate(
+      { userId: userId, organizationId: organizationId, channelName: channelName },
+      { $set: { access: access } },
+      { new: true }
+    );
+    if (!updatedRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Access request not found'
+      });
+    }
+    res.json({
+      success: true,
+      message: 'Access request updated successfully',
+      data: updatedRequest
+    });
+  }catch(error){
+    console.error('Error responding to access request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  } 
 }
