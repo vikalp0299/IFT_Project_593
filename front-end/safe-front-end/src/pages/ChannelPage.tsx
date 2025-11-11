@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { FileUpload } from '../components/FileUpload';
+import { FileList } from '../components/FileList';
 import './ChannelPage.css';
 
 interface UserData {
@@ -19,6 +21,7 @@ export const ChannelPage = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -69,6 +72,11 @@ export const ChannelPage = () => {
       console.error('Logout error:', error);
       navigate('/');
     }
+  };
+
+  const handleUploadSuccess = () => {
+    // Trigger file list refresh
+    setRefreshTrigger(prev => prev + 1);
   };
 
   if (loading) {
@@ -158,12 +166,19 @@ export const ChannelPage = () => {
             </div>
           </div>
 
-          <div className="coming-soon">
-            <h3>Coming Soon</h3>
-            <p>
-              File upload and management features are currently under development. 
-              This channel will soon support secure file sharing between organizations.
-            </p>
+          {/* File Upload Section */}
+          <div className="file-section">
+            <FileUpload 
+              onUploadSuccess={handleUploadSuccess}
+              maxFileSizeMB={100}
+            />
+          </div>
+
+          {/* File List Section */}
+          <div className="file-section">
+            <FileList 
+              refreshTrigger={refreshTrigger}
+            />
           </div>
         </div>
       </main>
