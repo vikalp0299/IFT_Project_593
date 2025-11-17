@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'SUPERSECRETKEY-CHANGE-IN-PRODUCTIO
 //     return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: '1h' });
 // };
 
-//Paswsword hashing
+//Paswsord hashing
 const hashPassword = async (password) => {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
@@ -315,4 +315,113 @@ async function logoutFunction(req, res) {
     });
 }
 
-export { loginFunction, registerFunction, logoutFunction };
+
+async function adminRegisterFunction(req, res) {
+    // Implement admin registration logic here
+    try {
+        const {username, password, email, firstName, lastName, phone, organizationName, jobTitle, department} = req.body;
+
+        // Validation
+        if (!username || !password || !email || !firstName || !lastName || !phone || !organizationName) {
+            return res.status(400).json({
+                success: false,
+                message: 'All fields are required'
+            });
+        }
+
+        // Convert phone to string if it's a number
+        const phoneStr = typeof phone === 'string' ? phone : String(phone);
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ 
+            $or: [{ username: username.toLowerCase().trim() }, { email: email.toLowerCase().trim() }] 
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: 'User with this username or email already exists'
+            });
+        }
+
+        // Find organization
+        const { findOrganization } = await import('../db.js');
+        const organization = await findOrganization(organizationName.trim());
+        
+        if (!organization) {
+            return res.status(400).json({
+                success: false,
+                message: `Organization '${organizationName}' does not exist. Please contact your administrator to create this organization first.`
+            });
+        }
+
+        // Check if organization already has an admin
+        const existingAdmin = await User.findOne({
+            organization: organization._id,
+            role: 'Admin',
+            isActive: true
+        });
+
+        if (existingAdmin) {
+            return res.status(409).json({
+                success: false,
+                message: `Organization '${organizationName}' already has an admin. Only one admin is allowed per organization.`,
+                data: {
+                    existingAdmin: {
+                        username: existingAdmin.username,
+                        email: existingAdmin.email,
+                        firstName: existingAdmin.firstName,
+                        lastName: existingAdmin.lastName
+                    }
+                }
+            });
+        }
+
+        const hashedPassword = await hashPassword(password);
+        const newUser = new User({
+            username: username.toLowerCase().trim(),
+            email: email.toLowerCase().trim(),
+            password: hashedPassword,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            phone: phoneStr.trim(),
+            jobTitle: jobTitle ? jobTitle.trim() : 'Administrator',
+            department: department ? department.trim() : 'Blockchain',
+            role: 'Admin',
+            permissions: ['read', 'write', 'delete', 'admin', 'manage_users', 'manage_organization'],
+            isActive: true,
+            organization: organization._id,
+            organizationName: organizationName.trim(),
+            lastPasswordChange: new Date()
+        });
+
+        await newUser.save();
+
+        // Generate tokens
+        const tokens = generateTokens(newUser);
+
+        res.status(201).json({
+            success: true,
+            message: 'Admin registered successfully',
+            data: {
+                userId: newUser._id,
+                username: newUser.username,
+                email: newUser.email,
+                firstName: newUser.firstName,
+                lastName: newUser.lastName,
+                role: newUser.role,
+                organizationName: newUser.organizationName,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                expiresIn: '24h'
+            }
+        });
+    } catch (error) {
+        console.error('Admin registration error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+}
+export { loginFunction, registerFunction, logoutFunction, adminRegisterFunction };
