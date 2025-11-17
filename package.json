@@ -28,7 +28,12 @@
     "test": "echo \"No tests specified\" && exit 0",
     "lint": "echo \"No linting configured\" && exit 0",
     "clean": "rm -rf logs/*.log",
-    "setup": "npm install && npm run install:frontend"
+    "setup": "npm install && npm run install:frontend",
+    "migrate": "node migrations/migrate.js up",
+    "migrate:down": "node migrations/migrate.js down",
+    "migrate:status": "node migrations/migrate.js status",
+    "migrate:flush": "node migrations/migrate.js flush",
+    "migrate:up-flush": "node migrations/migrate.js up --flush"
   },
   "keywords": [
     "express",

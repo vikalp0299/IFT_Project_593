@@ -29,11 +29,8 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
     jobTitle: '',
     department: '',
     
-    // Role and Preferences
+    // Role (default, not shown in form)
     role: 'Employee',
-    bio: '',
-    timezone: 'UTC',
-    language: 'en',
     
     // Contact Preferences
     emailNotifications: true,
@@ -175,12 +172,7 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
           // Contact Preferences
           emailNotifications: formData.emailNotifications,
           smsNotifications: formData.smsNotifications,
-          marketingEmails: formData.marketingEmails,
-          
-          // Optional fields
-          bio: formData.bio,
-          timezone: formData.timezone,
-          language: formData.language
+          marketingEmails: formData.marketingEmails
         });
         
         if (!data.success) {
@@ -457,45 +449,6 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
                   required
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Role and Preferences Section */}
-          <div className="form-section">
-            <h3 className="section-title">Role & Preferences</h3>
-            
-            <div className="create-account-field">
-              <label htmlFor="role" className="create-account-label">
-                Role *
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className="create-account-input"
-                required
-              >
-                <option value="Employee">Employee</option>
-                <option value="Manager">Manager</option>
-                <option value="Admin">Admin</option>
-                <option value="Guest">Guest</option>
-              </select>
-            </div>
-
-            <div className="create-account-field">
-              <label htmlFor="bio" className="create-account-label">
-                Bio (Optional)
-              </label>
-              <textarea
-                id="bio"
-                name="bio"
-                value={formData.bio}
-                onChange={handleInputChange}
-                placeholder="Tell us about yourself..."
-                className="create-account-input"
-                rows={3}
-              />
             </div>
           </div>
 

@@ -39,18 +39,18 @@
 }
 
 .welcome-button {
-  background: linear-gradient(135deg, #0E7490 0%, #4338CA 100%);
+  background-color: #1A1A2E;
   color: #FFFFFF;
   border: none;
   border-radius: 12px;
-  padding: 14px 24px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  height: 52px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   width: 100%;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  margin-top: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .welcome-button:hover {

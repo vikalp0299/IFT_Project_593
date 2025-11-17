@@ -52,6 +52,81 @@ export const displayAllFiles = async (req, res) => {
     }
 };
 
+/**
+ * Get files shared with the authenticated user
+ * Returns files the user uploaded AND files shared with the user (where user is in access array)
+ */
+export const getFilesSharedWithUser = async (req, res) => {
+    try {
+        // User ID from authenticated request (set by authenticateToken middleware)
+        const userId = req.user?.id || req.user?.userId;
+        
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User authentication required'
+            });
+        }
+
+        // Convert userId to ObjectId if it's a string
+        const mongoose = await import('mongoose');
+        const userObjectId = mongoose.default.Types.ObjectId.isValid(userId) 
+            ? new mongoose.default.Types.ObjectId(userId) 
+            : userId;
+
+        // Query MongoDB for files:
+        // 1. Files uploaded by the user (userId or uploader matches)
+        // 2. Files shared with the user (user ID is in the access array)
+        const userFiles = await File.find({ 
+            $or: [
+                { userId: userObjectId },
+                { uploader: userObjectId },
+                { access: userObjectId }
+            ]
+        })
+        .select('_id filename originalname size uploadedAt path mimetype userId uploader access')
+        .populate('uploader', 'username firstName lastName')
+        .sort({ uploadedAt: -1 }); // Most recent first
+
+        // Return files as JSON
+        res.status(200).json({
+            success: true,
+            count: userFiles.length,
+            files: userFiles.map(file => {
+                const isUploadedByUser = file.userId?.toString() === userId.toString() || 
+                                       file.uploader?._id?.toString() === userId.toString();
+                const isSharedWithUser = file.access && 
+                                       file.access.some(accessId => accessId.toString() === userId.toString()) &&
+                                       !isUploadedByUser;
+                
+                return {
+                    id: file._id,
+                    filename: file.filename,
+                    originalname: file.originalname,
+                    size: file.size,
+                    uploadedAt: file.uploadedAt,
+                    path: file.path,
+                    mimetype: file.mimetype,
+                    uploader: file.uploader ? {
+                        username: file.uploader.username,
+                        firstName: file.uploader.firstName,
+                        lastName: file.uploader.lastName
+                    } : null,
+                    isShared: isSharedWithUser
+                };
+            })
+        });
+
+    } catch (error) {
+        console.error('Error fetching files shared with user:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving files',
+            error: error.message
+        });
+    }
+};
+
 const TEMP_UPLOAD_DIR = path.resolve('temp_uploads');
 const UPLOADS_DIR = path.resolve('uploads');
 const upload = multer({ storage: multer.memoryStorage() });
@@ -63,7 +138,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 export async function initUpload(req, res) {
     try {
         const { filename } = req.body;
-        const userId = getUserIdfromToken(req);
+        const userId = req.user?.id || req.user?.userId || getUserIdfromToken(req);
 
         if (!userId) {
             return res.status(401).json({ 
@@ -115,7 +190,7 @@ export const uploadChunk = [
     async (req, res) => {
         try {
             const { uploadId, chunkIndex } = req.body;
-            const userId = req.user?.userId;
+            const userId = req.user?.id || req.user?.userId || getUserIdfromToken(req);
 
             if (!userId) {
                 return res.status(401).json({ 
@@ -169,7 +244,7 @@ export const uploadChunk = [
 export async function completeUpload(req, res) {
     try {
         const { uploadId, originalName, size } = req.body;
-        const userId = req.user?.userId;
+        const userId = req.user?.id || req.user?.userId;
 
         // Validate authentication
         if (!userId) {

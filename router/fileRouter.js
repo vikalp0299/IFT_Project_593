@@ -1,21 +1,25 @@
 //imports
 import express from 'express';
-import { completeUpload, displayAllFiles, initUpload, uploadChunk} from '../controller/fileController.js';
+import { completeUpload, displayAllFiles, initUpload, uploadChunk, getFilesSharedWithUser} from '../controller/fileController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
 //Display files
 router.get('/dispfiles',displayAllFiles );
 
+//Get files shared with user (includes files user uploaded and files shared with user)
+router.get('/getfiles', authenticateToken, getFilesSharedWithUser);
+
 
 //Upload file
 
 //router.post('/upload',uploadFile);
 
-//Test routers
-router.post('/uploads/init',initUpload);
-router.post('/uploads/chunk',uploadChunk);
-router.post('/uploads/complete',completeUpload);
+//Upload routers (require authentication)
+router.post('/uploads/init', authenticateToken, initUpload);
+router.post('/uploads/chunk', authenticateToken, uploadChunk);
+router.post('/uploads/complete', authenticateToken, completeUpload);
 
 
 

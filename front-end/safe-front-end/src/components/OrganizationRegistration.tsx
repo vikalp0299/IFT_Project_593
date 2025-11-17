@@ -1,22 +1,32 @@
 import React, { useState } from 'react';
 import { WelcomeScreen } from './WelcomeScreen';
 import { RegistrationForm } from './RegistrationForm';
+import { AdminAccountCreation } from './AdminAccountCreation';
 import { RegistrationSuccess } from './RegistrationSuccess';
 
-type RegistrationStep = 'welcome' | 'form' | 'success';
+type RegistrationStep = 'welcome' | 'organization' | 'admin' | 'success';
 
 export const OrganizationRegistration: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<RegistrationStep>('welcome');
   const [registeredOrganization, setRegisteredOrganization] = useState<string>('');
+  const [organizationId, setOrganizationId] = useState<string>('');
 
   const handleStartRegistration = () => {
-    setCurrentStep('form');
+    setCurrentStep('organization');
   };
 
-  const handleRegistrationSuccess = (orgData: any) => {
-    // Handle the new comprehensive organization data structure
-    const orgName = orgData.displayName || orgData.name || 'Unknown Organization';
+  const handleOrganizationCreated = (orgData: any) => {
+    // Organization created successfully, proceed to admin creation
+    const orgName = orgData.organizationName || orgData.organization?.displayName || orgData.organization?.name || 'Unknown Organization';
+    const orgId = orgData.organizationId || orgData.organization?._id || orgData.organization?.id;
+    
     setRegisteredOrganization(orgName);
+    setOrganizationId(orgId);
+    setCurrentStep('admin');
+  };
+
+  const handleAdminCreated = (adminData: any) => {
+    // Both organization and admin created successfully
     setCurrentStep('success');
   };
 
@@ -24,9 +34,14 @@ export const OrganizationRegistration: React.FC = () => {
     setCurrentStep('welcome');
   };
 
+  const handleBackToOrganization = () => {
+    setCurrentStep('organization');
+  };
+
   const handleRegisterAnother = () => {
     setRegisteredOrganization('');
-    setCurrentStep('form');
+    setOrganizationId('');
+    setCurrentStep('organization');
   };
 
   const renderCurrentStep = () => {
@@ -34,11 +49,21 @@ export const OrganizationRegistration: React.FC = () => {
       case 'welcome':
         return <WelcomeScreen onStartRegistration={handleStartRegistration} />;
       
-      case 'form':
+      case 'organization':
         return (
           <RegistrationForm
-            onRegistrationSuccess={handleRegistrationSuccess}
+            onRegistrationSuccess={handleOrganizationCreated}
             onBack={handleBackToWelcome}
+          />
+        );
+      
+      case 'admin':
+        return (
+          <AdminAccountCreation
+            organizationId={organizationId}
+            organizationName={registeredOrganization}
+            onAdminCreated={handleAdminCreated}
+            onBack={handleBackToOrganization}
           />
         );
       

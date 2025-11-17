@@ -5,10 +5,12 @@ import { OrganizationRegistrationPage } from './pages/OrganizationRegistrationPa
 import { CreateAccountPage } from './pages/CreateAccountPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignInCredentialsPage } from './pages/SignInCredentialsPage';
-import { HomePage } from './pages/HomePage';
+import { AdminHomePage } from './pages/AdminHomePage';
+import { UserHomePage } from './pages/UserHomePage';
 import { CreateBlockchain } from './pages/CreateBlockchain';
 import { JoinBlockchain } from './pages/JoinBlockchain';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { RoleBasedRoute, HomeRouteRedirect } from './components/RoleBasedRoute';
 
 function App() {
   return (
@@ -21,29 +23,51 @@ function App() {
           <Route path="/signin" element={<SignInPage />} />
           <Route path="/signin-credentials" element={<SignInCredentialsPage />} />
           
-          {/* Protected Routes */}
+          {/* Home route - redirects based on user role */}
           <Route 
             path="/home" 
             element={
               <ProtectedRoute>
-                <HomePage />
+                <HomeRouteRedirect />
               </ProtectedRoute>
             } 
           />
+          
+          {/* Admin Home Page - Only accessible to Admin users */}
+          <Route 
+            path="/admin/home" 
+            element={
+              <RoleBasedRoute allowedRoles={['Admin']}>
+                <AdminHomePage />
+              </RoleBasedRoute>
+            } 
+          />
+          
+          {/* User Home Page - For regular users */}
+          <Route 
+            path="/user/home" 
+            element={
+              <ProtectedRoute>
+                <UserHomePage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Admin-only routes */}
           <Route 
             path="/create-blockchain" 
             element={
-              <ProtectedRoute>
+              <RoleBasedRoute allowedRoles={['Admin']}>
                 <CreateBlockchain />
-              </ProtectedRoute>
+              </RoleBasedRoute>
             } 
           />
           <Route 
             path="/join-blockchain" 
             element={
-              <ProtectedRoute>
+              <RoleBasedRoute allowedRoles={['Admin']}>
                 <JoinBlockchain />
-              </ProtectedRoute>
+              </RoleBasedRoute>
             } 
           />
         </Routes>
