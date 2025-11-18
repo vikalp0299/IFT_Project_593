@@ -2,46 +2,46 @@
 apiVersion: hlf.kungfusoftware.es/v1alpha1
 kind: FabricFollowerChannel
 metadata:
-  name: demo-org2msp
+  name: demo-orgmsp
 spec:
   anchorPeers:
-    - host: org2-peer0.default
+    - host: org-peer0.default
       port: 7051
-    - host: org2-peer1.default
+    - host: org-peer1.default
       port: 7051
 
   hlfIdentity:
     secretKey: user.yaml
-    secretName: org2-admin
+    secretName: org-admin
     secretNamespace: default
-  mspId: org2MSP
+  mspId: orgMSP
   name: demo
   externalPeersToJoin: []
   orderers:
     - certificate: |
         -----BEGIN CERTIFICATE-----
-        MIIC8zCCApqgAwIBAgIURMAuZJuSNOT15SrKsCSn5Bm/HqQwCgYIKoZIzj0EAwIw
+        MIIC9DCCApqgAwIBAgIUOqoyWxYMzNTihyZ7XqDGmpuiwocwCgYIKoZIzj0EAwIw
         bTELMAkGA1UEBhMCRVMxETAPBgNVBAcTCEFsaWNhbnRlMREwDwYDVQQJEwhBbGlj
         YW50ZTEZMBcGA1UEChMQS3VuZyBGdSBTb2Z0d2FyZTENMAsGA1UECxMEVGVjaDEO
-        MAwGA1UEAxMFdGxzY2EwHhcNMjUxMTE2MjExNTQwWhcNMjYxMTE3MjExNjAwWjAk
+        MAwGA1UEAxMFdGxzY2EwHhcNMjUxMTE3MjAwMzE4WhcNMjYxMTE4MjAwNDAwWjAk
         MRAwDgYDVQQLEwdvcmRlcmVyMRAwDgYDVQQDEwdvcmRlcmVyMFkwEwYHKoZIzj0C
-        AQYIKoZIzj0DAQcDQgAEFrBMXVZzB8X1utaStiSLQJkBwUoFA4rRLudbI5QdZUBg
-        KHr+yvYzSDzg+l50NUKlOJI1kvK8oUWT6/nejAXFEaOCAV8wggFbMA4GA1UdDwEB
+        AQYIKoZIzj0DAQcDQgAEFFnWrZ+s3h/2v77Xb1hqRd87gGZAc12BXKh+OUm9ksP1
+        fFSZMviIzMNoFOZid+gdAVqUMqbrminYpQk7W4lfnaOCAV8wggFbMA4GA1UdDwEB
         /wQEAwIDqDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDAYDVR0TAQH/
-        BAIwADAdBgNVHQ4EFgQUvUexdwLu8gHC2PAWGHET8fF4vNIwKwYDVR0jBCQwIoAg
-        OubXwViRhOOn9EDk3Oxtyd59UcdZb8cnSiV7V4Ys654wcwYDVR0RBGwwaoIJbG9j
+        BAIwADAdBgNVHQ4EFgQUpPl+GHqqKOguKUzAY64Aa0on3bYwKwYDVR0jBCQwIoAg
+        yLsHuPkMEkMByvpp6Yul8Bpsftfx4MKA0/4WBuQ+UvYwcwYDVR0RBGwwaoIJbG9j
         YWxob3N0gglvcmQtbm9kZTGCEW9yZC1ub2RlMS5kZWZhdWx0ghRub2RlMS1vcmQu
         bG9jYWxoby5zdIIdYWRtaW4tb3JkZXJlcjEtb3JkLmxvY2FsaG8uc3SHBH8AAAGH
         BKwSAAIwWwYIKgMEBQYHCAEET3siYXR0cnMiOnsiaGYuQWZmaWxpYXRpb24iOiIi
         LCJoZi5FbnJvbGxtZW50SUQiOiJvcmRlcmVyIiwiaGYuVHlwZSI6Im9yZGVyZXIi
-        fX0wCgYIKoZIzj0EAwIDRwAwRAIgPWwlIs451lmVjHEKkU8r6MYQGhPUSFqX4ECP
-        lUBdbI8CIENNSGrGW/R07/2IsssjTcfONPJHGx506z/veeAYTIlu
+        fX0wCgYIKoZIzj0EAwIDSAAwRQIhAJf1HmJZ7RbT6YDt5mWAervewV/jARPHkMj+
+        SJTt9X/GAiBJZdBAyGmIhyezMzAx6Trpbmja0rjzYWPySBLHGjqD+Q==
         -----END CERTIFICATE-----
       url: grpcs://ord-node1.default:7050
 
   peersToJoin:
-    - name: org2-peer0
+    - name: org-peer0
       namespace: default
-    - name: org2-peer1
+    - name: org-peer1
       namespace: default
 

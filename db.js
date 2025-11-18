@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { databaseConfig } from './config/index.js';
 import { logger } from './utils/logger.js';
+import ChaincodeVersionTracker from './models/ChaincodeVersionTracker.js';
 
 // Organization Schema for managing organizations
 const organizationSchema = new mongoose.Schema({
@@ -238,4 +239,8 @@ export const disconnectDB = async () => {
     logger.error('Error closing MongoDB connection', { error: err.message });
     console.error('❌ Error closing MongoDB connection:', err);
   }
+};
+
+export {
+  ChaincodeVersionTracker
 };

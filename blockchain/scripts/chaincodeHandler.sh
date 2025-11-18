@@ -97,7 +97,9 @@ function create_connection_file() {
     local -a orgNames=()
     local ordererOrgName=""
     local channelName=""
-    
+    rm ../generated_resources/network-config.yaml 2>/dev/null
+    kubectl delete fabricnetworkconfigs network-cp 2>/dev/null
+    kubectl delete secret network-cp 2>/dev/null
     # First N-2 args are orgNames, last 2 are ordererOrgName and channelName
     while [ $# -gt 2 ]; do
         orgNames+=("$1")
