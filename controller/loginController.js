@@ -319,10 +319,10 @@ async function logoutFunction(req, res) {
 async function adminRegisterFunction(req, res) {
     // Implement admin registration logic here
     try {
-        const {username, password, email, firstName, lastName, phone, organizationName, jobTitle, department} = req.body;
+        const {username, password, email, firstName, lastName, phone, organizationId, jobTitle, department} = req.body;
 
         // Validation
-        if (!username || !password || !email || !firstName || !lastName || !phone || !organizationName) {
+        if (!username || !password || !email || !firstName || !lastName || !phone || !organizationId) {
             return res.status(400).json({
                 success: false,
                 message: 'All fields are required'
