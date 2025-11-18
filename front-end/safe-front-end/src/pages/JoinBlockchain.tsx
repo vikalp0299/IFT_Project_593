@@ -1,16 +1,62 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
 import './JoinBlockchain.css';
 
 export const JoinBlockchain = () => {
   const navigate = useNavigate();
-  const [invitationCode, setInvitationCode] = useState('');
+  const [organizationQuery, setOrganizationQuery] = useState('');
+  const [channelOptions, setChannelOptions] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedChannelId, setSelectedChannelId] = useState('');
+  const [peerCount, setPeerCount] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchMessage, setSearchMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const user = authService.getCurrentUser();
+  const selectedChannelName =
+    channelOptions.find((channel) => channel.id === selectedChannelId)?.name ?? '';
+
+  const handleOrganizationSearch = async () => {
+    if (!organizationQuery.trim()) {
+      setError('Please enter an organization name to search.');
+      return;
+    }
+
+    setError(null);
+    setSearchMessage(null);
+    setIsSearching(true);
+    setSelectedChannelId('');
+    setChannelOptions([]);
+
+    try {
+      // TODO: Replace with API call to fetch channels for the organization
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const normalizedOrg = organizationQuery.trim();
+
+      const mockChannels = [
+        {
+          id: `${normalizedOrg}-channel-main`,
+          name: `${normalizedOrg} Main Channel`,
+        },
+        {
+          id: `${normalizedOrg}-channel-aux`,
+          name: `${normalizedOrg} Auxiliary Channel`,
+        },
+      ];
+
+      setChannelOptions(mockChannels);
+      setSearchMessage(
+        `${mockChannels.length} channel${mockChannels.length > 1 ? 's' : ''} found for ${normalizedOrg}. Select one below.`
+      );
+    } catch (searchError) {
+      console.error('Error searching organization:', searchError);
+      setError('Failed to search organization. Please try again.');
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +68,10 @@ export const JoinBlockchain = () => {
       // const response = await authService.authenticatedRequest('/blockchain/join', {
       //   method: 'POST',
       //   body: JSON.stringify({
-      //     invitationCode: invitationCode.trim(),
-      //     userId: user?.userId,
-      //     organizationId: user?.organizationId
+      //     organizationName: organizationQuery.trim(),
+      //     channelId: selectedChannelId,
+      //     peerCount: Number(peerCount),
+      //     userId: user?.userId
       //   })
       // });
 
@@ -53,7 +100,9 @@ export const JoinBlockchain = () => {
         <div className="success-message">
           <div className="success-icon">✓</div>
           <h2>Successfully Joined Blockchain!</h2>
-          <p>You have been added to the blockchain network.</p>
+          <p>
+            You have been added to the "{selectedChannelName}" channel with {peerCount || '0'} peers.
+          </p>
           <p>Redirecting to homepage...</p>
         </div>
       </div>
@@ -73,26 +122,96 @@ export const JoinBlockchain = () => {
         <div className="form-container">
           <div className="form-header">
             <h2>Join Existing Blockchain Network</h2>
-            <p>Enter the invitation code provided by the blockchain administrator</p>
+            <p>Search for organization that has the blockchain network</p>
           </div>
 
           <form onSubmit={handleSubmit} className="blockchain-form">
             <div className="form-group">
-              <label htmlFor="invitationCode">Invitation Code *</label>
-              <input
-                type="text"
-                id="invitationCode"
-                value={invitationCode}
-                onChange={(e) => setInvitationCode(e.target.value)}
-                required
-                placeholder="Enter invitation code"
-                disabled={isLoading}
-                className="invitation-input"
-              />
+              <label htmlFor="organizationSearch">Search Organization *</label>
+              <div className="search-input-wrapper">
+                <input
+                  type="text"
+                  id="organizationSearch"
+                  value={organizationQuery}
+                  onChange={(e) => setOrganizationQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !isSearching && organizationQuery.trim()) {
+                      e.preventDefault();
+                      handleOrganizationSearch();
+                    }
+                  }}
+                  required
+                  placeholder="Enter organization name"
+                  disabled={isLoading || isSearching}
+                  className="invitation-input"
+                />
+                <button
+                  type="button"
+                  className="search-icon-button"
+                  onClick={handleOrganizationSearch}
+                  disabled={isLoading || isSearching || !organizationQuery.trim()}
+                  aria-label="Search organization"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
+              </div>
               <small className="form-hint">
-                The invitation code is typically provided by the blockchain network administrator
+                Search for an organization to load its available blockchain channels.
               </small>
             </div>
+
+            {searchMessage && <p className="info-message">{searchMessage}</p>}
+
+            {channelOptions.length > 0 && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="channelSelect">Channel Name *</label>
+                  <div className="select-wrapper">
+                    <select
+                      id="channelSelect"
+                      className="channel-select"
+                      value={selectedChannelId}
+                      onChange={(e) => setSelectedChannelId(e.target.value)}
+                      disabled={isLoading}
+                      required
+                    >
+                      <option value="">Select a channel</option>
+                      {channelOptions.map((channel) => (
+                        <option value={channel.id} key={channel.id}>
+                          {channel.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="peerCount">Peer Count *</label>
+                  <input
+                    type="number"
+                    id="peerCount"
+                    className="peer-input"
+                    value={peerCount}
+                    min={1}
+                    onChange={(e) => setPeerCount(e.target.value)}
+                    required
+                    placeholder="Enter number of peers"
+                    disabled={isLoading}
+                  />
+                </div>
+              </>
+            )}
 
             {error && (
               <div className="error-message">
@@ -112,7 +231,12 @@ export const JoinBlockchain = () => {
               <button
                 type="submit"
                 className="submit-button"
-                disabled={isLoading || !invitationCode.trim()}
+                disabled={
+                  isLoading ||
+                  !organizationQuery.trim() ||
+                  !selectedChannelId ||
+                  !peerCount.trim()
+                }
               >
                 {isLoading ? 'Joining...' : 'Join Blockchain'}
               </button>
@@ -123,6 +247,8 @@ export const JoinBlockchain = () => {
     </div>
   );
 };
+
+
 
 
 

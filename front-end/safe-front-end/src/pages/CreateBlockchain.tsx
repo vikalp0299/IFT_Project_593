@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
 import './CreateBlockchain.css';
 
 export const CreateBlockchain = () => {
   const navigate = useNavigate();
-  const [blockchainName, setBlockchainName] = useState('');
-  const [description, setDescription] = useState('');
+  const [peerCount, setPeerCount] = useState('');
+  const [channelName, setChannelName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  const user = authService.getCurrentUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,8 +20,8 @@ export const CreateBlockchain = () => {
       // const response = await authService.authenticatedRequest('/blockchain/create', {
       //   method: 'POST',
       //   body: JSON.stringify({
-      //     name: blockchainName,
-      //     description,
+      //     peerCount: Number(peerCount),
+      //     channelName,
       //     organizationId: user?.organizationId
       //   })
       // });
@@ -54,7 +51,10 @@ export const CreateBlockchain = () => {
         <div className="success-message">
           <div className="success-icon">✓</div>
           <h2>Blockchain Created Successfully!</h2>
-          <p>Your blockchain network "{blockchainName}" has been created.</p>
+          <p>
+            Your blockchain network for channel "{channelName}" with {peerCount || '0'} peers has
+            been created.
+          </p>
           <p>Redirecting to homepage...</p>
         </div>
       </div>
@@ -79,26 +79,28 @@ export const CreateBlockchain = () => {
 
           <form onSubmit={handleSubmit} className="blockchain-form">
             <div className="form-group">
-              <label htmlFor="blockchainName">Blockchain Name *</label>
+              <label htmlFor="peerCount">Peer Count *</label>
               <input
-                type="text"
-                id="blockchainName"
-                value={blockchainName}
-                onChange={(e) => setBlockchainName(e.target.value)}
+                type="number"
+                id="peerCount"
+                value={peerCount}
+                min={1}
+                onChange={(e) => setPeerCount(e.target.value)}
                 required
-                placeholder="Enter blockchain name"
+                placeholder="Enter number of peers"
                 disabled={isLoading}
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter blockchain description (optional)"
-                rows={4}
+              <label htmlFor="channelName">Channel Name *</label>
+              <input
+                type="text"
+                id="channelName"
+                value={channelName}
+                onChange={(e) => setChannelName(e.target.value)}
+                required
+                placeholder="Enter channel name"
                 disabled={isLoading}
               />
             </div>
@@ -121,7 +123,7 @@ export const CreateBlockchain = () => {
               <button
                 type="submit"
                 className="submit-button"
-                disabled={isLoading || !blockchainName.trim()}
+                disabled={isLoading || !peerCount.trim() || !channelName.trim()}
               >
                 {isLoading ? 'Creating...' : 'Create Blockchain'}
               </button>
@@ -132,6 +134,8 @@ export const CreateBlockchain = () => {
     </div>
   );
 };
+
+
 
 
 

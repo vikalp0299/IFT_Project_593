@@ -72,7 +72,7 @@ export const AdminAccountCreation: React.FC<AdminAccountCreationProps> = ({
     setIsLoading(true);
 
     try {
-      // Send admin details to /admin/registration
+      // Send admin details to /auth/adminRegister
       const adminData = {
         username: formData.username,
         email: formData.email,
@@ -83,7 +83,24 @@ export const AdminAccountCreation: React.FC<AdminAccountCreationProps> = ({
         organizationId: organizationId
       };
 
-      const adminResponse = await fetch('http://localhost:8000/admin/registration', {
+      // Log the details being sent to backend
+      console.log('=== Admin Registration Request (Frontend) ===');
+      console.log('Timestamp:', new Date().toISOString());
+      console.log('Endpoint:', 'http://localhost:8000/auth/adminRegister');
+      console.log('Request Method:', 'POST');
+      console.log('Admin Data Being Sent:', {
+        username: adminData.username,
+        email: adminData.email,
+        password: '[HIDDEN - Length: ' + adminData.password.length + ']',
+        firstName: adminData.firstName,
+        lastName: adminData.lastName,
+        phone: adminData.phone,
+        organizationId: adminData.organizationId
+      });
+      console.log('Full Request Body (JSON):', JSON.stringify(adminData, null, 2));
+      console.log('===========================================');
+
+      const adminResponse = await fetch('http://localhost:8000/auth/adminRegister', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,8 +110,17 @@ export const AdminAccountCreation: React.FC<AdminAccountCreationProps> = ({
 
       const adminResponseData = await adminResponse.json();
       
+      // Log response from backend
+      console.log('=== Admin Registration Response (Frontend) ===');
+      console.log('Status:', adminResponse.status);
+      console.log('Response Data:', JSON.stringify(adminResponseData, null, 2));
+      console.log('==============================================');
+
       if (adminResponseData.success) {
         // Admin registration succeeded
+        console.log('✅ Admin registration successful!');
+        console.log('Admin ID:', adminResponseData.data?.id);
+        console.log('Username:', adminResponseData.data?.username);
         onAdminCreated({
           organizationId,
           organizationName,
@@ -102,6 +128,8 @@ export const AdminAccountCreation: React.FC<AdminAccountCreationProps> = ({
         });
       } else {
         // Admin registration failed
+        console.error('❌ Admin registration failed');
+        console.error('Errors:', adminResponseData.errors || adminResponseData.message);
         if (adminResponseData.errors && Array.isArray(adminResponseData.errors)) {
           setErrors(adminResponseData.errors);
         } else {
@@ -109,6 +137,11 @@ export const AdminAccountCreation: React.FC<AdminAccountCreationProps> = ({
         }
       }
     } catch (err) {
+      console.error('❌ Admin registration error:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined
+      });
       setErrors(['An error occurred. Please try again.']);
     } finally {
       setIsLoading(false);

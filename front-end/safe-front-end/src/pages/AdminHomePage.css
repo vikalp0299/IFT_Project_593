@@ -24,6 +24,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1.25rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
@@ -36,6 +37,7 @@
   align-items: center;
   gap: 2rem;
   flex: 1;
+  min-width: 0;
 }
 
 .header-content h1 {
@@ -59,6 +61,36 @@
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.menu-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px rgba(249, 115, 22, 0.35);
+}
+
+.menu-icon {
+  font-size: 1.1rem;
 }
 
 .logout-button {
@@ -141,6 +173,373 @@
   text-align: left;
   position: relative;
   overflow: hidden;
+}
+
+.department-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 200;
+}
+
+.department-modal {
+  width: 100%;
+  max-width: 520px;
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 24px;
+  padding: 2rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.7);
+  position: relative;
+  backdrop-filter: blur(12px);
+}
+
+.department-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: #f8fafc;
+}
+
+.department-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.department-modal-header p {
+  margin: 0.15rem 0 0 0;
+  color: rgba(248, 250, 252, 0.8);
+  font-size: 0.95rem;
+}
+
+.department-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.modal-close-button {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: rgba(248, 250, 252, 0.8);
+  font-size: 1.75rem;
+  cursor: pointer;
+  line-height: 1;
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  transition: background 0.2s ease;
+}
+
+.modal-close-button:hover {
+  background: rgba(248, 250, 252, 0.1);
+}
+
+.department-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.department-form label {
+  color: rgba(248, 250, 252, 0.9);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.department-input {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.6);
+  color: #f8fafc;
+  font-size: 1rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.department-input:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.department-status {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.department-status.success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #bbf7d0;
+}
+
+.department-status.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fecaca;
+}
+
+.department-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.access-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 200;
+}
+
+.access-modal {
+  width: 100%;
+  max-width: 900px;
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 28px;
+  padding: 2rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(14px);
+}
+
+.access-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: #f8fafc;
+}
+
+.access-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.access-modal-header p {
+  margin: 0.25rem 0 0 0;
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.access-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.access-search label {
+  color: rgba(248, 250, 252, 0.9);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.access-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.access-column h4 {
+  margin: 0 0 0.75rem 0;
+  color: #f8fafc;
+}
+
+.muted-text {
+  color: rgba(148, 163, 184, 0.9);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.employee-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.employee-card {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.7);
+  cursor: pointer;
+  transition: border 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.employee-card input {
+  margin-top: 0.35rem;
+}
+
+.employee-card.selected {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.employee-name {
+  margin: 0;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.employee-meta {
+  margin: 0.15rem 0;
+  color: rgba(148, 163, 184, 0.9);
+  font-size: 0.9rem;
+}
+
+.employee-email {
+  margin: 0;
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 0.85rem;
+}
+
+.grant-access-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.access-modal .grant-access-form label {
+  color: rgba(248, 250, 252, 0.9);
+  font-weight: 600;
+}
+
+.access-modal .select-wrapper {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 12px;
+  padding: 0.35rem 0.5rem;
+}
+
+.access-modal .channel-select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #f8fafc;
+  font-size: 1rem;
+  padding: 0.5rem 0.25rem;
+  appearance: none;
+}
+
+.access-modal .channel-select:focus {
+  outline: none;
+}
+
+.access-modal .channel-select option {
+  color: #0f172a;
+}
+
+.access-modal .search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.4rem 0.75rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.access-modal .search-input-container:focus-within {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25);
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.access-modal .department-input-field {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #f8fafc;
+  font-size: 1rem;
+  padding: 0.55rem 0.25rem;
+  font-family: inherit;
+}
+
+.access-modal .department-input-field::placeholder {
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.access-modal .department-input-field:disabled {
+  color: rgba(248, 250, 252, 0.5);
+}
+
+.access-modal .department-input-field:focus {
+  outline: none;
+}
+
+.access-modal .search-icon-button {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: rgba(248, 250, 252, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  padding: 0;
+}
+
+.access-modal .search-icon-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.access-modal .search-icon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.access-modal .search-icon-button:hover:not(:disabled) {
+  color: rgba(248, 250, 252, 0.95);
+}
+
+@media (max-width: 768px) {
+  .access-modal {
+    padding: 1.5rem;
+  }
+
+  .access-content {
+    grid-template-columns: 1fr;
+  }
 }
 
 .blockchain-button::before {

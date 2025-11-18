@@ -40,6 +40,14 @@ export const UserHomePage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [filesPerPage] = useState(10);
+  const [isDragging, setIsDragging] = useState(false);
+  const [ttlDays, setTtlDays] = useState('');
+  const [ttlHours, setTtlHours] = useState('');
+  const [ttlMinutes, setTtlMinutes] = useState('');
+  const [organizationSearch, setOrganizationSearch] = useState('');
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -94,6 +102,63 @@ export const UserHomePage = () => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind === 'file') {
+        const file = items[i].getAsFile();
+        if (file) {
+          setSelectedFile(file);
+        }
+      }
+    }
+  };
+
+  const handleOrganizationSearch = async () => {
+    if (!organizationSearch.trim()) {
+      return;
+    }
+    
+    setIsSearching(true);
+    // TODO: Add backend API call here
+    // For now, simulate with mock data
+    setTimeout(() => {
+      // Mock departments - replace with actual API call
+      setDepartments(['IT', 'HR', 'Finance', 'Marketing', 'Operations']);
+      setIsSearching(false);
+    }, 500);
+  };
+
+  const handleCloseModal = () => {
+    setUploadModalOpen(false);
+    setSelectedFile(null);
+    setTtlDays('');
+    setTtlHours('');
+    setTtlMinutes('');
+    setOrganizationSearch('');
+    setDepartments([]);
+    setSelectedDepartment('');
+    setIsDragging(false);
   };
 
   const handleUpload = async () => {
@@ -153,8 +218,7 @@ export const UserHomePage = () => {
 
       if (completeResponse.success) {
         alert('File uploaded successfully!');
-        setUploadModalOpen(false);
-        setSelectedFile(null);
+        handleCloseModal();
         fetchFiles(); // Refresh file list
       } else {
         throw new Error(completeResponse.message || 'Failed to complete upload');
@@ -348,19 +412,143 @@ export const UserHomePage = () => {
 
       {/* Upload Modal */}
       {uploadModalOpen && (
-        <div className="modal-overlay" onClick={() => setUploadModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content upload-modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Upload File</h2>
-            <input
-              type="file"
-              onChange={handleFileSelect}
-              className="file-input"
-            />
+            
+            {/* File Upload Area */}
+            <div 
+              className={`file-upload-area ${isDragging ? 'dragging' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onPaste={handlePaste}
+            >
+              <input
+                type="file"
+                onChange={handleFileSelect}
+                className="file-input-hidden"
+                id="file-upload-input"
+              />
+              <div className="upload-area-content">
+                <div className="upload-icon">📁</div>
+                {selectedFile ? (
+                  <div className="selected-file-info">
+                    <p className="file-name-display">{selectedFile.name}</p>
+                    <p className="file-size-display">{formatFileSize(selectedFile.size)}</p>
+                    <button 
+                      onClick={() => setSelectedFile(null)}
+                      className="remove-file-button"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <p className="upload-instructions">
+                      Drag and drop your file here, or{' '}
+                      <label htmlFor="file-upload-input" className="upload-link">
+                        click to browse
+                      </label>
+                    </p>
+                    <p className="upload-hint">You can also paste a file from clipboard</p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* TTL Time Input */}
+            <div className="ttl-input-section">
+              <label className="ttl-label">TTL Time (Day:Hour:Minute)</label>
+              <div className="ttl-inputs">
+                <div className="ttl-input-group">
+                  <input
+                    type="number"
+                    min="0"
+                    value={ttlDays}
+                    onChange={(e) => setTtlDays(e.target.value)}
+                    placeholder="Days"
+                    className="ttl-input"
+                  />
+                  <span className="ttl-separator">:</span>
+                </div>
+                <div className="ttl-input-group">
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    value={ttlHours}
+                    onChange={(e) => setTtlHours(e.target.value)}
+                    placeholder="Hours"
+                    className="ttl-input"
+                  />
+                  <span className="ttl-separator">:</span>
+                </div>
+                <div className="ttl-input-group">
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={ttlMinutes}
+                    onChange={(e) => setTtlMinutes(e.target.value)}
+                    placeholder="Minutes"
+                    className="ttl-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Organization Search */}
+            <div className="organization-search-section">
+              <label className="org-search-label">Search Organization</label>
+              <div className="org-search-input-group">
+                <input
+                  type="text"
+                  value={organizationSearch}
+                  onChange={(e) => setOrganizationSearch(e.target.value)}
+                  placeholder="Enter organization name"
+                  className="org-search-input"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleOrganizationSearch();
+                    }
+                  }}
+                />
+                <button
+                  onClick={handleOrganizationSearch}
+                  className="search-button"
+                  disabled={!organizationSearch.trim() || isSearching}
+                >
+                  {isSearching ? 'Searching...' : 'Search'}
+                </button>
+              </div>
+            </div>
+
+            {/* Department Dropdown */}
+            {departments.length > 0 && (
+              <div className="department-section">
+                <label className="department-label">Select Department</label>
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="department-select"
+                >
+                  <option value="">Select a department</option>
+                  {departments.map((dept, index) => (
+                    <option key={index} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Modal Actions */}
             <div className="modal-actions">
-              <button onClick={() => {
-                setUploadModalOpen(false);
-                setSelectedFile(null);
-              }} className="modal-button cancel-button">
+              <button 
+                onClick={handleCloseModal} 
+                className="modal-button cancel-button"
+              >
                 Cancel
               </button>
               <button 
