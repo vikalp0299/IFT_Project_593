@@ -1,0 +1,22 @@
+{
+  "watch": [
+    "**/*.js",
+    "**/*.json"
+  ],
+  "ignore": [
+    "node_modules/**",
+    "blockchain/generated_resources/**",
+    "generated_resources/**",
+    "*.log",
+    "*.tgz",
+    "*.tar.gz",
+    "*.yaml",
+    ".git/**",
+    "dist/**",
+    "build/**",
+    "blockchain/scripts/*.sh"
+  ],
+  "ext": "js,json",
+  "verbose": false,
+  "delay": "1000"
+}

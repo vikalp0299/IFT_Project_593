@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { databaseConfig } from './config/index.js';
 import { logger } from './utils/logger.js';
+import ChaincodeVersionTracker from './models/ChaincodeVersionTracker.js';
 
 // Organization Schema for managing organizations
 const organizationSchema = new mongoose.Schema({
@@ -132,8 +133,20 @@ const organizationSchema = new mongoose.Schema({
   lastActivity: {
     type: Date,
     default: Date.now
+  },
+  
+  // Blockchain Information
+  hasBlockchain: {
+    type: Boolean,
+    default: false
+  },
+  blockchainOrgName: {
+    type: String,
+    default: null,
+    unique: true,
+    sparse: true // Allows multiple null values but ensures unique non-null values
   }
-});
+}, { timestamps: true });
 
 // Create Organization model
 export const Organization = mongoose.model('Organization', organizationSchema);
@@ -226,4 +239,8 @@ export const disconnectDB = async () => {
     logger.error('Error closing MongoDB connection', { error: err.message });
     console.error('❌ Error closing MongoDB connection:', err);
   }
+};
+
+export {
+  ChaincodeVersionTracker
 };
