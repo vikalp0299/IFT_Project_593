@@ -319,10 +319,10 @@ async function logoutFunction(req, res) {
 async function adminRegisterFunction(req, res) {
     // Implement admin registration logic here
     try {
-        const {username, password, email, firstName, lastName, phone, organizationName, jobTitle, department} = req.body;
+        const {username, password, email, firstName, lastName, phone, organizationId, jobTitle, department} = req.body;
 
         // Validation
-        if (!username || !password || !email || !firstName || !lastName || !phone || !organizationName) {
+        if (!username || !password || !email || !firstName || !lastName || !phone || !organizationId) {
             return res.status(400).json({
                 success: false,
                 message: 'All fields are required'
@@ -344,20 +344,20 @@ async function adminRegisterFunction(req, res) {
             });
         }
 
-        // Find organization
-        const { findOrganization } = await import('../db.js');
-        const organization = await findOrganization(organizationName.trim());
+        // Find organization by ID directly using mongoose
+        const { Organization } = await import('../db.js');
+        const organization = await Organization.findById(organizationId);
         
         if (!organization) {
             return res.status(400).json({
                 success: false,
-                message: `Organization '${organizationName}' does not exist. Please contact your administrator to create this organization first.`
+                message: `Organization with ID '${organizationId}' does not exist.`
             });
         }
 
-        // Check if organization already has an admin
+        // Check if organization already has an admin using organizationId
         const existingAdmin = await User.findOne({
-            organization: organization._id,
+            organization: organizationId,
             role: 'Admin',
             isActive: true
         });
@@ -365,7 +365,7 @@ async function adminRegisterFunction(req, res) {
         if (existingAdmin) {
             return res.status(409).json({
                 success: false,
-                message: `Organization '${organizationName}' already has an admin. Only one admin is allowed per organization.`,
+                message: `Organization '${organization.name}' already has an admin. Only one admin is allowed per organization.`,
                 data: {
                     existingAdmin: {
                         username: existingAdmin.username,
@@ -390,8 +390,8 @@ async function adminRegisterFunction(req, res) {
             role: 'Admin',
             permissions: ['read', 'write', 'delete', 'admin', 'manage_users', 'manage_organization'],
             isActive: true,
-            organization: organization._id,
-            organizationName: organizationName.trim(),
+            organization: organizationId,
+            organizationName: organization.name,
             lastPasswordChange: new Date()
         });
 
