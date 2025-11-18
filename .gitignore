@@ -17,3 +17,8 @@ dbtest.js
 dbtest.js
 logs/*.log
 logs/
+./blockchain/generated_resources/*
+./blockchain/generated_resources/
+channel.yaml
+follower_channel.yaml
+network-config.yaml
