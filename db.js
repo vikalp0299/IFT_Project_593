@@ -132,8 +132,20 @@ const organizationSchema = new mongoose.Schema({
   lastActivity: {
     type: Date,
     default: Date.now
+  },
+  
+  // Blockchain Information
+  hasBlockchain: {
+    type: Boolean,
+    default: false
+  },
+  blockchainOrgName: {
+    type: String,
+    default: null,
+    unique: true,
+    sparse: true // Allows multiple null values but ensures unique non-null values
   }
-});
+}, { timestamps: true });
 
 // Create Organization model
 export const Organization = mongoose.model('Organization', organizationSchema);

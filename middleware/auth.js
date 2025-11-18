@@ -387,34 +387,78 @@ export const logout = (req, res) => {
 };
 
 /**
- * Get current user profile
+ * Get current user profile from token
+ * @param {Object} req - Request object
+ * @param {Array|String} fields - Optional fields to return (e.g., ['username', 'email'] or 'username email')
+ * @returns {Object|null} - User data or null
  */
-export const getCurrentUser = (req, res) => {
+export async function getCurrentUser(req, fields = null) {
   try {
-    const user = req.user;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+      return null;
+    }
+
+    // Check if token is blacklisted
+    if (isTokenBlacklisted(token)) {
+      return null;
+    }
+
+    // Verify token and get userId
+    const decoded = verifyToken(token);
+
+    // Build select query based on fields parameter
+    let selectFields = '';
+    if (fields) {
+      // Convert array to space-separated string or use string directly
+      selectFields = Array.isArray(fields) ? fields.join(' ') : fields;
+    }
+
+    // Fetch user data with optional field selection
+    const user = selectFields 
+      ? await User.findById(decoded.userId).select(selectFields)
+      : await User.findById(decoded.userId);
     
-    res.json({
-      success: true,
-      data: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        organizationId: user.organizationId,
-        organizationName: user.organizationName,
-        permissions: user.permissions
-      }
-    });
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    // If specific fields requested, return only those fields
+    if (fields) {
+      return user.toObject();
+    }
+
+    // Return all fields (default behavior)
+    return {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      password: user.password, // Hashed password
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      jobTitle: user.jobTitle,
+      department: user.department,
+      role: user.role,
+      permissions: user.permissions,
+      isActive: user.isActive,
+      organization: user.organization,
+      organizationName: user.organizationName,
+      contactPreferences: user.contactPreferences,
+      bio: user.bio,
+      timezone: user.timezone,
+      language: user.language,
+      lastLogin: user.lastLogin,
+      lastPasswordChange: user.lastPasswordChange,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
 
   } catch (error) {
     logger.error('Get current user error', { error: error.message });
-    
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get user profile'
-    });
+    return null;
   }
 };
 

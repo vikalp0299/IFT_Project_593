@@ -32,6 +32,7 @@ import { requestLogger, errorLogger, log } from './middleware/logger.js';
 
 // Utilities
 import { serverConfig, securityConfig, rateLimitConfig, appConfig } from './config/index.js';
+import blockchainRouter from './router/blockchainRouter.js';
 
 // Load environment variables
 dotenv.config();
@@ -106,6 +107,7 @@ app.use('/api', router);
 app.use('/auth', loginRouter);
 app.use('/api/keys', keyRouter);
 app.use('/org', orgRouter);
+app.use('/api/blockchain',blockchainRouter);
 
 // Static file serving (after API routes to avoid conflicts)
 app.use(express.static(path.join(__dirpath, 'public')));

@@ -1,592 +1,172 @@
-import {spawn} from 'child_process';
-import path from 'path';    
-import { fileURLToPath } from 'url';
+import blockChainFunctionHandler from "./blockChainFunctionHandler.js";
+import { getCurrentUser } from "../../middleware/auth.js";
+import { Organization } from "../../db.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const controller = new blockChainFunctionHandler();
 
-export default class blockChainController {
-
-    startChain(){
-        console.log("Starting the blockchain...");
-        return new Promise((resolve, reject) => {
-            
-            const scriptPath = path.join(__dirname, '../scripts/startup.sh');
-            
-            const child = spawn('bash', [scriptPath], {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-            
-            child.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-            });
-            
-            child.stderr.on('data', (data) => {
-                console.error(`stderr: ${data}`);
-            });
-            
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    resolve("Blockchain started successfully");
-                } else {
-                    reject(new Error(`Blockchain startup failed with code ${code}`));
-                }
-            });
-            child.on('error', (err) => {
-                reject(err);
-            });
-        }); 
+/**
+ * Generate blockchain org name from organization name
+ * Examples: "Vikalp" => "vik", "Vikalp org 123134" => "vik123134"
+ */
+function generateBlockchainOrgName(orgName) {
+    // Remove special characters and extra spaces
+    const cleaned = orgName.trim().replace(/[^a-zA-Z0-9\s]/g, '');
+    
+    // Split into words
+    const words = cleaned.split(/\s+/);
+    
+    // Get first 3 letters of first word (lowercase)
+    let prefix = words[0].substring(0, 3).toLowerCase();
+    
+    // Extract all numbers from the entire string
+    const allNumbers = cleaned.match(/\d+/g);
+    
+    if (allNumbers && allNumbers.length > 0) {
+        // Join all numbers together
+        return prefix + allNumbers.join('');
     }
-
-    createPeer(orgName, peerCount = 2, adminUsername, adminPassword){
-        console.log(`Creating peer with count ${peerCount}...`);
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            // Handle orgName as array or string
-            const orgNameStr = Array.isArray(orgName) ? orgName.join(',') : orgName;
-            const args = [
-                scriptPath, 
-                "create-system-org", 
-                "--orgName", orgNameStr,
-                "--peerCount", peerCount.toString(),
-                "--adminUsername", adminUsername,
-                "--adminPassword", adminPassword,
-                "--peerUsername", "peer",
-                "--peerPassword", "peerpw"
-            ];
-            
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn ('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Peer created successfully");
-                    resolve("Peer created successfully");
-                } else {
-                    console.error(`Peer creation failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Peer creation failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);    
-            }); 
-
-        });
-        
-
-       
-    }
-    createOrderer(ordererName, ordererCount = 4, adminUsername, adminPassword){
-        console.log(`Creating orderer with count ${ordererCount}...`);
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            const args = [
-                scriptPath, 
-                "create-system-orderer", 
-                "--orgName", ordererName,
-                "--ordererCount", ordererCount.toString(),
-                "--adminUsername", adminUsername,
-                "--adminPassword", adminPassword,
-                "--ordererUsername", "orderer",
-                "--ordererPassword", "ordererpw"
-            ];
-            
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn ('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Orderer created successfully");
-                    resolve("Orderer created successfully");
-                } else {
-                    console.error(`Orderer creation failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Orderer creation failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);    
-            });
-
-        }); 
-    }
-
-    create_Channel(channelName, orgName, ordererOrgName){
-        console.log(`Creating channel ${channelName} for org ${orgName}...`);   
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            // Handle orgName as array or string
-            const orgNameStr = Array.isArray(orgName) ? orgName.join(',') : orgName;
-            const args = [
-                scriptPath, 
-                "create-channels",
-                "--channelName", channelName,
-                "--orgName", orgNameStr,
-                "--ordererOrgName", ordererOrgName
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn ('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Channel created successfully");
-                    resolve("Channel created successfully");
-                } else {
-                    console.error(`Channel creation failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Channel creation failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-
-        });
-    }
-
-    create_follower_Channel(channelName,mainChannelName, orgNames, ordererOrgName, ordererNodeNumber=1){
-        console.log(`Creating follower channel ${channelName} for orgs ${orgNames}...`);
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            const orgNamesStr = Array.isArray(orgNames) ? orgNames.join(',') : orgNames;
-            const args = [
-                scriptPath,
-                "create-follower-channel",
-                "--channelName", channelName,
-                "--orgName", orgNamesStr,
-                "--ordererOrgName", ordererOrgName,
-                "--mainChannelName", mainChannelName,
-                "--ordererNode", ordererNodeNumber.toString()
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Follower channel created successfully");
-                    resolve("Follower channel created successfully");
-                } else {
-                    console.error(`Follower channel creation failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Follower channel creation failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        });
-    }
-
-    create_identities_and_network_config(channelName, orgNames, ordererOrgName){
-        console.log("Creating identities and network config...");
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            // Handle orgNames as array or string
-            const orgNamesStr = Array.isArray(orgNames) ? orgNames.join(',') : orgNames;
-            const args = [
-                scriptPath,
-                "create-identities-and-network-config",
-                "--channelName", channelName,
-                "--orgName", orgNamesStr,
-                "--ordererOrgName", ordererOrgName
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Identities and network config created successfully");
-                    resolve("Identities and network config created successfully");
-                } else {
-                    console.error(`Creation failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Creation failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        });
-    }
-
-    meta_data_upload(){
-        console.log("Uploading metadata to blockchain...");
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            const args = [
-                scriptPath,
-                "metadata-upload"
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Metadata uploaded successfully");
-                    resolve("Metadata uploaded successfully");
-                } else {
-                    console.error(`Upload failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Upload failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        });
-    }
-
-    install_chaincode_metadata(chaincodeLabel, chaincodePath, orgNames, configPath){
-        console.log("Installing chaincode for metadata...");
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            // Handle orgNames as array or string
-            const orgNamesStr = Array.isArray(orgNames) ? orgNames.join(',') : orgNames;
-            const args = [
-                scriptPath,
-                "install-chaincode-metadata",
-                "--chaincodeLabel", chaincodeLabel,
-                "--chaincodePath", chaincodePath,
-                "--orgName",  orgNamesStr,
-                "--configFile", configPath
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            }); 
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Chaincode installed successfully");
-                    resolve("Chaincode installed successfully");
-                } else {
-                    console.error(`Installation failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Installation failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        });
-    }
-
-    deploy_external_chaincode(chaincodeName, imageName, configFile){
-        console.log("Deploying external chaincode...");
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            const args = [
-                scriptPath,
-                "deploy-chaincode",
-                "--chaincodeName", chaincodeName,
-                "--imageName", imageName,
-                "--configFile", configFile
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("External chaincode deployed successfully");
-                    resolve("External chaincode deployed successfully");
-                } else {
-                    console.error(`Deployment failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Deployment failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        });
-    }
-
-    approve_chaincode(chaincodeName,version,sequence,channelName,orgNames,configFile){
-        // Implementation for approving chaincode
-        console.log("Approving chaincode...");
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            const args = [
-                scriptPath,
-                "approve-chaincode",
-                "--chaincodeName", chaincodeName,
-                "--version", version,
-                "--sequence", sequence,
-                "--channelName", channelName,
-                "--orgName", orgNames.join(','),
-                "--configFile", configFile
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Chaincode approved successfully");
-                    resolve("Chaincode approved successfully");
-                } else {
-                    console.error(`Approval failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Approval failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        });
-    }
-
-    commit_chaincode(chaincodeName,version,sequence,channelName,orgNames,configFile){
-        console.log("Committing chaincode...");
-        return new Promise((resolve, reject) => {
-            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
-            const args = [
-                scriptPath,
-                "commit-chaincode",
-                "--chaincodeName", chaincodeName,
-                "--version", version,
-                "--sequence", sequence,
-                "--channelName", channelName,
-                "--orgName", orgNames.join(','),
-                "--configFile", configFile
-            ];
-            console.log('Running command:', 'bash', args.join(' '));
-            console.log('Working directory:', path.join(__dirname, '../scripts'));
-
-            const child = spawn('bash', args, {
-                cwd: path.join(__dirname, '../scripts'),
-                env: process.env
-            });
-
-            let stderrData = '';
-            let stdoutData = '';
-
-            child.stdout.on('data', (data) => {
-                stdoutData += data.toString();
-                console.log(`stdout: ${data}`);
-            });
-
-            child.stderr.on('data', (data) => {
-                stderrData += data.toString();
-                console.error(`stderr: ${data}`);
-            });
-
-            child.on('close', (code) => {
-                console.log(`child process exited with code ${code}`);
-                if(code === 0){
-                    console.log("Chaincode committed successfully");
-                    resolve("Chaincode committed successfully");
-                } else {
-                    console.error(`Commit failed with code ${code}`);
-                    console.error('Full stderr:', stderrData);
-                    console.error('Full stdout:', stdoutData);
-                    reject(new Error(`Commit failed with code ${code}. Error: ${stderrData}`));
-                }
-            });
-
-            child.on('error', (err) => {
-                console.error('Spawn error:', err);
-                reject(err);
-            });
-        }); 
-    }
+    
+    // If no number, just return the prefix
+    return prefix;
 }
 
+export async function createBlockchain(req, res) {
+    try {
+        const currentUser = await getCurrentUser(req);
+        console.log("Current User:", currentUser);
+
+        const { peerCount } = req.body;
+        console.log("Request body:", req.body);
+        console.log("Peer count:", peerCount);
+        
+        if (!currentUser || currentUser.role !== 'Admin') {
+            console.log("Access denied - not admin");
+            return res.status(403).json({ 
+                success: false,
+                message: 'Access denied. Admins only.' 
+            });
+        }
+
+        // Validate required fields
+        if (!peerCount) {
+            console.log("Validation failed - peerCount missing");
+            return res.status(400).json({
+                success: false,
+                message: 'peerCount is required'
+            });
+        }
+
+        // Fetch organization from database
+        console.log("Fetching organization:", currentUser.organization);
+        const organization = await Organization.findById(currentUser.organization);
+        
+        if (!organization) {
+            console.log("Organization not found");
+            return res.status(404).json({ 
+                success: false,
+                message: 'Organization not found' 
+            });
+        }
+
+        console.log("Organization found:", organization);
+
+        // Check if blockchain already exists for this organization
+        if (organization.hasBlockchain) {
+            console.log("Blockchain already exists");
+            return res.status(400).json({ 
+                success: false,
+                message: 'Blockchain already exists for this organization',
+                blockchainOrgName: organization.blockchainOrgName
+            });
+        }
+
+        // Generate blockchain org name
+        const blockchainOrgName = generateBlockchainOrgName(organization.name);
+        const ordererOrgName = generateBlockchainOrgName('OrdererOrg');
+        
+        console.log("Generated blockchain org name:", blockchainOrgName);
+
+        // Set up Server-Sent Events
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        // Helper function to send SSE messages
+        const sendUpdate = (status, message, progress, data = {}) => {
+            const update = {
+                status,
+                message,
+                progress,
+                timestamp: new Date().toISOString(),
+                ...data
+            };
+            res.write(`data: ${JSON.stringify(update)}\n\n`);
+        };
+
+        // Start the blockchain creation process
+        try {
+            sendUpdate('started', 'Blockchain creation initiated', 0, {
+                organizationName: organization.name,
+                blockchainOrgName,
+                ordererOrgName,
+                peerCount,
+                ordererCount: 4
+            });
+
+            // Step 1: Start chain
+            sendUpdate('in_progress', 'Starting blockchain network...', 10);
+            await controller.startChain();
+            sendUpdate('in_progress', 'Blockchain network started successfully', 25);
+
+            // Step 2: Create peers
+            sendUpdate('in_progress', `Creating ${peerCount} peer node(s) for ${blockchainOrgName}...`, 30);
+            await controller.createPeer(blockchainOrgName, peerCount, currentUser.username, currentUser.password);
+            sendUpdate('in_progress', 'Peer nodes created successfully', 60);
+
+            // Step 3: Create orderers
+            sendUpdate('in_progress', 'Creating orderer nodes...', 65);
+            await controller.createOrderer(ordererOrgName, 4, currentUser.username, currentUser.password);
+            sendUpdate('in_progress', 'Orderer nodes created successfully', 90);
+
+            // Step 4: Update database
+            sendUpdate('in_progress', 'Updating organization settings...', 95);
+            organization.hasBlockchain = true;
+            organization.blockchainOrgName = blockchainOrgName;
+            await organization.save();
+            
+            // Final success message
+            sendUpdate('completed', 'Blockchain setup completed successfully!', 100, {
+                organizationName: organization.name,
+                blockchainOrgName,
+                ordererOrgName,
+                peerCount,
+                ordererCount: 4
+            });
+
+            console.log("Blockchain setup completed successfully for", organization.name);
+            res.end();
+
+        } catch (asyncError) {
+            console.error("Error in blockchain creation:", asyncError);
+            console.error("Error stack:", asyncError.stack);
+            
+            sendUpdate('failed', `Blockchain creation failed: ${asyncError.message}`, -1, {
+                error: asyncError.message
+            });
+            res.end();
+        }
+        
+    } catch (error) {
+        console.error("Error in createBlockchain:", error);
+        console.error("Error stack:", error.stack);
+        
+        if (!res.headersSent) {
+            res.status(500).json({ 
+                success: false,
+                message: "Internal server error",
+                error: error.message
+            });
+        }
+    }
+}
