@@ -267,6 +267,9 @@ export async function createBlockchain(req, res) {
             sendUpdate('in_progress', 'Updating organization settings...', 22*100/23);
             organization.hasBlockchain = true;
             organization.blockchainOrgName = blockchainOrgName;
+            if (!organization.organizationChannels.includes(channelName)) {
+                organization.organizationChannels.push(channelName);
+            }
             await organization.save();
             await sleep(14000);
 
@@ -457,5 +460,33 @@ export async function joinBlockchain(req, res) {
                 error: error.message
             });
         }
+    }
+}
+
+export async function getBlockchainOrganizations(req, res) {
+    try {
+        // Find all organizations that have blockchain
+        const organizations = await Organization.find({ hasBlockchain: true })
+            .select('name organizationChannels')
+            .lean();
+
+        // Transform the data to match the requested output format
+        const result = organizations.map(org => ({
+            orgName: org.name,
+            organizationChannelName: org.organizationChannels || []
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: result
+        });
+
+    } catch (error) {
+        console.error("Error fetching blockchain organizations:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
     }
 }
