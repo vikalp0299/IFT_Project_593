@@ -340,19 +340,29 @@ export async function joinBlockchain(req, res) {
             });
         }
 
-        const { channelName, mainChannelName } = req.body;
+        const { channelName, mainChannelName, creatorOrgName, peerCount} = req.body;
 
         // Fetch organization
         const organization = await Organization.findById(currentUser.organization);
+        const creatororg = await Organization.findOne({ name: creatorOrgName });
         
-        if (!organization || !organization.hasBlockchain) {
+        if (!organization){
+            return res.status(404).json({ 
+                success: false,
+                message: 'Organization not found'
+            });
+        }
+
+        if (!creatororg || !creatororg.hasBlockchain) {
             return res.status(400).json({ 
                 success: false,
                 message: 'Organization must have blockchain setup first'
             });
         }
+        
 
-        const blockchainOrgName = organization.blockchainOrgName;
+        const blockchainOrgName = generateBlockchainOrgName(organization.name);
+        const creatorBlockchainOrgName = creatororg.blockchainOrgName;
         const ordererOrgName = generateBlockchainOrgName('OrdererOrg');
 
         // Set up SSE
@@ -369,25 +379,58 @@ export async function joinBlockchain(req, res) {
         try {
             sendUpdate('started', 'Joining blockchain network', 0);
 
-            // Get current version tracker (FIXED FUNCTION NAME)
-            const currentTracker = await getOrgCreateVersionTracker(organization.name);
+            // Get version tracker from creator organization (not current org since we're just joining)
+            const currentTracker = await getOrgCreateVersionTracker(creatororg.name);
+            // Create peers 
+            sendUpdate('in_progress', 'Creating peer nodes...', 1*100/14);
+            await controller.createPeer(blockchainOrgName, peerCount, 'admin', 'adminpw');
+            await sleep(14000);
+            sendUpdate('in_progress', 'Peer nodes created successfully', 2*100/14);
+
+            // Create channels
+            sendUpdate('in_progress', 'Creating channels...', 3*100/14);
+            await controller.create_Channel(mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName);
+            await sleep(14000);
+            sendUpdate('in_progress', 'Channels created successfully', 4*100/14);
 
             // Join channel operations
-            sendUpdate('in_progress', 'Joining channel...', 30);
-            await controller.create_follower_Channel(channelName, mainChannelName, [blockchainOrgName], ordererOrgName, 1);
-            sendUpdate('in_progress', 'Channel joined successfully', 60);
+            sendUpdate('in_progress', 'Joining channel...', 5*100/14);
+            await controller.create_follower_Channel(channelName, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName, 1);
+            await sleep(14000);
+            sendUpdate('in_progress', 'Channel joined successfully', 6*100/14);
+
+            // Step 6: Creating identities and network config
+            sendUpdate('in_progress', 'Setting up identities and network configuration...', 7*100/14);
+            await controller.create_identities_and_network_config(mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName);
+            await sleep(14000);
+            sendUpdate('in_progress', 'Identities and network configuration set up successfully', 8*100/14);
+
+            // Step 8: Install chaincode metadata
+            sendUpdate('in_progress', 'Installing chaincode for metadata...', 8*100/14);
+            await controller.install_chaincode_metadata('asset_1.0','../generated_resources/chaincode.tgz', [ blockchainOrgName], '../generated_resources/network-config.yaml');
+            await sleep(14000);
+            sendUpdate('in_progress', 'Chaincode for metadata installed successfully', 9*100/14);
 
             // Approve chaincode with current version
-            sendUpdate('in_progress', 'Approving chaincode...', 80);
-            await controller.approve_chaincode('asset', currentTracker.version, currentTracker.sequence, channelName, [blockchainOrgName], '../generated_resources/network-config.yaml');
-            sendUpdate('in_progress', 'Chaincode approved successfully', 90);
+            sendUpdate('in_progress', 'Approving chaincode...', 9*100/14);
+            console.log("Initial tracker for commit:", currentTracker);
+            await controller.approve_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], '../generated_resources/network-config.yaml');
+            await sleep(14000);
+            sendUpdate('in_progress', 'Chaincode approved successfully', 10 *100/14);
+
+             // Step 11: Commit chaincode (MISSING STEP!)
+            sendUpdate('in_progress', 'Committing chaincode...', 11*100/14);
+
+            await controller.commit_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], '../generated_resources/network-config.yaml');
+            await sleep(14000);
+            sendUpdate('in_progress', 'Chaincode committed successfully', 12 *100/14);
 
             // Update version tracker (SECOND LOCATION)
-            sendUpdate('in_progress', 'Updating chaincode version tracker...', 95);
-            const updatedVersion = await updateVersionTracker(organization.name);
+            sendUpdate('in_progress', 'Updating chaincode version tracker...', 13*100/14 );
+            const updatedVersion = await updateVersionTracker(creatororg.name);
             console.log(`Version tracker updated: sequence ${updatedVersion.sequence}, version ${updatedVersion.version}`);
 
-            sendUpdate('completed', 'Successfully joined blockchain network!', 100, {
+            sendUpdate('completed', 'Successfully joined blockchain network!', 14 * 100/14, {
                 organizationName: organization.name,
                 blockchainOrgName,
                 channelName,
