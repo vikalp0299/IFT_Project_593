@@ -1,6 +1,6 @@
 import PrivateKey from '../models/PrivateKey.js';
 import Permission from '../models/Permission.js';
-import User from '../models/User.js';
+import { encryptSecret, decryptSecret } from '../utils/cryptoUtils.js';
 
 /**
  * Store encrypted private key
@@ -8,13 +8,13 @@ import User from '../models/User.js';
  */
 export const storePrivateKey = async (req, res) => {
   try {
-    const { privateKey, departmentName, username, userEmail } = req.body;
+    const { privateKey, departmentName } = req.body;
 
     // Validation
-    if (!privateKey || !departmentName || !username || !userEmail) {
+    if (!privateKey || !departmentName) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: privateKey, departmentName, username, userEmail',
+        message: 'Missing required fields: privateKey and departmentName',
         code: 'MISSING_FIELDS'
       });
     }
@@ -36,12 +36,23 @@ export const storePrivateKey = async (req, res) => {
       });
     }
 
+    const encryptedPayload = encryptSecret(privateKey.trim());
+
     // Create new private key record
     const newPrivateKey = new PrivateKey({
-      privateKey: privateKey.trim(),
+      encryptedPrivateKey: encryptedPayload.ciphertext,
+      encryption: {
+        algorithm: encryptedPayload.algorithm,
+        iv: encryptedPayload.iv,
+        authTag: encryptedPayload.authTag,
+        fingerprint: encryptedPayload.fingerprint
+      },
       departmentName: departmentName.toLowerCase().trim(),
-      username: username.toLowerCase().trim(),
-      userEmail: userEmail.toLowerCase().trim()
+      storedBy: {
+        adminId: req.admin._id,
+        username: req.admin.username,
+        email: req.admin.email
+      }
     });
 
     await newPrivateKey.save();
@@ -52,9 +63,9 @@ export const storePrivateKey = async (req, res) => {
       data: {
         id: newPrivateKey._id,
         departmentName: newPrivateKey.departmentName,
-        username: newPrivateKey.username,
-        userEmail: newPrivateKey.userEmail,
-        createdAt: newPrivateKey.createdAt
+        storedBy: newPrivateKey.storedBy.username,
+        createdAt: newPrivateKey.createdAt,
+        fingerprint: newPrivateKey.encryption.fingerprint
       }
     });
 
@@ -119,7 +130,7 @@ export const checkPrivateKeyExists = async (req, res) => {
 export const getPrivateKey = async (req, res) => {
   try {
     const { departmentName } = req.params;
-    const user = req.user;
+    const actor = req.admin || req.user;
 
     if (!departmentName) {
       return res.status(400).json({
@@ -128,10 +139,19 @@ export const getPrivateKey = async (req, res) => {
         code: 'MISSING_DEPARTMENT'
       });
     }
+    if (!actor) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+        code: 'AUTH_REQUIRED'
+      });
+    }
+
+    const requestedDepartment = departmentName.toLowerCase().trim();
 
     // Find private key for the department
     const privateKey = await PrivateKey.findOne({ 
-      departmentName: departmentName.toLowerCase().trim() 
+      departmentName: requestedDepartment 
     });
 
     if (!privateKey) {
@@ -142,23 +162,39 @@ export const getPrivateKey = async (req, res) => {
       });
     }
 
-    // Check if user belongs to the same department
-    const userDepartment = user.department?.toLowerCase().trim();
-    const requestedDepartment = departmentName.toLowerCase().trim();
+    const decryptedKey = decryptSecret({
+      ciphertext: privateKey.encryptedPrivateKey,
+      iv: privateKey.encryption.iv,
+      authTag: privateKey.encryption.authTag
+    });
 
+    if (req.admin) {
+      return res.json({
+        success: true,
+        message: 'Private key retrieved successfully',
+        data: {
+          privateKey: decryptedKey,
+          departmentName: privateKey.departmentName,
+          storedBy: privateKey.storedBy,
+          storedAt: privateKey.createdAt,
+          encryptionFingerprint: privateKey.encryption.fingerprint,
+          accessedVia: 'admin_session'
+        }
+      });
+    }
+
+    const userDepartment = actor.department?.toLowerCase().trim();
     if (userDepartment === requestedDepartment) {
       // User belongs to same department - grant access
       return res.json({
         success: true,
         message: 'Private key retrieved successfully',
         data: {
-          privateKey: privateKey.privateKey,
+          privateKey: decryptedKey,
           departmentName: privateKey.departmentName,
-          storedBy: {
-            username: privateKey.username,
-            userEmail: privateKey.userEmail
-          },
-          storedAt: privateKey.createdAt
+          storedBy: privateKey.storedBy,
+          storedAt: privateKey.createdAt,
+          encryptionFingerprint: privateKey.encryption.fingerprint
         }
       });
     }
@@ -179,9 +215,9 @@ export const getPrivateKey = async (req, res) => {
     // Check if user is in the permission list
     const isAllowed = permission.allowedUsers.some(allowedUser => {
       return (
-        (allowedUser.userId && allowedUser.userId.toString() === user.id.toString()) ||
-        (allowedUser.username && allowedUser.username.toLowerCase() === user.username.toLowerCase()) ||
-        (allowedUser.userEmail && allowedUser.userEmail.toLowerCase() === user.email.toLowerCase())
+        (allowedUser.userId && allowedUser.userId.toString() === actor.id.toString()) ||
+        (allowedUser.username && allowedUser.username.toLowerCase() === actor.username.toLowerCase()) ||
+        (allowedUser.userEmail && allowedUser.userEmail.toLowerCase() === actor.email.toLowerCase())
       );
     });
 
@@ -198,13 +234,11 @@ export const getPrivateKey = async (req, res) => {
       success: true,
       message: 'Private key retrieved successfully',
       data: {
-        privateKey: privateKey.privateKey,
+        privateKey: decryptedKey,
         departmentName: privateKey.departmentName,
-        storedBy: {
-          username: privateKey.username,
-          userEmail: privateKey.userEmail
-        },
+        storedBy: privateKey.storedBy,
         storedAt: privateKey.createdAt,
+        encryptionFingerprint: privateKey.encryption.fingerprint,
         accessedVia: 'permission_list'
       }
     });

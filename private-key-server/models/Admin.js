@@ -1,0 +1,71 @@
+import mongoose from 'mongoose';
+
+const adminSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      minlength: 3,
+      maxlength: 50,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email'],
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 60,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 60,
+    },
+    passwordHash: {
+      type: String,
+      required: true,
+    },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lockedUntil: {
+      type: Date,
+      default: null,
+    },
+    lastLoginAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+adminSchema.methods.toSafeObject = function toSafeObject() {
+  return {
+    id: this._id.toString(),
+    username: this.username,
+    email: this.email,
+    firstName: this.firstName,
+    lastName: this.lastName,
+    lastLoginAt: this.lastLoginAt,
+    createdAt: this.createdAt,
+  };
+};
+
+const Admin = mongoose.model('Admin', adminSchema);
+
+export default Admin;
+

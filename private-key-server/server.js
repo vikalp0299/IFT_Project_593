@@ -4,6 +4,7 @@ import cors from 'cors';
 import { config } from './config.js';
 import privateKeyRoutes from './routes/privateKeyRoutes.js';
 import permissionRoutes from './routes/permissionRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
+app.use('/', adminRoutes);
 app.use('/', privateKeyRoutes);
 app.use('/', permissionRoutes);
 

@@ -5,18 +5,12 @@ import {
   getPrivateKey
 } from '../controllers/privateKeyController.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { authenticateAdmin } from '../middleware/adminAuth.js';
 
 const router = express.Router();
 
-// POST /private-key - Store encrypted private key (no auth required for storing)
-router.post('/private-key', storePrivateKey);
-
-// GET /private-key/check/:departmentName - Check if private key exists (no auth required)
+router.post('/private-key', authenticateAdmin, storePrivateKey);
 router.get('/private-key/check/:departmentName', checkPrivateKeyExists);
-
-// GET /private-key/:departmentName - Get private key (requires authentication)
-router.get('/private-key/:departmentName', authenticateToken, getPrivateKey);
+router.get('/private-key/:departmentName', authenticateAdmin, getPrivateKey);
 
 export default router;
-
-
