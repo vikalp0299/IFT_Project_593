@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import './JoinBlockchain.css';
 
+const API_BASE_URL = 'http://localhost:8000';
+
 interface BlockchainOrganization {
   orgName: string;
   organizationChannelName: string[];
@@ -19,6 +21,8 @@ export const JoinBlockchain = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [progressPercent, setProgressPercent] = useState(0);
 
   const selectedChannelName =
     channelOptions.find((channel) => channel.id === selectedChannelId)?.name ?? '';
@@ -86,29 +90,150 @@ export const JoinBlockchain = () => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    setStatusMessage(null);
+    setProgressPercent(0);
 
     try {
-      // TODO: Implement API call to join blockchain
-      // const response = await authService.authenticatedRequest('/blockchain/join', {
-      //   method: 'POST',
-      //   body: JSON.stringify({
-      //     organizationName: organizationQuery.trim(),
-      //     channelId: selectedChannelId,
-      //     peerCount: Number(peerCount),
-      //     userId: user?.userId
-      //   })
-      // });
+      // Validate peerCount is a valid number
+      const peerCountNum = Number(peerCount);
+      if (isNaN(peerCountNum) || peerCountNum < 1) {
+        setError('Peer count must be a valid number greater than 0');
+        setIsLoading(false);
+        return;
+      }
 
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Extract channel name from selectedChannelId
+      // Format: "orgName-index-channelName" or from selectedChannelName "orgName - channelName"
+      let channelName = '';
+      if (selectedChannelId) {
+        // Try to extract from ID format: "orgName-index-channelName"
+        const parts = selectedChannelId.split('-');
+        if (parts.length >= 3) {
+          // Take everything after the second dash as channel name
+          channelName = parts.slice(2).join('-');
+        } else {
+          // Fallback to extracting from display name
+          channelName = selectedChannelName.split(' - ').pop() || '';
+        }
+      } else {
+        channelName = selectedChannelName.split(' - ').pop() || '';
+      }
 
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/home');
-      }, 2000);
+      const token = authService.getAccessToken();
+      if (!token) {
+        throw new Error('You are not authenticated. Please sign in again.');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/blockchain/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          channelName: channelName,
+          mainChannelName: channelName,
+          creatorOrgName: organizationQuery.trim(),
+          peerCount: peerCountNum
+        })
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to join blockchain.';
+        try {
+          const errorData = await response.json();
+          if (errorData?.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          try {
+            const text = await response.text();
+            if (text) {
+              errorMessage = text;
+            }
+          } catch {
+            // ignore
+          }
+        }
+        throw new Error(errorMessage);
+      }
+
+      if (!response.body) {
+        throw new Error('No response body received from server.');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let operationFinished = false;
+      let shouldStop = false;
+
+      while (!shouldStop) {
+        const { value, done } = await reader.read();
+        if (done) {
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        let boundary = buffer.indexOf('\n\n');
+
+        while (boundary !== -1) {
+          const rawEvent = buffer.slice(0, boundary).trim();
+          buffer = buffer.slice(boundary + 2);
+          boundary = buffer.indexOf('\n\n');
+
+          if (!rawEvent || rawEvent.startsWith(':')) {
+            continue;
+          }
+
+          const dataLine = rawEvent
+            .split('\n')
+            .find((line) => line.startsWith('data:'));
+
+          if (!dataLine) {
+            continue;
+          }
+
+          const payload = dataLine.replace(/^data:\s*/, '');
+
+          try {
+            const update = JSON.parse(payload);
+
+            if (update.message) {
+              setStatusMessage(update.message);
+            }
+
+            if (typeof update.progress === 'number') {
+              setProgressPercent(Math.min(Math.max(update.progress, 0), 100));
+            }
+
+            if (update.status === 'completed') {
+              operationFinished = true;
+              shouldStop = true;
+              setSuccess(true);
+              setTimeout(() => {
+                navigate('/home');
+              }, 2000);
+              break;
+            }
+
+            if (update.status === 'failed') {
+              operationFinished = true;
+              shouldStop = true;
+              throw new Error(update.message || 'Failed to join blockchain.');
+            }
+          } catch (parseError) {
+            console.error('Failed to parse SSE message:', parseError, payload);
+          }
+        }
+      }
+
+      if (!operationFinished) {
+        throw new Error('Joining blockchain ended unexpectedly. Please try again.');
+      }
     } catch (err) {
       console.error('Error joining blockchain:', err);
-      setError(err instanceof Error ? err.message : 'Failed to join blockchain');
+      setError(err instanceof Error ? err.message : 'Failed to join blockchain. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -235,6 +360,28 @@ export const JoinBlockchain = () => {
                   />
                 </div>
               </>
+            )}
+
+            {statusMessage && (
+              <div className="info-message">
+                <div className="status-indicator">
+                  <span className="status-dot" />
+                  <p style={{ margin: 0 }}>{statusMessage}</p>
+                </div>
+                {!success && (
+                  <div className="progress-container">
+                    <div className="progress-bar-wrapper">
+                      <div
+                        className="progress-bar"
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                    <div className="progress-percentage">
+                      {Math.round(progressPercent)}%
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
 
             {error && (

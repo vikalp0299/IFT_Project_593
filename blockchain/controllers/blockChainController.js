@@ -223,7 +223,7 @@ export async function createBlockchain(req, res) {
             
             // Step 5: Join peers to channel
             sendUpdate('in_progress', 'Joining peers to channel...', 9*100/22);
-            await controller.create_follower_Channel(channelName, "demo", [blockchainOrgName], ordererOrgName, 1);
+            await controller.create_follower_Channel("demo", channelName, [blockchainOrgName], ordererOrgName, 1);
             await sleep(14000);
             sendUpdate('in_progress', 'Peers joined to channel successfully', 10*100/22);
 
