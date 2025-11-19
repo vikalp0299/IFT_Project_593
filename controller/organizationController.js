@@ -1,6 +1,8 @@
 import { ObjectId } from 'mongodb';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import { Organization } from '../db.js';
+import Department from '../models/Department.js';
 import { verifyToken,getOrganizationIdFromToken,getUserIdfromToken,getUserRoleFromToken } from '../middleware/auth.js';
 import  Access  from '../models/access.js';
 import { request } from 'express';
@@ -432,4 +434,129 @@ export async function respondToAccessRequest(req, res) {
       message: 'Internal server error'
     });
   } 
+}
+
+export async function getOrganizationDepartments(req, res) {
+  try {
+    const { organizationName } = req.params;
+
+    if (!organizationName || typeof organizationName !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Organization name is required',
+      });
+    }
+
+    const normalizedName = organizationName.toLowerCase().trim();
+    const organization = await Organization.findOne({ name: normalizedName });
+
+    if (!organization) {
+      return res.status(404).json({
+        success: false,
+        message: 'Organization not found',
+      });
+    }
+
+    const departments = await Department.find({ organization: organization._id })
+      .sort({ displayName: 1 })
+      .lean();
+
+    return res.json({
+      success: true,
+      data: {
+        organization: {
+          id: organization._id,
+          name: organization.name,
+          displayName: organization.displayName,
+        },
+        departments: departments.map((dept) => ({
+          id: dept._id,
+          name: dept.departmentName,
+          displayName: dept.displayName,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error('getOrganizationDepartments error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch departments for organization',
+    });
+  }
+}
+
+export async function createDepartmentWithPublicKey(req, res) {
+  try {
+    const { departmentName, publicKeyPem, keyType = 'RSA-OAEP', keySize = 2048, fingerprint } =
+      req.body || {};
+
+    if (!departmentName || !publicKeyPem) {
+      return res.status(400).json({
+        success: false,
+        message: 'Department name and public key are required',
+        code: 'MISSING_FIELDS',
+      });
+    }
+
+    if (!req.user || !req.user.organizationId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Organization context missing',
+        code: 'ORG_CONTEXT_MISSING',
+      });
+    }
+
+    const normalizedName = departmentName.toLowerCase().trim();
+    const displayName = departmentName.trim();
+
+    const existing = await Department.findOne({
+      organization: req.user.organizationId,
+      departmentName: normalizedName,
+    });
+
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        message: 'Department already exists for this organization',
+        code: 'DEPARTMENT_EXISTS',
+        data: {
+          departmentId: existing._id,
+        },
+      });
+    }
+
+    const keyFingerprint =
+      fingerprint || crypto.createHash('sha256').update(publicKeyPem).digest('hex');
+
+    const department = await Department.create({
+      organization: req.user.organizationId,
+      organizationName: req.user.organizationName?.toLowerCase() || '',
+      departmentName: normalizedName,
+      displayName,
+      publicKey: {
+        pem: publicKeyPem.trim(),
+        keyType,
+        keySize,
+        fingerprint: keyFingerprint,
+      },
+      createdBy: {
+        userId: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Department created successfully',
+      data: department.toResponse(),
+    });
+  } catch (error) {
+    console.error('Create department error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create department',
+      code: 'DEPARTMENT_CREATE_ERROR',
+    });
+  }
 }

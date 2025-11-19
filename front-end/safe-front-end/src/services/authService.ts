@@ -32,14 +32,40 @@ interface ApiResponse<T = any> {
   code?: string;
 }
 
+interface OrganizationDepartmentsResponse {
+  organization: {
+    id: string;
+    name: string;
+    displayName: string;
+  };
+  departments: Array<{
+    id: string;
+    name: string;
+    displayName: string;
+  }>;
+}
+
 class AuthService {
   private static instance: AuthService;
   private accessToken: string | null = null;
   private refreshToken: string | null = null;
   private user: UserData | null = null;
+  private tokenStorage: 'session' | 'local' = 'session';
 
   private constructor() {
     this.loadTokensFromStorage();
+  }
+
+  private getStorage(type: 'session' | 'local' = 'session'): Storage | null {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    try {
+      return type === 'local' ? window.localStorage : window.sessionStorage;
+    } catch (error) {
+      console.error(`${type}Storage is not available`, error);
+      return null;
+    }
   }
 
   public static getInstance(): AuthService {
@@ -49,38 +75,65 @@ class AuthService {
     return AuthService.instance;
   }
 
-  // Load tokens from localStorage
+  // Load tokens from storage (session first, then local for remember-me)
   private loadTokensFromStorage(): void {
-    try {
-      const storedAccessToken = localStorage.getItem('accessToken');
-      const storedRefreshToken = localStorage.getItem('refreshToken');
-      const storedUser = localStorage.getItem('user');
+    const tryLoad = (storage: Storage | null, storageType: 'session' | 'local'): boolean => {
+      if (!storage) {
+        return false;
+      }
 
-      if (storedAccessToken) {
+      try {
+        const storedAccessToken = storage.getItem('accessToken');
+        const storedRefreshToken = storage.getItem('refreshToken');
+        const storedUser = storage.getItem('user');
+
+        if (!storedAccessToken || !storedRefreshToken || !storedUser) {
+          return false;
+        }
+
         this.accessToken = storedAccessToken;
-      }
-      if (storedRefreshToken) {
         this.refreshToken = storedRefreshToken;
-      }
-      if (storedUser) {
         this.user = JSON.parse(storedUser);
+        this.tokenStorage = storageType;
+        return true;
+      } catch (error) {
+        console.error('Error loading tokens from storage:', error);
+        storage.removeItem('accessToken');
+        storage.removeItem('refreshToken');
+        storage.removeItem('user');
+        return false;
       }
-    } catch (error) {
-      console.error('Error loading tokens from storage:', error);
-      this.clearTokens();
+    };
+
+    if (tryLoad(this.getStorage('session'), 'session')) {
+      return;
     }
+
+    tryLoad(this.getStorage('local'), 'local');
   }
 
-  // Save tokens to localStorage
-  private saveTokensToStorage(tokens: AuthTokens, user: UserData): void {
+  // Save tokens to chosen storage
+  private saveTokensToStorage(tokens: AuthTokens, user: UserData, remember = false): void {
     try {
-      localStorage.setItem('accessToken', tokens.accessToken);
-      localStorage.setItem('refreshToken', tokens.refreshToken);
-      localStorage.setItem('user', JSON.stringify(user));
+      const primaryStorage = this.getStorage(remember ? 'local' : 'session');
+      if (!primaryStorage) {
+        return;
+      }
+
+      const secondaryStorage = this.getStorage(remember ? 'session' : 'local');
+
+      primaryStorage.setItem('accessToken', tokens.accessToken);
+      primaryStorage.setItem('refreshToken', tokens.refreshToken);
+      primaryStorage.setItem('user', JSON.stringify(user));
+
+      secondaryStorage?.removeItem('accessToken');
+      secondaryStorage?.removeItem('refreshToken');
+      secondaryStorage?.removeItem('user');
       
       this.accessToken = tokens.accessToken;
       this.refreshToken = tokens.refreshToken;
       this.user = user;
+      this.tokenStorage = remember ? 'local' : 'session';
     } catch (error) {
       console.error('Error saving tokens to storage:', error);
     }
@@ -88,9 +141,18 @@ class AuthService {
 
   // Clear tokens from localStorage
   private clearTokens(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    const session = this.getStorage('session');
+    const local = this.getStorage('local');
+
+    session?.removeItem('accessToken');
+    session?.removeItem('refreshToken');
+    session?.removeItem('user');
+
+    local?.removeItem('accessToken');
+    local?.removeItem('refreshToken');
+    local?.removeItem('user');
+
+    this.tokenStorage = 'session';
     
     this.accessToken = null;
     this.refreshToken = null;
@@ -113,7 +175,12 @@ class AuthService {
   }
 
   // Login user
-  public async login(username: string, password: string, organizationName: string): Promise<LoginResponse> {
+  public async login(
+    username: string,
+    password: string,
+    organizationName: string,
+    rememberMe = false
+  ): Promise<LoginResponse> {
     try {
       const response = await fetch('http://localhost:8000/auth/login', {
         method: 'POST',
@@ -134,7 +201,8 @@ class AuthService {
         
         this.saveTokensToStorage(
           { accessToken, refreshToken, expiresIn },
-          userData
+          userData,
+          rememberMe
         );
 
         console.log('✅ Login successful:', userData);
@@ -204,8 +272,11 @@ class AuthService {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        const storage = this.getStorage(this.tokenStorage);
+        if (storage) {
+          storage.setItem('accessToken', accessToken);
+          storage.setItem('refreshToken', refreshToken);
+        }
         
         console.log('✅ Token refreshed successfully');
         return true;
@@ -401,6 +472,52 @@ class AuthService {
         message: error instanceof Error ? error.message : 'Network error during user keys query'
       };
     }
+  }
+
+  public async fetchOrganizationDepartments(
+    organizationName: string
+  ): Promise<ApiResponse<OrganizationDepartmentsResponse>> {
+    if (!organizationName) {
+      return {
+        success: false,
+        message: 'Organization name is required',
+      };
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/org/departments/${encodeURIComponent(organizationName.trim())}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      const data: ApiResponse<OrganizationDepartmentsResponse> = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Organization department lookup failed:', error);
+      return {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Unable to look up organization departments right now.',
+      };
+    }
+  }
+
+  public async confirmLocalAccount(payload: {
+    status: 'success' | 'failed';
+    serverUrl?: string;
+    externalUserId?: string;
+    error?: string;
+  }): Promise<ApiResponse> {
+    return this.authenticatedRequest('/auth/local-sync', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   /**

@@ -6,8 +6,11 @@ import {
   putOrganizationChannels,
   requestAccessToChannel,
   respondToAccessRequest,
-  displayAccessRequestsToAdmin
+  displayAccessRequestsToAdmin,
+  createDepartmentWithPublicKey,
+  getOrganizationDepartments
 } from '../controller/organizationController.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const orgRouter = express.Router();
 /**
@@ -61,6 +64,15 @@ orgRouter.post('/request-access', requestAccessToChannel);
  * @access Private
  */
 orgRouter.post('/respond-access', respondToAccessRequest);
+
+orgRouter.post(
+  '/departments',
+  authenticateToken,
+  requireRole(['Admin']),
+  createDepartmentWithPublicKey
+);
+
+orgRouter.get('/departments/:organizationName', getOrganizationDepartments);
 
 /**
  * Export organization router

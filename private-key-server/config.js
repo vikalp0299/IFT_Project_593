@@ -6,11 +6,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables from parent directory's .env file
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, './.env') });
 
 export const config = {
   port: process.env.PRIVATE_KEY_SERVER_PORT || 8001,
-  mongoUri: process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/safe-app',
+  mongoUri:
+    process.env.PRIVATE_KEY_SERVER_MONGO_URI ||
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URI ||
+    'mongodb://localhost:27017/key-store',
   jwtSecret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
   corsOrigins: [
     'http://localhost:5173',

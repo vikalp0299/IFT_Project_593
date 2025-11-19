@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { privateKeyServerClient } from '../services/privateKeyServerClient';
 import './AdminHomePage.css';
+
+const PRIVATE_KEY_SERVER_URL_KEY = 'safe.privateKeyServerUrl';
+const ACTIVE_PRIVATE_KEY_SERVER_KEY = 'safe.activePrivateKeyServer';
 
 interface UserData {
   userId: string;
@@ -11,6 +15,30 @@ interface UserData {
   lastName: string;
   role: string;
   organizationName: string;
+}
+
+type StatusBanner = {
+  type: 'success' | 'error' | 'info';
+  message: string;
+};
+
+interface AdminSession {
+  baseUrl: string;
+  token: string;
+  admin: {
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+interface RemotePrivateKeyServer {
+  id: string;
+  baseUrl: string;
+  isActive: boolean;
+  addedAt: string;
+  addedByName?: string;
 }
 
 export const AdminHomePage = () => {
@@ -31,6 +59,390 @@ export const AdminHomePage = () => {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
   const [accessStatus, setAccessStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isGrantingAccess, setIsGrantingAccess] = useState(false);
+  const [privateKeyServerUrl, setPrivateKeyServerUrl] = useState(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    return localStorage.getItem(PRIVATE_KEY_SERVER_URL_KEY) ?? '';
+  });
+  const [savedPrivateKeyServers, setSavedPrivateKeyServers] = useState<RemotePrivateKeyServer[]>([]);
+  const [isServersLoading, setIsServersLoading] = useState(false);
+  const [serversError, setServersError] = useState<string | null>(null);
+  const [isPrivateKeyServerConnected, setIsPrivateKeyServerConnected] = useState(false);
+  const [activePrivateKeyServerUrl, setActivePrivateKeyServerUrl] = useState(() => {
+    if (typeof window === 'undefined') {
+      return '';
+    }
+    return localStorage.getItem(ACTIVE_PRIVATE_KEY_SERVER_KEY) ?? '';
+  });
+  const [lastCheckedServer, setLastCheckedServer] = useState<{ url: string; details?: Record<string, unknown> } | null>(null);
+  const [isCheckingPrivateKeyServer, setIsCheckingPrivateKeyServer] = useState(false);
+  const [privateKeyServerStatus, setPrivateKeyServerStatus] = useState<StatusBanner | null>(null);
+  const [isPrivateKeyModalOpen, setIsPrivateKeyModalOpen] = useState(false);
+  const [adminStatusInfo, setAdminStatusInfo] = useState<{ exists: boolean } | null>(null);
+  const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
+  const [adminRegisterData, setAdminRegisterData] = useState({
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [adminLoginData, setAdminLoginData] = useState({
+    username: '',
+    password: '',
+  });
+  const [isAdminActionLoading, setIsAdminActionLoading] = useState(false);
+  const [adminActionMessage, setAdminActionMessage] = useState<string | null>(null);
+
+  const syncServersState = useCallback((servers: RemotePrivateKeyServer[]) => {
+    setSavedPrivateKeyServers(servers);
+    const activeServer = servers.find((server) => server.isActive);
+    setActivePrivateKeyServerUrl(activeServer?.baseUrl ?? '');
+  }, []);
+
+  const refreshAdminStatus = useCallback(
+    async (targetUrl: string) => {
+      try {
+        setIsAdminActionLoading(true);
+        const status = await privateKeyServerClient.getAdminStatus(targetUrl);
+        setAdminStatusInfo(status.data);
+        if (status.data.exists) {
+          setAdminActionMessage('Admin account detected. Sign in to continue.');
+        } else {
+          setAdminActionMessage('No admin account found. Create one to continue.');
+        }
+      } catch (error) {
+        console.error('Failed to fetch admin status:', error);
+        setAdminStatusInfo(null);
+        setAdminActionMessage(
+          error instanceof Error ? error.message : 'Unable to verify admin status.'
+        );
+      } finally {
+        setIsAdminActionLoading(false);
+      }
+    },
+    []
+  );
+
+  const fetchSavedServers = useCallback(async () => {
+    try {
+      setIsServersLoading(true);
+      setServersError(null);
+      const response = await authService.authenticatedRequest<{
+        servers: RemotePrivateKeyServer[];
+      }>('/api/local-servers');
+
+      if (response.success && response.data?.servers) {
+        syncServersState(response.data.servers);
+      } else {
+        setServersError(response.message || 'Unable to load saved servers.');
+      }
+    } catch (fetchError) {
+      console.error('Failed to fetch saved servers:', fetchError);
+      setServersError(
+        fetchError instanceof Error ? fetchError.message : 'Unable to load saved servers.'
+      );
+    } finally {
+      setIsServersLoading(false);
+    }
+  }, [syncServersState]);
+
+  const normalizeServerUrl = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return '';
+    }
+    const hasProtocol = /^https?:\/\//i.test(trimmed);
+    const urlWithProtocol = hasProtocol ? trimmed : `http://${trimmed}`;
+    return urlWithProtocol.replace(/\/+$/, '');
+  };
+
+  const getSessionStorageKey = (url: string) => `safe.localServerSession::${url}`;
+
+  const checkPrivateKeyServerHealth = useCallback(
+    async (
+      inputUrl?: string,
+      options: { silent?: boolean; autoConnect?: boolean } = {}
+    ) => {
+      const targetUrl = inputUrl ?? privateKeyServerUrl;
+      if (!targetUrl.trim()) {
+        if (!options.silent) {
+          setPrivateKeyServerStatus({
+            type: 'error',
+            message: 'Please enter a private-key-server address.',
+          });
+        }
+        return false;
+      }
+
+      const normalizedUrl = normalizeServerUrl(targetUrl);
+      if (!options.silent) {
+        setIsCheckingPrivateKeyServer(true);
+        setPrivateKeyServerStatus({
+          type: 'info',
+          message: 'Checking connectivity...',
+        });
+      }
+
+      try {
+        const data = await privateKeyServerClient.getHealth(normalizedUrl);
+        setLastCheckedServer({ url: normalizedUrl, details: data });
+        setPrivateKeyServerUrl(normalizedUrl);
+
+        if (!options.silent) {
+          setPrivateKeyServerStatus({
+            type: 'success',
+            message: data?.message
+              ? `${data.message} (${normalizedUrl})`
+              : `Healthy response received from ${normalizedUrl}`,
+          });
+        }
+
+        await refreshAdminStatus(normalizedUrl);
+        return true;
+      } catch (checkError) {
+        console.error('Private key server check failed:', checkError);
+        setLastCheckedServer(null);
+        setAdminStatusInfo(null);
+        if (!options.silent) {
+          const message =
+            checkError instanceof DOMException && checkError.name === 'AbortError'
+              ? 'Connection timed out while waiting for the private-key-server.'
+              : checkError instanceof Error
+                ? checkError.message
+                : 'Unable to reach the private-key-server.';
+          setPrivateKeyServerStatus({
+            type: 'error',
+            message,
+          });
+        }
+
+        return false;
+      } finally {
+        if (!options.silent) {
+          setIsCheckingPrivateKeyServer(false);
+        }
+      }
+    },
+    [privateKeyServerUrl, refreshAdminStatus]
+  );
+
+  const handleCheckPrivateKeyServer = () => {
+    void checkPrivateKeyServerHealth();
+  };
+
+  const handleAdminRegister = async () => {
+    if (!privateKeyServerUrl) {
+      setAdminActionMessage('Enter a server URL before creating an admin.');
+      return;
+    }
+
+    if (!adminRegisterData.password || adminRegisterData.password !== adminRegisterData.confirmPassword) {
+      setAdminActionMessage('Passwords must match before continuing.');
+      return;
+    }
+
+    const normalizedUrl = normalizeServerUrl(privateKeyServerUrl);
+
+    try {
+      setIsAdminActionLoading(true);
+      const response = await privateKeyServerClient.registerAdmin(normalizedUrl, adminRegisterData);
+      setAdminSession({
+        baseUrl: normalizedUrl,
+        token: response.data.token,
+        admin: response.data.admin,
+      });
+      setAdminRegisterData({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      });
+      setAdminStatusInfo({ exists: true });
+      setAdminActionMessage(`Admin account created for ${response.data.admin.username}.`);
+      setPrivateKeyServerStatus({
+        type: 'success',
+        message: `Securely connected to ${normalizedUrl}.`,
+      });
+    } catch (error) {
+      setAdminActionMessage(
+        error instanceof Error ? error.message : 'Failed to create admin account.'
+      );
+    } finally {
+      setIsAdminActionLoading(false);
+    }
+  };
+
+  const handleAdminLogin = async () => {
+    if (!privateKeyServerUrl) {
+      setAdminActionMessage('Enter a server URL before connecting.');
+      return;
+    }
+    if (!adminLoginData.username || !adminLoginData.password) {
+      setAdminActionMessage('Username and password are required.');
+      return;
+    }
+
+    const normalizedUrl = normalizeServerUrl(privateKeyServerUrl);
+
+    try {
+      setIsAdminActionLoading(true);
+      const response = await privateKeyServerClient.loginAdmin(normalizedUrl, adminLoginData);
+      setAdminSession({
+        baseUrl: normalizedUrl,
+        token: response.data.token,
+        admin: response.data.admin,
+      });
+      setAdminLoginData({
+        username: '',
+        password: '',
+      });
+      setAdminActionMessage(`Connected as ${response.data.admin.username}.`);
+      setPrivateKeyServerStatus({
+        type: 'success',
+        message: `Authenticated with ${normalizedUrl}.`,
+      });
+    } catch (error) {
+      setAdminActionMessage(
+        error instanceof Error ? error.message : 'Failed to authenticate with the server.'
+      );
+    } finally {
+      setIsAdminActionLoading(false);
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    if (!adminSession) {
+      return;
+    }
+    try {
+      await privateKeyServerClient.logoutAdmin(adminSession.baseUrl, adminSession.token);
+    } catch (error) {
+      console.warn('Failed to notify server about logout:', error);
+    } finally {
+      setAdminSession(null);
+      setAdminActionMessage('Disconnected from private-key-server.');
+      setPrivateKeyServerStatus({
+        type: 'info',
+        message: 'Disconnected from private-key-server.',
+      });
+    }
+  };
+
+  const handleAddPrivateKeyServer = async () => {
+    if (!lastCheckedServer) {
+      setPrivateKeyServerStatus({
+        type: 'error',
+        message: 'Check connectivity before adding the server.',
+      });
+      return;
+    }
+
+    try {
+      setPrivateKeyServerStatus({
+        type: 'info',
+        message: 'Saving server to organization list...',
+      });
+
+      const response = await authService.authenticatedRequest<{
+        servers: RemotePrivateKeyServer[];
+      }>('/api/local-servers', {
+        method: 'POST',
+        body: JSON.stringify({ baseUrl: lastCheckedServer.url }),
+      });
+
+      if (response.success && response.data?.servers) {
+        syncServersState(response.data.servers);
+        setPrivateKeyServerStatus({
+          type: 'success',
+          message: `${lastCheckedServer.url} saved and set as active.`,
+        });
+      } else {
+        setPrivateKeyServerStatus({
+          type: 'error',
+          message: response.message || 'Failed to save server. Please try again.',
+        });
+      }
+    } catch (saveError) {
+      console.error('Failed to save private-key-server:', saveError);
+      setPrivateKeyServerStatus({
+        type: 'error',
+        message:
+          saveError instanceof Error
+            ? saveError.message
+            : 'Unable to save server. Please try again.',
+      });
+    }
+  };
+
+  const handleUseSavedServer = (server: RemotePrivateKeyServer) => {
+    setPrivateKeyServerUrl(server.baseUrl);
+    setLastCheckedServer(null);
+    setAdminSession(null);
+    setAdminStatusInfo(null);
+    setAdminActionMessage(null);
+    setPrivateKeyServerStatus({
+      type: 'info',
+      message: 'Server address loaded. Run a connectivity check to continue.',
+    });
+  };
+
+  const handleMarkActiveServer = async (server: RemotePrivateKeyServer) => {
+    if (server.isActive) {
+      return;
+    }
+
+    try {
+      setPrivateKeyServerStatus({
+        type: 'info',
+        message: 'Updating active server...',
+      });
+
+      const response = await authService.authenticatedRequest<{
+        servers: RemotePrivateKeyServer[];
+      }>(`/api/local-servers/${server.id}/activate`, {
+        method: 'PATCH',
+      });
+
+      if (response.success && response.data?.servers) {
+        syncServersState(response.data.servers);
+        setPrivateKeyServerStatus({
+          type: 'success',
+          message: `${server.baseUrl} marked as the active private-key-server.`,
+        });
+      } else {
+        setPrivateKeyServerStatus({
+          type: 'error',
+          message: response.message || 'Failed to update active server.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update active server:', error);
+      setPrivateKeyServerStatus({
+        type: 'error',
+        message:
+          error instanceof Error ? error.message : 'Unable to update active server.',
+      });
+    }
+  };
+
+  const openPrivateKeyModal = () => {
+    setIsPrivateKeyModalOpen(true);
+    void fetchSavedServers();
+  };
+
+  const closePrivateKeyModal = () => {
+    if (!isCheckingPrivateKeyServer) {
+      setIsPrivateKeyModalOpen(false);
+    }
+  };
+
+  const canManageDepartments = isPrivateKeyServerConnected;
+  const canAttemptConnection = Boolean(lastCheckedServer) && !isCheckingPrivateKeyServer;
 
   useEffect(() => {
     // Check if user is authenticated
@@ -52,6 +464,61 @@ export const AdminHomePage = () => {
     setLoading(false);
   }, [navigate]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(PRIVATE_KEY_SERVER_URL_KEY, privateKeyServerUrl);
+    }
+  }, [privateKeyServerUrl]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(ACTIVE_PRIVATE_KEY_SERVER_KEY, activePrivateKeyServerUrl);
+    }
+  }, [activePrivateKeyServerUrl]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    if (adminSession) {
+      sessionStorage.setItem(
+        getSessionStorageKey(adminSession.baseUrl),
+        JSON.stringify(adminSession)
+      );
+    } else if (privateKeyServerUrl) {
+      sessionStorage.removeItem(getSessionStorageKey(privateKeyServerUrl));
+    }
+  }, [adminSession, privateKeyServerUrl]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !privateKeyServerUrl) {
+      return;
+    }
+
+    const stored = sessionStorage.getItem(getSessionStorageKey(privateKeyServerUrl));
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as AdminSession;
+        setAdminSession(parsed);
+      } catch {
+        sessionStorage.removeItem(getSessionStorageKey(privateKeyServerUrl));
+      }
+    } else {
+      setAdminSession(null);
+    }
+  }, [privateKeyServerUrl]);
+
+  useEffect(() => {
+    if (!isPrivateKeyServerConnected && isDepartmentModalOpen) {
+      setIsDepartmentModalOpen(false);
+    }
+  }, [isPrivateKeyServerConnected, isDepartmentModalOpen]);
+
+  useEffect(() => {
+    setIsPrivateKeyServerConnected(Boolean(adminSession));
+  }, [adminSession]);
+
   const handleCreateBlockchain = () => {
     navigate('/create-blockchain');
   };
@@ -72,6 +539,13 @@ export const AdminHomePage = () => {
   };
 
   const handleDepartmentMenu = () => {
+    if (!canManageDepartments) {
+      setPrivateKeyServerStatus({
+        type: 'error',
+        message: 'Connect to your private-key-server before managing departments.',
+      });
+      return;
+    }
     setDepartmentStatus(null);
     setDepartmentName('');
     setIsDepartmentModalOpen(true);
@@ -92,25 +566,53 @@ export const AdminHomePage = () => {
       setDepartmentStatus({ type: 'error', message: 'Department name is required.' });
       return;
     }
+    if (!adminSession) {
+      setDepartmentStatus({
+        type: 'error',
+        message: 'Connect to your private-key-server as an admin before creating departments.',
+      });
+      return;
+    }
 
     setIsDepartmentSubmitting(true);
     setDepartmentStatus(null);
 
     try {
-      // TODO: Replace with real API call to create department
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      console.log('Creating department:', departmentName.trim());
+      const normalizedDepartment = departmentName.trim();
+
+      const departmentResult = await privateKeyServerClient.createDepartment(
+        adminSession.baseUrl,
+        adminSession.token,
+        {
+          departmentName: normalizedDepartment,
+          organizationName: user?.organizationName ?? '',
+        }
+      );
+
+      await authService.authenticatedRequest('/org/departments', {
+        method: 'POST',
+        body: JSON.stringify({
+          departmentName: normalizedDepartment,
+          publicKeyPem: departmentResult.data.publicKeyPem,
+          keyType: departmentResult.data.keyType,
+          keySize: departmentResult.data.keySize,
+          fingerprint: departmentResult.data.fingerprint,
+        }),
+      });
 
       setDepartmentStatus({
         type: 'success',
-        message: `Department "${departmentName.trim()}" created successfully.`,
+        message: `Department "${normalizedDepartment}" created and keys synced.`,
       });
       setDepartmentName('');
     } catch (submitError) {
       console.error('Department creation failed:', submitError);
       setDepartmentStatus({
         type: 'error',
-        message: 'Failed to create department. Please try again.',
+        message:
+          submitError instanceof Error
+            ? submitError.message
+            : 'Failed to create department. Please try again.',
       });
     } finally {
       setIsDepartmentSubmitting(false);
@@ -254,11 +756,27 @@ export const AdminHomePage = () => {
           <p className="user-name">Welcome, {user?.firstName} {user?.lastName}</p>
         </div>
         <div className="header-actions">
+          <button
+            onClick={openPrivateKeyModal}
+            className="menu-button key-server-button"
+            title={isPrivateKeyServerConnected ? 'Connected to private-key-server' : 'Not connected to private-key-server'}
+          >
+            <span
+              className={`status-dot ${isPrivateKeyServerConnected ? 'connected' : 'disconnected'}`}
+              aria-hidden="true"
+            ></span>
+            <span>Key Server</span>
+          </button>
           <button onClick={handleAccessMenu} className="menu-button access-button">
             <span className="menu-icon" aria-hidden="true">🗝️</span>
             <span>Access</span>
           </button>
-          <button onClick={handleDepartmentMenu} className="menu-button">
+          <button
+            onClick={handleDepartmentMenu}
+            className="menu-button"
+            disabled={!canManageDepartments}
+            title={!canManageDepartments ? 'Connect your private-key-server to enable department creation.' : undefined}
+          >
             <span className="menu-icon" aria-hidden="true">🏢</span>
             <span>Departments</span>
           </button>
@@ -306,6 +824,332 @@ export const AdminHomePage = () => {
         </div>
       </main>
 
+      {isPrivateKeyModalOpen && (
+        <div className="private-key-modal-overlay" role="dialog" aria-modal="true">
+          <div className="private-key-modal">
+            <div className="private-key-modal-header">
+              <button
+                type="button"
+                className="modal-back-button"
+                onClick={closePrivateKeyModal}
+                aria-label="Close private key modal"
+                title="Back to dashboard"
+              >
+                <span aria-hidden="true">←</span>
+              </button>
+              <div className="private-key-heading">
+                <p className="private-key-eyebrow">Private-key-server</p>
+                <h2>Secure Key Bridge</h2>
+                <p className="private-key-subtitle">
+                  Link your admin console to the local private-key-server to unlock sensitive actions.
+                </p>
+              </div>
+              <div
+                className={`status-pill ${
+                  isPrivateKeyServerConnected
+                    ? 'connected'
+                    : isCheckingPrivateKeyServer
+                      ? 'checking'
+                      : 'disconnected'
+                }`}
+              >
+                <span className="status-indicator" aria-hidden="true"></span>
+                {isPrivateKeyServerConnected ? 'Connected' : isCheckingPrivateKeyServer ? 'Checking...' : 'Disconnected'}
+              </div>
+            </div>
+
+            <div className="private-key-grid">
+              <div className="private-key-panel">
+                <div className="panel-header">
+                  <h3>Connection details</h3>
+                  <p>Use your local tunnel or LAN address.</p>
+                </div>
+
+                <label htmlFor="privateKeyServerUrl">Server URL *</label>
+                <div className="connection-input-row">
+                  <input
+                    id="privateKeyServerUrl"
+                    className="connection-input"
+                    type="text"
+                    placeholder="e.g. http://localhost:8001"
+                    value={privateKeyServerUrl}
+                    onChange={(e) => setPrivateKeyServerUrl(e.target.value)}
+                    disabled={isCheckingPrivateKeyServer}
+                    autoComplete="off"
+                  />
+                  <button
+                    type="button"
+                    className="connection-button"
+                    onClick={handleCheckPrivateKeyServer}
+                    disabled={isCheckingPrivateKeyServer || !privateKeyServerUrl.trim()}
+                  >
+                    {isCheckingPrivateKeyServer ? 'Checking...' : 'Check'}
+                  </button>
+                </div>
+
+                {privateKeyServerStatus && (
+                  <div className={`connection-status ${privateKeyServerStatus.type}`}>
+                    {privateKeyServerStatus.message}
+                  </div>
+                )}
+
+                <div className="connection-actions">
+                  {adminSession ? (
+                    <>
+                      <button
+                        type="button"
+                        className="disconnect-button"
+                        onClick={handleAdminLogout}
+                        disabled={isAdminActionLoading}
+                      >
+                        Disconnect
+                      </button>
+                      <button
+                        type="button"
+                        className="connection-secondary-button"
+                        onClick={handleAddPrivateKeyServer}
+                        disabled={!canAttemptConnection}
+                      >
+                        Add to list
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="connection-secondary-button"
+                      onClick={handleAddPrivateKeyServer}
+                      disabled={!canAttemptConnection}
+                    >
+                      Add to list
+                    </button>
+                  )}
+                </div>
+
+                {adminActionMessage && (
+                  <p className="admin-action-message">{adminActionMessage}</p>
+                )}
+
+                {!adminStatusInfo && (
+                  <p className="muted-text">
+                    Run a connectivity check to verify administrator status.
+                  </p>
+                )}
+
+                {adminStatusInfo?.exists === false && (
+                  <form
+                    className="admin-form"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void handleAdminRegister();
+                    }}
+                  >
+                    <div className="admin-form-grid">
+                      <input
+                        type="text"
+                        placeholder="First name"
+                        value={adminRegisterData.firstName}
+                        onChange={(e) =>
+                          setAdminRegisterData((prev) => ({ ...prev, firstName: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Last name"
+                        value={adminRegisterData.lastName}
+                        onChange={(e) =>
+                          setAdminRegisterData((prev) => ({ ...prev, lastName: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Username"
+                        value={adminRegisterData.username}
+                        onChange={(e) =>
+                          setAdminRegisterData((prev) => ({ ...prev, username: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={adminRegisterData.email}
+                        onChange={(e) =>
+                          setAdminRegisterData((prev) => ({ ...prev, email: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Password"
+                        value={adminRegisterData.password}
+                        onChange={(e) =>
+                          setAdminRegisterData((prev) => ({ ...prev, password: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Confirm password"
+                        value={adminRegisterData.confirmPassword}
+                        onChange={(e) =>
+                          setAdminRegisterData((prev) => ({
+                            ...prev,
+                            confirmPassword: e.target.value,
+                          }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="submit-button"
+                      disabled={isAdminActionLoading}
+                    >
+                      {isAdminActionLoading ? 'Creating...' : 'Create admin account'}
+                    </button>
+                  </form>
+                )}
+
+                {adminStatusInfo?.exists && !adminSession && (
+                  <form
+                    className="admin-form"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void handleAdminLogin();
+                    }}
+                  >
+                    <div className="admin-form-grid">
+                      <input
+                        type="text"
+                        placeholder="Admin username"
+                        value={adminLoginData.username}
+                        onChange={(e) =>
+                          setAdminLoginData((prev) => ({ ...prev, username: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Password"
+                        value={adminLoginData.password}
+                        onChange={(e) =>
+                          setAdminLoginData((prev) => ({ ...prev, password: e.target.value }))
+                        }
+                        required
+                        disabled={isAdminActionLoading}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="connection-button"
+                      disabled={isAdminActionLoading}
+                    >
+                      {isAdminActionLoading ? 'Connecting...' : 'Connect'}
+                    </button>
+                  </form>
+                )}
+
+                {adminSession && (
+                  <div className="admin-session-banner">
+                    <div>
+                      <p>
+                        Connected as <strong>{adminSession.admin.username}</strong>
+                      </p>
+                      <span>{adminSession.admin.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="use-server-button"
+                      onClick={handleAdminLogout}
+                      disabled={isAdminActionLoading}
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                )}
+
+                {!isPrivateKeyServerConnected && (
+                  <div className="private-key-note">
+                    <strong>Heads up:</strong> Departments remain locked until a secure connection is active.
+                  </div>
+                )}
+              </div>
+
+              <div className="private-key-panel">
+                <div className="panel-header">
+                  <h3>Saved servers</h3>
+                  <p>Reuse known-good endpoints for faster onboarding.</p>
+                </div>
+
+                {isServersLoading ? (
+                  <div className="empty-state">
+                    <p>Loading saved servers...</p>
+                  </div>
+                ) : serversError ? (
+                  <div className="empty-state error">
+                    <p>{serversError}</p>
+                    <span>Try refreshing or adding a new server.</span>
+                  </div>
+                ) : savedPrivateKeyServers.length === 0 ? (
+                  <div className="empty-state">
+                    <p>No saved servers yet.</p>
+                    <span>Add one after a successful connectivity check.</span>
+                  </div>
+                ) : (
+                  <ul className="saved-server-list modern">
+                    {savedPrivateKeyServers.map((server) => (
+                      <li className="saved-server-item modern" key={server.id}>
+                        <div>
+                          <p className="saved-server-url">{server.baseUrl}</p>
+                          <p className="saved-server-meta">
+                            Added on {new Date(server.addedAt).toLocaleString()}
+                            {server.addedByName ? ` · ${server.addedByName}` : ''}
+                          </p>
+                          {server.isActive && (
+                            <span className="active-server-chip">Active server</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="use-server-button"
+                          onClick={() => handleUseSavedServer(server)}
+                        >
+                          Use
+                        </button>
+                        <button
+                          type="button"
+                          className="activate-server-button"
+                          onClick={() => handleMarkActiveServer(server)}
+                          disabled={server.isActive}
+                        >
+                          {server.isActive ? 'Active' : 'Set Active'}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {activePrivateKeyServerUrl && !isServersLoading && (
+                  <p className="active-server-note">
+                    Active server:{' '}
+                    <span className="active-server-highlight">{activePrivateKeyServerUrl}</span>.
+                    This endpoint will be used to distribute keys to employees once backend support is enabled.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isDepartmentModalOpen && (
         <div className="department-modal-overlay" role="dialog" aria-modal="true">
           <div className="department-modal">
@@ -327,7 +1171,7 @@ export const AdminHomePage = () => {
                 value={departmentName}
                 onChange={(e) => setDepartmentName(e.target.value)}
                 placeholder="Enter department name"
-                disabled={isDepartmentSubmitting}
+                disabled={isDepartmentSubmitting || !canManageDepartments}
                 className="department-input"
                 autoFocus
               />
@@ -348,7 +1192,7 @@ export const AdminHomePage = () => {
                 <button
                   type="submit"
                   className="submit-button"
-                  disabled={isDepartmentSubmitting}
+                  disabled={isDepartmentSubmitting || !canManageDepartments}
                 >
                   {isDepartmentSubmitting ? 'Creating...' : 'Create Department'}
                 </button>

@@ -5,6 +5,7 @@ import { config } from './config.js';
 import privateKeyRoutes from './routes/privateKeyRoutes.js';
 import permissionRoutes from './routes/permissionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/', adminRoutes);
+app.use('/', userRoutes);
 app.use('/', privateKeyRoutes);
 app.use('/', permissionRoutes);
 

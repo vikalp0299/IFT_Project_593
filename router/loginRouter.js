@@ -1,5 +1,6 @@
 import express from 'express';
-import { adminRegisterFunction, loginFunction, logoutFunction, registerFunction } from '../controller/loginController.js';
+import { adminRegisterFunction, loginFunction, logoutFunction, registerFunction, confirmLocalAccount } from '../controller/loginController.js';
+import { authenticateToken } from '../middleware/auth.js';
 const loginRouter = express.Router();  
 
 //@route POST /auth/register
@@ -18,5 +19,7 @@ loginRouter.post('/logout', logoutFunction);
 //@desc Register admin user
 //@access Public    
 loginRouter.post('/adminRegister', adminRegisterFunction)
+
+loginRouter.post('/local-sync', authenticateToken, confirmLocalAccount);
 
 export default loginRouter;

@@ -2,6 +2,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
 import User  from '../models/User.js';
+import Department from '../models/Department.js';
+import LocalServer from '../models/LocalServer.js';
 import { generateTokens } from '../middleware/auth.js';
 
 dotenv.config();
@@ -220,6 +222,24 @@ async function registerFunction(req, res) {
             });
         }
 
+        const normalizedDepartment = department.trim().toLowerCase();
+        const departmentRecord = await Department.findOne({
+            organization: organization._id,
+            departmentName: normalizedDepartment,
+        });
+
+        if (!departmentRecord) {
+            return res.status(404).json({
+                success: false,
+                message: `Department '${department}' is not available for organization '${organizationName}'.`,
+            });
+        }
+
+        const activeLocalServer = await LocalServer.findOne({
+            organization: organization._id,
+            isActive: true,
+        });
+
         // Set default permissions based on role
         let defaultPermissions = [];
         switch (role) {
@@ -250,7 +270,7 @@ async function registerFunction(req, res) {
             lastName: lastName.trim(),
             phone: phone.trim(),
             jobTitle: jobTitle.trim(),
-            department: department.trim(),
+            department: departmentRecord.departmentName,
             
             // Role and Permissions
             role: role,
@@ -277,10 +297,27 @@ async function registerFunction(req, res) {
             lastPasswordChange: new Date()
         });
 
+        newUser.localAccount = activeLocalServer
+            ? {
+                status: 'pending',
+                serverUrl: activeLocalServer.baseUrl,
+            }
+            : {
+                status: 'not_required',
+            };
+
         await newUser.save();
 
         // Generate tokens
         const tokens = generateTokens(newUser);
+        const localServerPayload = activeLocalServer
+            ? {
+                baseUrl: activeLocalServer.baseUrl,
+                organizationName: organization.displayName || organization.name,
+                departmentName: departmentRecord.displayName,
+                normalizedDepartmentName: departmentRecord.departmentName,
+            }
+            : null;
         console.log('Registration successful for user:', newUser.username, tokens.accessToken);
         res.status(201).json({
             success: true,
@@ -293,6 +330,9 @@ async function registerFunction(req, res) {
                 lastName: newUser.lastName,
                 role: newUser.role,
                 organizationName: newUser.organizationName,
+                departmentName: departmentRecord.displayName,
+                localServer: localServerPayload,
+                localAccountStatus: newUser.localAccount?.status,
                 accessToken: tokens.accessToken,
                 refreshToken: tokens.refreshToken,
                 expiresIn: '24h'
@@ -306,6 +346,70 @@ async function registerFunction(req, res) {
         });
     }
 
+}
+
+async function confirmLocalAccount(req, res) {
+    try {
+        const { status, serverUrl, externalUserId, error } = req.body || {};
+
+        if (!status || !['success', 'failed'].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Status must be either success or failed',
+            });
+        }
+
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found',
+            });
+        }
+
+        if (!user.localAccount || user.localAccount.status === 'not_required') {
+            return res.status(400).json({
+                success: false,
+                message: 'Local account synchronization is not required for this user',
+            });
+        }
+
+        if (status === 'success') {
+            user.localAccount.status = 'synced';
+            user.localAccount.serverUrl = serverUrl || user.localAccount.serverUrl;
+            user.localAccount.externalUserId = externalUserId || user.localAccount.externalUserId;
+            user.localAccount.lastSyncedAt = new Date();
+            user.localAccount.lastError = null;
+            await user.save();
+
+            return res.json({
+                success: true,
+                message: 'Local private-key-server account synchronized successfully',
+                data: {
+                    localAccountStatus: user.localAccount.status,
+                },
+            });
+        }
+
+        const userId = user._id;
+        await User.deleteOne({ _id: userId });
+
+        return res.status(409).json({
+            success: false,
+            message: 'Local private-key-server provisioning failed. The main account has been removed. Please register again.',
+            data: {
+                removed: true,
+                reason: error || 'Local server rejected account creation',
+            },
+        });
+    } catch (err) {
+        console.error('confirmLocalAccount error:', err);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to update local account status',
+        });
+    }
 }
 
 async function logoutFunction(req, res) {
@@ -426,4 +530,4 @@ async function adminRegisterFunction(req, res) {
         });
     }
 }
-export { loginFunction, registerFunction, logoutFunction, adminRegisterFunction };
+export { loginFunction, registerFunction, logoutFunction, adminRegisterFunction, confirmLocalAccount };

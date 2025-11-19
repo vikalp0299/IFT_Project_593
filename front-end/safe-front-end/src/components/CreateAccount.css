@@ -124,6 +124,48 @@
   margin: 4px 0 0 0;
   line-height: 1.4;
 }
+.create-account-helper.warning {
+  color: #b45309;
+}
+
+.organization-field-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.fetch-departments-button {
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: none;
+  background: #1f2937;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fetch-departments-button:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.organization-status {
+  font-size: 12px;
+  margin: 4px 0 0 0;
+  font-weight: 600;
+}
+
+.organization-status.status-success {
+  color: #059669;
+}
+
+.organization-status.status-error {
+  color: #dc2626;
+}
 
 .create-account-button {
   background-color: #1A1A2E;
@@ -232,6 +274,10 @@
   align-items: center;
   gap: 12px;
 }
+.key-generation-status.secondary {
+  background-color: #FEFCE8;
+  border-color: #FDE68A;
+}
 
 .key-generation-status-text {
   color: #0369A1;
@@ -242,6 +288,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+.key-generation-status.secondary .key-generation-status-text {
+  color: #92400E;
 }
 
 /* Password Requirements Styles */

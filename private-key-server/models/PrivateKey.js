@@ -23,12 +23,25 @@ const privateKeySchema = new mongoose.Schema({
       required: true,
     },
   },
+  organizationName: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true,
+    index: true,
+  },
   departmentName: {
     type: String,
     required: true,
     trim: true,
     lowercase: true,
     index: true,
+  },
+  displayName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 150,
   },
   storedBy: {
     adminId: {
@@ -66,10 +79,11 @@ privateKeySchema.pre('save', function(next) {
   next();
 });
 
-// Index for faster queries - ensure one private key per department
-privateKeySchema.index({ departmentName: 1 }, { unique: true });
+// Index for faster queries - ensure one private key per department per organization
+privateKeySchema.index({ organizationName: 1, departmentName: 1 }, { unique: true });
 privateKeySchema.index({ 'storedBy.username': 1 });
 privateKeySchema.index({ 'storedBy.email': 1 });
+privateKeySchema.index({ 'encryption.fingerprint': 1 }, { unique: true });
 
 const PrivateKey = mongoose.model('PrivateKey', privateKeySchema);
 

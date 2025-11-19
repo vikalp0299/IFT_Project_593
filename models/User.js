@@ -159,7 +159,31 @@ const userSchema = new mongoose.Schema({
   },
   lockedUntil: {
     type: Date
-  }
+  },
+
+  // Local private-key server sync metadata
+  localAccount: {
+    status: {
+      type: String,
+      enum: ['pending', 'synced', 'failed', 'not_required'],
+      default: 'not_required',
+    },
+    serverUrl: {
+      type: String,
+      trim: true,
+    },
+    externalUserId: {
+      type: String,
+      trim: true,
+    },
+    lastSyncedAt: {
+      type: Date,
+    },
+    lastError: {
+      type: String,
+      trim: true,
+    },
+  },
 });
 
 const User = mongoose.model('User', userSchema);

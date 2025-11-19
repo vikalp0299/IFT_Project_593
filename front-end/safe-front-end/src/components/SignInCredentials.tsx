@@ -27,6 +27,7 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
   const [error, setError] = useState('');
   const [loginSuccess, setLoginSuccess] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -51,7 +52,8 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
       const data = await authService.login(
         credentials.username,
         credentials.password,
-        organizationName || 'default_org'
+        organizationName || 'default_org',
+        rememberMe
       );
       
       // Log the response to console
@@ -208,6 +210,20 @@ export const SignInCredentials: React.FC<SignInCredentialsProps> = ({
               className="signin-credentials-input"
               required
             />
+          </div>
+
+          <div className="signin-credentials-remember">
+            <label className="signin-credentials-remember-label">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+              />
+              <span>Remember me on this device</span>
+            </label>
+            <p className="signin-credentials-remember-helper">
+              Use this option only on trusted devices.
+            </p>
           </div>
 
           {/* Helper Text */}

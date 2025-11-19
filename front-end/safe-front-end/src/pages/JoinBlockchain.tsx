@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 import './JoinBlockchain.css';
+
+interface BlockchainOrganization {
+  orgName: string;
+  organizationChannelName: string[];
+}
 
 export const JoinBlockchain = () => {
   const navigate = useNavigate();
@@ -30,25 +36,43 @@ export const JoinBlockchain = () => {
     setChannelOptions([]);
 
     try {
-      // TODO: Replace with API call to fetch channels for the organization
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await authService.authenticatedRequest<BlockchainOrganization[]>(
+        '/api/blockchain/organizations'
+      );
+
+      if (!response.success || !response.data) {
+        setError(response.message || 'Unable to fetch organizations.');
+        return;
+      }
 
       const normalizedOrg = organizationQuery.trim();
+      const normalizedQuery = normalizedOrg.toLowerCase();
+      const matchedOrganizations = response.data.filter((org) =>
+        org.orgName.toLowerCase().includes(normalizedQuery)
+      );
 
-      const mockChannels = [
-        {
-          id: `${normalizedOrg}-channel-main`,
-          name: `${normalizedOrg} Main Channel`,
-        },
-        {
-          id: `${normalizedOrg}-channel-aux`,
-          name: `${normalizedOrg} Auxiliary Channel`,
-        },
-      ];
+      if (matchedOrganizations.length === 0) {
+        setSearchMessage(`No organizations found for "${normalizedOrg}".`);
+        return;
+      }
 
-      setChannelOptions(mockChannels);
+      const generatedChannels = matchedOrganizations.flatMap((org) => {
+        const channels =
+          Array.isArray(org.organizationChannelName) && org.organizationChannelName.length > 0
+            ? org.organizationChannelName
+            : ['Main Channel'];
+
+        return channels.map((channelName, index) => ({
+          id: `${org.orgName}-${index}-${channelName || 'channel'}`,
+          name: `${org.orgName} - ${channelName || 'Channel'}`,
+        }));
+      });
+
+      setChannelOptions(generatedChannels);
       setSearchMessage(
-        `${mockChannels.length} channel${mockChannels.length > 1 ? 's' : ''} found for ${normalizedOrg}. Select one below.`
+        `${generatedChannels.length} channel${
+          generatedChannels.length > 1 ? 's' : ''
+        } found for ${normalizedOrg}. Select one below.`
       );
     } catch (searchError) {
       console.error('Error searching organization:', searchError);

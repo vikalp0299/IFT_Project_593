@@ -40,13 +40,11 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true,
     trim: true,
     match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
   jobTitle: {
     type: String,
-    required: true,
     trim: true,
     maxlength: 100
   },
@@ -68,6 +66,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'suspended'],
+    default: 'active',
+  },
   permissions: [{
     type: String,
     enum: ['read', 'write', 'delete', 'admin', 'manage_users', 'manage_organization']
@@ -77,9 +80,18 @@ const userSchema = new mongoose.Schema({
   organization: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
-    required: true
   },
   organizationName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  organizationDisplayName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  departmentDisplayName: {
     type: String,
     required: true,
     trim: true,

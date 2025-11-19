@@ -4,6 +4,7 @@ import './CreateAccount.css';
 import { AccountCreatedSuccess } from './AccountCreatedSuccess';
 import { authService } from '../services/authService';
 import { cryptoService } from '../services/cryptoService';
+import { privateKeyServerClient } from '../services/privateKeyServerClient';
 
 interface CreateAccountProps {
   onAccountCreated?: (accountData: { organizationName: string; username: string; password: string }) => void;
@@ -45,6 +46,15 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
   const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
   const [keyGenerationStatus, setKeyGenerationStatus] = useState('');
+  const [departmentOptions, setDepartmentOptions] = useState<
+    Array<{ id: string; name: string; displayName: string }>
+  >([]);
+  const [isFetchingDepartments, setIsFetchingDepartments] = useState(false);
+  const [organizationStatus, setOrganizationStatus] = useState<{
+    state: 'idle' | 'valid' | 'invalid';
+    message?: string;
+  }>({ state: 'idle' });
+  const [localSyncStatus, setLocalSyncStatus] = useState('');
 
   // Password validation function
   const validatePassword = (password: string): string[] => {
@@ -85,8 +95,14 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: value,
+        ...(name === 'organizationName' ? { department: '' } : {}),
       }));
+
+      if (name === 'organizationName') {
+        setOrganizationStatus({ state: 'idle' });
+        setDepartmentOptions([]);
+      }
     }
     
     // Clear error when user starts typing
@@ -101,10 +117,109 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
     }
   };
 
+  const handleOrganizationLookup = async () => {
+    if (!formData.organizationName.trim()) {
+      setOrganizationStatus({
+        state: 'invalid',
+        message: 'Enter an organization name to fetch departments.',
+      });
+      return;
+    }
+
+    setIsFetchingDepartments(true);
+    setOrganizationStatus({ state: 'idle' });
+
+    try {
+      const response = await authService.fetchOrganizationDepartments(formData.organizationName.trim());
+
+      if (!response.success || !response.data?.departments?.length) {
+        throw new Error(response.message || 'No departments found for this organization.');
+      }
+
+      setDepartmentOptions(response.data.departments);
+      setOrganizationStatus({
+        state: 'valid',
+        message: `${response.data.organization.displayName} verified. Select a department.`,
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        department: response.data.departments[0]?.name || '',
+      }));
+    } catch (lookupError) {
+      setOrganizationStatus({
+        state: 'invalid',
+        message:
+          lookupError instanceof Error
+            ? lookupError.message
+            : 'Failed to fetch departments. Please try again.',
+      });
+      setDepartmentOptions([]);
+      setFormData(prev => ({
+        ...prev,
+        department: '',
+      }));
+    } finally {
+      setIsFetchingDepartments(false);
+    }
+  };
+
+  const syncWithLocalKeyServer = async (localServerInfo: {
+    baseUrl: string;
+    organizationName?: string;
+    normalizedDepartmentName?: string;
+    departmentName?: string;
+  }) => {
+    if (!localServerInfo?.baseUrl) {
+      return;
+    }
+
+    setLocalSyncStatus('🔁 Syncing account with your private-key-server...');
+
+    const payload = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      jobTitle: formData.jobTitle,
+      phone: formData.phone,
+      departmentName: localServerInfo.normalizedDepartmentName || formData.department,
+      organizationName: localServerInfo.organizationName || formData.organizationName,
+      role: formData.role,
+    };
+
+    try {
+      const registration = await privateKeyServerClient.registerUser(localServerInfo.baseUrl, payload);
+      await authService.confirmLocalAccount({
+        status: 'success',
+        serverUrl: localServerInfo.baseUrl,
+        externalUserId: registration?.data?.userId,
+      });
+      setLocalSyncStatus('✅ Local private-key-server account synchronized.');
+    } catch (syncError) {
+      setLocalSyncStatus('❌ Local private-key-server sync failed.');
+      await authService
+        .confirmLocalAccount({
+          status: 'failed',
+          serverUrl: localServerInfo.baseUrl,
+          error: syncError instanceof Error ? syncError.message : 'Local sync failed',
+        })
+        .catch(() => undefined);
+      await authService.logout();
+      throw new Error(
+        syncError instanceof Error
+          ? `Local private-key-server provisioning failed: ${syncError.message}. Your account was rolled back.`
+          : 'Local private-key-server provisioning failed unexpectedly.'
+      );
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setLocalSyncStatus('');
 
     try {
       // Frontend validation
@@ -118,6 +233,9 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
       if (!formData.phone.trim()) errors.push('Phone number is required');
       if (!formData.jobTitle.trim()) errors.push('Job title is required');
       if (!formData.department.trim()) errors.push('Department is required');
+      if (!departmentOptions.length) {
+        errors.push('Verify your organization and load departments before continuing.');
+      }
       if (!formData.organizationName.trim()) errors.push('Organization name is required');
       
       // Password validation
@@ -151,7 +269,7 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
         // Step 2: Register user account first
         setKeyGenerationStatus('📝 Creating user account...');
         
-        const data = await authService.register({
+        const registrationResponse = await authService.register({
           // Basic Authentication
           username: formData.username,
           password: formData.password,
@@ -175,8 +293,8 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
           marketingEmails: formData.marketingEmails
         });
         
-        if (!data.success) {
-          throw new Error(data.message || 'User registration failed');
+        if (!registrationResponse.success) {
+          throw new Error(registrationResponse.message || 'User registration failed');
         }
 
         setKeyGenerationStatus('🔐 Uploading public key to server...');
@@ -200,8 +318,15 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
           keyPair.privateKey,
           formData.password,
           formData.organizationName,
-          data.data.userId
+          registrationResponse.data?.userId || ''
         );
+
+        const localServerInfo = registrationResponse.data?.localServer;
+
+        if (localServerInfo?.baseUrl) {
+          setKeyGenerationStatus('🔄 Provisioning local private-key-server account...');
+          await syncWithLocalKeyServer(localServerInfo);
+        }
 
         setKeyGenerationStatus('✅ Registration completed successfully!');
         
@@ -257,18 +382,37 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
               <label htmlFor="organizationName" className="create-account-label">
                 Organization Name *
               </label>
-              <input
-                id="organizationName"
-                name="organizationName"
-                type="text"
-                value={formData.organizationName}
-                onChange={handleInputChange}
-                placeholder="Enter your organization name"
-                className="create-account-input"
-                required
-              />
+              <div className="organization-field-row">
+                <input
+                  id="organizationName"
+                  name="organizationName"
+                  type="text"
+                  value={formData.organizationName}
+                  onChange={handleInputChange}
+                  placeholder="Enter your organization name"
+                  className="create-account-input"
+                  required
+                />
+                <button
+                  type="button"
+                  className="fetch-departments-button"
+                  onClick={handleOrganizationLookup}
+                  disabled={isFetchingDepartments || !formData.organizationName.trim()}
+                >
+                  {isFetchingDepartments ? 'Checking...' : 'Fetch Departments'}
+                </button>
+              </div>
+              {organizationStatus.state !== 'idle' && organizationStatus.message && (
+                <p
+                  className={`organization-status ${
+                    organizationStatus.state === 'valid' ? 'status-success' : 'status-error'
+                  }`}
+                >
+                  {organizationStatus.message}
+                </p>
+              )}
               <p className="create-account-helper">
-                Enter the organization name you want to join
+                Verify the organization to load available departments.
               </p>
             </div>
 
@@ -438,16 +582,29 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
                 <label htmlFor="department" className="create-account-label">
                   Department *
                 </label>
-                <input
+                <select
                   id="department"
                   name="department"
-                  type="text"
                   value={formData.department}
                   onChange={handleInputChange}
-                  placeholder="Engineering"
                   className="create-account-input"
+                  disabled={!departmentOptions.length}
                   required
-                />
+                >
+                  <option value="">
+                    {departmentOptions.length ? 'Select a department' : 'Fetch organization first'}
+                  </option>
+                  {departmentOptions.map((dept) => (
+                    <option key={dept.id} value={dept.name}>
+                      {dept.displayName}
+                    </option>
+                  ))}
+                </select>
+                {!departmentOptions.length && (
+                  <p className="create-account-helper warning">
+                    Departments appear after verifying your organization.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -498,6 +655,11 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
           {keyGenerationStatus && (
             <div className="key-generation-status">
               <p className="key-generation-status-text">{keyGenerationStatus}</p>
+            </div>
+          )}
+          {localSyncStatus && (
+            <div className="key-generation-status secondary">
+              <p className="key-generation-status-text">{localSyncStatus}</p>
             </div>
           )}
 
