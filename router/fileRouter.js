@@ -1,6 +1,6 @@
 //imports
 import express from 'express';
-import { completeUpload, displayAllFiles, initUpload, uploadChunk, getFilesSharedWithUser} from '../controller/fileController.js';
+import { completeUpload, displayAllFiles, initUpload, uploadChunk, getFilesSharedWithDepartment} from '../controller/fileController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -8,8 +8,8 @@ const router = express.Router();
 //Display files
 router.get('/dispfiles',displayAllFiles );
 
-//Get files shared with user (includes files user uploaded and files shared with user)
-router.get('/getfiles', authenticateToken, getFilesSharedWithUser);
+//Get files shared with user's department (includes files user uploaded and files shared with user)
+router.get('/getfiles', authenticateToken, getFilesSharedWithDepartment);
 
 
 //Upload file

@@ -53,10 +53,10 @@ export const displayAllFiles = async (req, res) => {
 };
 
 /**
- * Get files shared with the authenticated user
- * Returns files the user uploaded AND files shared with the user (where user is in access array)
+ * Get files shared with the authenticated user's department
+ * Returns files the user uploaded AND files shared with their department/organization
  */
-export const getFilesSharedWithUser = async (req, res) => {
+export const getFilesSharedWithDepartment = async (req, res) => {
     try {
         // User ID from authenticated request (set by authenticateToken middleware)
         const userId = req.user?.id || req.user?.userId;
@@ -68,36 +68,72 @@ export const getFilesSharedWithUser = async (req, res) => {
             });
         }
 
-        // Convert userId to ObjectId if it's a string
+        // Get user's organization and department
+        const User = (await import('../models/User.js')).default;
+        const user = await User.findById(userId).select('organization department');
+        
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        // Convert to ObjectId if needed
         const mongoose = await import('mongoose');
         const userObjectId = mongoose.default.Types.ObjectId.isValid(userId) 
             ? new mongoose.default.Types.ObjectId(userId) 
             : userId;
 
         // Query MongoDB for files:
-        // 1. Files uploaded by the user (userId or uploader matches)
-        // 2. Files shared with the user (user ID is in the access array)
-        const userFiles = await File.find({ 
+        // 1. Files uploaded by the user
+        // 2. Files shared with the user's organization and department
+        const query = {
             $or: [
                 { userId: userObjectId },
-                { uploader: userObjectId },
-                { access: userObjectId }
+                { uploader: userObjectId }
             ]
-        })
-        .select('_id filename originalname size uploadedAt path mimetype userId uploader access')
-        .populate('uploader', 'username firstName lastName')
-        .sort({ uploadedAt: -1 }); // Most recent first
+        };
+
+        // Add access query for organization and optionally department
+        if (user.organization) {
+            if (user.department) {
+                // Match files shared with this specific department
+                query.$or.push({
+                    'access': {
+                        $elemMatch: {
+                            organizationId: user.organization,
+                            departmentId: user.department
+                        }
+                    }
+                });
+            }
+            // Also include files shared with the entire organization (no specific department)
+            query.$or.push({
+                'access': {
+                    $elemMatch: {
+                        organizationId: user.organization,
+                        departmentId: null
+                    }
+                }
+            });
+        }
+
+        const departmentFiles = await File.find(query)
+            .select('_id filename originalname size uploadedAt path mimetype userId uploader access')
+            .populate('uploader', 'username firstName lastName')
+            .populate('access.organizationId', 'name displayName')
+            .populate('access.departmentId', 'name')
+            .sort({ uploadedAt: -1 }); // Most recent first
 
         // Return files as JSON
         res.status(200).json({
             success: true,
-            count: userFiles.length,
-            files: userFiles.map(file => {
+            count: departmentFiles.length,
+            files: departmentFiles.map(file => {
                 const isUploadedByUser = file.userId?.toString() === userId.toString() || 
                                        file.uploader?._id?.toString() === userId.toString();
-                const isSharedWithUser = file.access && 
-                                       file.access.some(accessId => accessId.toString() === userId.toString()) &&
-                                       !isUploadedByUser;
+                const isSharedWithDepartment = file.access && file.access.length > 0 && !isUploadedByUser;
                 
                 return {
                     id: file._id,
@@ -112,7 +148,11 @@ export const getFilesSharedWithUser = async (req, res) => {
                         firstName: file.uploader.firstName,
                         lastName: file.uploader.lastName
                     } : null,
-                    isShared: isSharedWithUser
+                    isShared: isSharedWithDepartment,
+                    sharedWith: file.access?.map(acc => ({
+                        organization: acc.organizationId?.name || acc.organizationId?.displayName,
+                        department: acc.departmentId?.name || 'All Departments'
+                    }))
                 };
             })
         });

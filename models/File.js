@@ -32,11 +32,18 @@ const fileSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
-  access: {
-    type: [mongoose.Schema.Types.ObjectId],   // Array of user IDs who can access the file
-    ref: 'User',
-    default: [],
-  },
+  access: [{
+    organizationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Organization',
+      required: true
+    },
+    departmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Department',
+      default: null
+    }
+  }],
   uploadedAt: {                      // upload time
     type: Date,
     default: Date.now,

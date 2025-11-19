@@ -85,6 +85,13 @@ const userSchema = new mongoose.Schema({
     trim: true,
   },
   
+  // Department Association
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    default: null
+  },
+  
   // Profile and Preferences
   profilePicture: {
     type: String, // URL to profile picture
