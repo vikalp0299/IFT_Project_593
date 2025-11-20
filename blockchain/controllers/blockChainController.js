@@ -222,8 +222,9 @@ export async function createBlockchain(req, res) {
             sendUpdate('in_progress', 'Channel created successfully', 8*100/22);
             
             // Step 5: Join peers to channel
+            // FIXED: Both channelName parameters should match (follower channel resource name and main channel name)
             sendUpdate('in_progress', 'Joining peers to channel...', 9*100/22);
-            await controller.create_follower_Channel("demo", channelName, [blockchainOrgName], ordererOrgName, 1);
+            await controller.create_follower_Channel(channelName, channelName, [blockchainOrgName], ordererOrgName, 1);
             await sleep(14000);
             sendUpdate('in_progress', 'Peers joined to channel successfully', 10*100/22);
 
@@ -257,7 +258,7 @@ export async function createBlockchain(req, res) {
             await sleep(14000);
             sendUpdate('in_progress', 'Chaincode approved successfully', 19*100/23);
 
-            // Step 11: Commit chaincode (MISSING STEP!)
+            // Step 11: Commit chaincode
             sendUpdate('in_progress', 'Committing chaincode...', 20*100/23);
             await controller.commit_chaincode('asset', initialTracker.version, initialTracker.sequence, channelName, [blockchainOrgName], '../generated_resources/network-config.yaml');
             await sleep(14000);
@@ -370,89 +371,125 @@ export async function joinBlockchain(req, res) {
 
         // Set up SSE
         res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
         res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
         res.flushHeaders();
 
         const sendUpdate = (status, message, progress, data = {}) => {
-            const update = { status, message, progress, timestamp: new Date().toISOString(), ...data };
-            res.write(`data: ${JSON.stringify(update)}\n\n`);
+            try {
+                if (!res.writableEnded) {
+                    const update = { status, message, progress, timestamp: new Date().toISOString(), ...data };
+                    res.write(`data: ${JSON.stringify(update)}\n\n`);
+                }
+            } catch (error) {
+                console.error('Error sending SSE update:', error);
+            }
         };
+
+        // Send heartbeat every 30 seconds to keep connection alive
+        const heartbeatInterval = setInterval(() => {
+            if (!res.writableEnded) {
+                res.write(': heartbeat\n\n');
+            } else {
+                clearInterval(heartbeatInterval);
+            }
+        }, 30000);
+
+        // Clean up on client disconnect
+        req.on('close', () => {
+            clearInterval(heartbeatInterval);
+            console.log('Client disconnected from SSE stream');
+        });
 
         try {
             sendUpdate('started', 'Joining blockchain network', 0);
 
             // Get version tracker from creator organization (not current org since we're just joining)
             const currentTracker = await getOrgCreateVersionTracker(creatororg.name);
+            
             // Create peers 
             sendUpdate('in_progress', 'Creating peer nodes...', 1*100/14);
             await controller.createPeer(blockchainOrgName, peerCount, 'admin', 'adminpw');
             await sleep(14000);
             sendUpdate('in_progress', 'Peer nodes created successfully', 2*100/14);
 
-            // Create channels
+            // Create channels - FIXED: Include both organizations in channel creation
             sendUpdate('in_progress', 'Creating channels...', 3*100/14);
             await controller.create_Channel(mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName);
             await sleep(14000);
             sendUpdate('in_progress', 'Channels created successfully', 4*100/14);
 
-            // Join channel operations
+            // Join channel operations - FIXED: Both channelName parameters should match
             sendUpdate('in_progress', 'Joining channel...', 5*100/14);
-            await controller.create_follower_Channel(channelName, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName, 1);
+            await controller.create_follower_Channel(mainChannelName, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName, 1);
             await sleep(14000);
             sendUpdate('in_progress', 'Channel joined successfully', 6*100/14);
 
-            // Step 6: Creating identities and network config
+            // Step 6: Creating identities and network config - FIXED: Include both organizations
             sendUpdate('in_progress', 'Setting up identities and network configuration...', 7*100/14);
             await controller.create_identities_and_network_config(mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName);
             await sleep(14000);
             sendUpdate('in_progress', 'Identities and network configuration set up successfully', 8*100/14);
 
-            // Step 8: Install chaincode metadata
-            sendUpdate('in_progress', 'Installing chaincode for metadata...', 8*100/14);
-            await controller.install_chaincode_metadata('asset_1.0','../generated_resources/chaincode.tgz', [ blockchainOrgName], '../generated_resources/network-config.yaml');
+            // Step 8: Install chaincode metadata - Only for joining org
+            sendUpdate('in_progress', 'Installing chaincode for metadata...', 9*100/14);
+            await controller.install_chaincode_metadata('asset_1.0','../generated_resources/chaincode.tgz', [blockchainOrgName], '../generated_resources/network-config.yaml');
             await sleep(14000);
-            sendUpdate('in_progress', 'Chaincode for metadata installed successfully', 9*100/14);
+            sendUpdate('in_progress', 'Chaincode for metadata installed successfully', 10*100/14);
 
-            // Approve chaincode with current version
-            sendUpdate('in_progress', 'Approving chaincode...', 9*100/14);
+            // Approve chaincode with current version - FIXED: Include both organizations
+            sendUpdate('in_progress', 'Approving chaincode...', 11*100/14);
             console.log("Initial tracker for commit:", currentTracker);
             await controller.approve_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], '../generated_resources/network-config.yaml');
             await sleep(14000);
-            sendUpdate('in_progress', 'Chaincode approved successfully', 10 *100/14);
+            sendUpdate('in_progress', 'Chaincode approved successfully', 12*100/14);
 
-             // Step 11: Commit chaincode (MISSING STEP!)
-            sendUpdate('in_progress', 'Committing chaincode...', 11*100/14);
-
+            // Step 11: Commit chaincode - FIXED: Include both organizations
+            sendUpdate('in_progress', 'Committing chaincode...', 13*100/14);
             await controller.commit_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], '../generated_resources/network-config.yaml');
             await sleep(14000);
-            sendUpdate('in_progress', 'Chaincode committed successfully', 12 *100/14);
+            sendUpdate('in_progress', 'Chaincode committed successfully', 14*100/14);
 
             // Update version tracker (SECOND LOCATION)
-            sendUpdate('in_progress', 'Updating chaincode version tracker...', 13*100/14 );
+            sendUpdate('in_progress', 'Updating chaincode version tracker...', 14*100/14);
             const updatedVersion = await updateVersionTracker(creatororg.name);
             console.log(`Version tracker updated: sequence ${updatedVersion.sequence}, version ${updatedVersion.version}`);
 
-            sendUpdate('completed', 'Successfully joined blockchain network!', 14 * 100/14, {
+            // Clear heartbeat before completing
+            clearInterval(heartbeatInterval);
+
+            sendUpdate('completed', 'Successfully joined blockchain network!', 100, {
                 organizationName: organization.name,
                 blockchainOrgName,
-                channelName,
+                channelName: mainChannelName,
                 chaincodeSequence: updatedVersion.sequence,
                 chaincodeVersion: updatedVersion.version
             });
 
-            res.end();
+            setTimeout(() => {
+                if (!res.writableEnded) {
+                    res.end();
+                }
+            }, 1000);
 
         } catch (asyncError) {
+            clearInterval(heartbeatInterval);
             console.error("Error joining blockchain:", asyncError);
+            console.error("Error stack:", asyncError.stack);
             sendUpdate('failed', `Failed to join blockchain: ${asyncError.message}`, -1, {
                 error: asyncError.message
             });
-            res.end();
+            setTimeout(() => {
+                if (!res.writableEnded) {
+                    res.end();
+                }
+            }, 1000);
         }
 
     } catch (error) {
         console.error("Error in joinBlockchain:", error);
+        console.error("Error stack:", error.stack);
         if (!res.headersSent) {
             res.status(500).json({ 
                 success: false,
