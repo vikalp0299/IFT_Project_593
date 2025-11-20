@@ -43,8 +43,111 @@ const fileSchema = new mongoose.Schema({
   },
   toHoldTime: {                      // Last updated time
     type: Date,
-    default: Date.now + 24 * 60 * 60 * 1000, // Default to 24 hours from upload
+    default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // Default to 24 hours from upload
   },
+  accessRights: [
+    {
+      organizationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        required: true,
+      },
+      organizationName: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+      },
+      organizationDisplayName: {
+        type: String,
+        trim: true,
+      },
+      departmentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Department',
+        required: true,
+      },
+      departmentName: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+      },
+      departmentDisplayName: {
+        type: String,
+        trim: true,
+      },
+    },
+  ],
+  editAgreementRequired: {
+    type: Boolean,
+    default: false,
+  },
+  editAgreementOrganizations: [
+    {
+      organizationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+      },
+      organizationName: {
+        type: String,
+        trim: true,
+        lowercase: true,
+      },
+      organizationDisplayName: {
+        type: String,
+        trim: true,
+      },
+    },
+  ],
+  // Encryption metadata
+  encryption: {
+    algorithm: {
+      type: String,
+      enum: ['AES-256-GCM'],
+      default: 'AES-256-GCM',
+    },
+    iv: {
+      type: String, // Base64 encoded IV
+    },
+    authTag: {
+      type: String, // Base64 encoded auth tag
+    },
+  },
+  // Encrypted symmetric keys for each department
+  encryptedSymmetricKeys: [
+    {
+      departmentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Department',
+        required: true,
+      },
+      departmentName: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+      },
+      organizationId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        required: true,
+      },
+      organizationName: {
+        type: String,
+        required: true,
+        trim: true,
+        lowercase: true,
+      },
+      encryptedKey: {
+        type: String, // Base64 encoded encrypted symmetric key
+        required: true,
+      },
+      publicKeyId: {
+        type: String, // Reference to the public key used for encryption
+      },
+    },
+  ],
 });
 
 const File = mongoose.model('File', fileSchema);

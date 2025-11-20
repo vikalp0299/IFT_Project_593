@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { privateKeyServerClient } from '../services/privateKeyServerClient';
@@ -15,6 +15,8 @@ interface UserData {
   lastName: string;
   role: string;
   organizationName: string;
+  organizationId?: string;
+  organizationDisplayName?: string;
 }
 
 type StatusBanner = {
@@ -96,6 +98,16 @@ export const AdminHomePage = () => {
   const [isAdminActionLoading, setIsAdminActionLoading] = useState(false);
   const [adminActionMessage, setAdminActionMessage] = useState<string | null>(null);
 
+  const organizationContext = useMemo(
+    () => ({
+      organizationName: user?.organizationName?.trim() ?? '',
+      organizationDisplayName:
+        user?.organizationDisplayName?.trim() ?? user?.organizationName?.trim() ?? '',
+      organizationId: user?.organizationId,
+    }),
+    [user?.organizationName, user?.organizationDisplayName, user?.organizationId]
+  );
+
   const syncServersState = useCallback((servers: RemotePrivateKeyServer[]) => {
     setSavedPrivateKeyServers(servers);
     const activeServer = servers.find((server) => server.isActive);
@@ -104,9 +116,17 @@ export const AdminHomePage = () => {
 
   const refreshAdminStatus = useCallback(
     async (targetUrl: string) => {
+      if (!organizationContext.organizationName) {
+        setAdminStatusInfo(null);
+        setAdminActionMessage('Organization context is missing. Please sign in again.');
+        return;
+      }
       try {
         setIsAdminActionLoading(true);
-        const status = await privateKeyServerClient.getAdminStatus(targetUrl);
+        const status = await privateKeyServerClient.getAdminStatus(
+          targetUrl,
+          organizationContext.organizationName
+        );
         setAdminStatusInfo(status.data);
         if (status.data.exists) {
           setAdminActionMessage('Admin account detected. Sign in to continue.');
@@ -123,7 +143,7 @@ export const AdminHomePage = () => {
         setIsAdminActionLoading(false);
       }
     },
-    []
+    [organizationContext.organizationName]
   );
 
   const fetchSavedServers = useCallback(async () => {
@@ -238,6 +258,10 @@ export const AdminHomePage = () => {
       setAdminActionMessage('Enter a server URL before creating an admin.');
       return;
     }
+    if (!organizationContext.organizationName) {
+      setAdminActionMessage('Your organization context is missing. Please refresh and sign in again.');
+      return;
+    }
 
     if (!adminRegisterData.password || adminRegisterData.password !== adminRegisterData.confirmPassword) {
       setAdminActionMessage('Passwords must match before continuing.');
@@ -248,7 +272,11 @@ export const AdminHomePage = () => {
 
     try {
       setIsAdminActionLoading(true);
-      const response = await privateKeyServerClient.registerAdmin(normalizedUrl, adminRegisterData);
+      const response = await privateKeyServerClient.registerAdmin(
+        normalizedUrl,
+        adminRegisterData,
+        organizationContext
+      );
       setAdminSession({
         baseUrl: normalizedUrl,
         token: response.data.token,
@@ -282,6 +310,10 @@ export const AdminHomePage = () => {
       setAdminActionMessage('Enter a server URL before connecting.');
       return;
     }
+    if (!organizationContext.organizationName) {
+      setAdminActionMessage('Your organization context is missing. Please refresh and sign in again.');
+      return;
+    }
     if (!adminLoginData.username || !adminLoginData.password) {
       setAdminActionMessage('Username and password are required.');
       return;
@@ -291,7 +323,11 @@ export const AdminHomePage = () => {
 
     try {
       setIsAdminActionLoading(true);
-      const response = await privateKeyServerClient.loginAdmin(normalizedUrl, adminLoginData);
+      const response = await privateKeyServerClient.loginAdmin(
+        normalizedUrl,
+        adminLoginData,
+        organizationContext
+      );
       setAdminSession({
         baseUrl: normalizedUrl,
         token: response.data.token,
@@ -410,6 +446,34 @@ export const AdminHomePage = () => {
 
       if (response.success && response.data?.servers) {
         syncServersState(response.data.servers);
+        
+        // Configure organization on private-key-server with JWT_SECRET
+        if (adminSession && adminSession.token && user) {
+          try {
+            // Get JWT_SECRET from main server environment (via API endpoint)
+            const jwtSecretResponse = await authService.authenticatedRequest<{
+              jwtSecret: string;
+            }>('/api/local-servers/jwt-secret');
+            
+            if (jwtSecretResponse.success && jwtSecretResponse.data?.jwtSecret) {
+              await privateKeyServerClient.configureOrganization(
+                server.baseUrl,
+                adminSession.token,
+                {
+                  organizationName: user.organizationName || '',
+                  organizationDisplayName: user.organizationDisplayName || user.organizationName || '',
+                  organizationId: user.organizationId || '',
+                  jwtSecret: jwtSecretResponse.data.jwtSecret,
+                  mainServerUrl: window.location.origin,
+                }
+              );
+            }
+          } catch (configError) {
+            console.warn('Failed to configure organization on private-key-server:', configError);
+            // Don't fail the activation if config fails - admin can configure manually
+          }
+        }
+        
         setPrivateKeyServerStatus({
           type: 'success',
           message: `${server.baseUrl} marked as the active private-key-server.`,
@@ -577,15 +641,24 @@ export const AdminHomePage = () => {
     setIsDepartmentSubmitting(true);
     setDepartmentStatus(null);
 
+    let departmentResult: Awaited<
+      ReturnType<typeof privateKeyServerClient.createDepartment>
+    > | null = null;
+
     try {
       const normalizedDepartment = departmentName.trim();
 
-      const departmentResult = await privateKeyServerClient.createDepartment(
+      if (!organizationContext.organizationName) {
+        throw new Error('Organization context missing. Please refresh and try again.');
+      }
+
+      departmentResult = await privateKeyServerClient.createDepartment(
         adminSession.baseUrl,
         adminSession.token,
         {
           departmentName: normalizedDepartment,
-          organizationName: user?.organizationName ?? '',
+          organizationName: organizationContext.organizationName,
+          organizationId: organizationContext.organizationId,
         }
       );
 
@@ -607,6 +680,22 @@ export const AdminHomePage = () => {
       setDepartmentName('');
     } catch (submitError) {
       console.error('Department creation failed:', submitError);
+
+      if (departmentResult) {
+        try {
+          await privateKeyServerClient.deleteDepartment(
+            adminSession.baseUrl,
+            adminSession.token,
+            {
+              organizationName: organizationContext.organizationName,
+              departmentName: departmentName.trim(),
+            }
+          );
+        } catch (rollbackError) {
+          console.error('Failed to rollback department on private-key-server:', rollbackError);
+        }
+      }
+
       setDepartmentStatus({
         type: 'error',
         message:

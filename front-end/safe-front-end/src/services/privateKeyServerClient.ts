@@ -77,6 +77,20 @@ export interface LocalUserRegistrationResponse {
   };
 }
 
+interface OrganizationContext {
+  organizationName?: string;
+  organizationDisplayName?: string;
+  organizationId?: string;
+}
+
+const appendOrganizationQuery = (path: string, organizationName?: string) => {
+  if (!organizationName) {
+    return path;
+  }
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}organizationName=${encodeURIComponent(organizationName)}`;
+};
+
 export const privateKeyServerClient = {
   getHealth: async (baseUrl: string) => {
     const normalized = normalizeBaseUrl(baseUrl);
@@ -86,17 +100,36 @@ export const privateKeyServerClient = {
     }
     return response.json();
   },
-  getAdminStatus: (baseUrl: string) =>
-    jsonRequest<AdminStatusResponse>(baseUrl, '/admin/status'),
-  registerAdmin: (baseUrl: string, payload: Record<string, string>) =>
+  getAdminStatus: (baseUrl: string, organizationName?: string) =>
+    jsonRequest<AdminStatusResponse>(
+      baseUrl,
+      appendOrganizationQuery('/admin/status', organizationName)
+    ),
+  registerAdmin: (
+    baseUrl: string,
+    payload: Record<string, string>,
+    organization?: OrganizationContext
+  ) =>
     jsonRequest<AdminAuthResponse>(baseUrl, '/admin/register', {
       method: 'POST',
-      body: payload,
+      body: {
+        ...payload,
+        organizationName: organization?.organizationName,
+        organizationDisplayName: organization?.organizationDisplayName,
+        organizationId: organization?.organizationId,
+      },
     }),
-  loginAdmin: (baseUrl: string, payload: { username: string; password: string }) =>
+  loginAdmin: (
+    baseUrl: string,
+    payload: { username: string; password: string },
+    organization?: OrganizationContext
+  ) =>
     jsonRequest<AdminAuthResponse>(baseUrl, '/admin/login', {
       method: 'POST',
-      body: payload,
+      body: {
+        ...payload,
+        organizationName: organization?.organizationName,
+      },
     }),
   logoutAdmin: (baseUrl: string, token: string) =>
     jsonRequest(baseUrl, '/admin/logout', {
@@ -106,7 +139,7 @@ export const privateKeyServerClient = {
   createDepartment: (
     baseUrl: string,
     token: string,
-    payload: { departmentName: string; organizationName: string }
+    payload: { departmentName: string; organizationName: string; organizationId?: string }
   ) =>
     jsonRequest<DepartmentCreationResponse>(baseUrl, '/departments', {
       method: 'POST',
@@ -125,12 +158,95 @@ export const privateKeyServerClient = {
       phone: string;
       departmentName: string;
       organizationName: string;
+      organizationId?: string;
       role?: string;
     }
   ) =>
     jsonRequest<LocalUserRegistrationResponse>(baseUrl, '/users/register', {
       method: 'POST',
       body: payload,
+    }),
+  deleteDepartment: (
+    baseUrl: string,
+    token: string,
+    params: { organizationName: string; departmentName: string }
+  ) =>
+    jsonRequest(
+      baseUrl,
+      `/departments/${encodeURIComponent(params.organizationName)}/${encodeURIComponent(
+        params.departmentName
+      )}`,
+      {
+        method: 'DELETE',
+        token,
+      }
+    ),
+  configureOrganization: (
+    baseUrl: string,
+    token: string,
+    payload: {
+      organizationName: string;
+      organizationDisplayName?: string;
+      organizationId?: string;
+      jwtSecret: string;
+      mainServerUrl?: string;
+    }
+  ) =>
+    jsonRequest(baseUrl, '/organization-config', {
+      method: 'POST',
+      token,
+      body: payload,
+    }),
+  getUserStatus: (
+    baseUrl: string,
+    organizationName?: string,
+    username?: string
+  ) =>
+    jsonRequest(
+      baseUrl,
+      `/users/status?${organizationName ? `organizationName=${encodeURIComponent(organizationName)}&` : ''}${username ? `username=${encodeURIComponent(username)}` : ''}`
+    ),
+  registerUser: (
+    baseUrl: string,
+    payload: {
+      username: string;
+      email: string;
+      password: string;
+      firstName: string;
+      lastName: string;
+      jobTitle: string;
+      phone: string;
+      departmentName: string;
+      organizationName: string;
+      organizationId?: string;
+      role?: string;
+    }
+  ) =>
+    jsonRequest(baseUrl, '/users/register', {
+      method: 'POST',
+      body: payload,
+    }),
+  loginUser: (
+    baseUrl: string,
+    payload: { username: string; password: string },
+    organization?: OrganizationContext
+  ) =>
+    jsonRequest(baseUrl, '/users/login', {
+      method: 'POST',
+      body: {
+        ...payload,
+        organizationName: organization?.organizationName,
+      },
+    }),
+  logoutUser: (baseUrl: string, token: string) =>
+    jsonRequest(baseUrl, '/users/logout', {
+      method: 'POST',
+      token,
+    }),
+  getUserProfile: (baseUrl: string, token: string) =>
+    jsonRequest(baseUrl, '/users/profile', {
+      method: 'GET',
+      token,
     }),
 };
 

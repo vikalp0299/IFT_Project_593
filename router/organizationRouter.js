@@ -8,7 +8,9 @@ import {
   respondToAccessRequest,
   displayAccessRequestsToAdmin,
   createDepartmentWithPublicKey,
-  getOrganizationDepartments
+  getOrganizationDepartments,
+  listOrganizations,
+  getLocalServerUrl
 } from '../controller/organizationController.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
@@ -73,6 +75,8 @@ orgRouter.post(
 );
 
 orgRouter.get('/departments/:organizationName', getOrganizationDepartments);
+orgRouter.get('/list', authenticateToken, listOrganizations);
+orgRouter.get('/local-server', authenticateToken, getLocalServerUrl);
 
 /**
  * Export organization router

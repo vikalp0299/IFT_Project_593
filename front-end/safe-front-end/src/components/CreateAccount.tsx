@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import './CreateAccount.css';
 import { AccountCreatedSuccess } from './AccountCreatedSuccess';
 import { authService } from '../services/authService';
-import { cryptoService } from '../services/cryptoService';
 import { privateKeyServerClient } from '../services/privateKeyServerClient';
 
 interface CreateAccountProps {
@@ -44,8 +43,6 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
   const [error, setError] = useState('');
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
-  const [isGeneratingKeys, setIsGeneratingKeys] = useState(false);
-  const [keyGenerationStatus, setKeyGenerationStatus] = useState('');
   const [departmentOptions, setDepartmentOptions] = useState<
     Array<{ id: string; name: string; displayName: string }>
   >([]);
@@ -131,20 +128,21 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
 
     try {
       const response = await authService.fetchOrganizationDepartments(formData.organizationName.trim());
+      const organizationData = response.data;
 
-      if (!response.success || !response.data?.departments?.length) {
+      if (!response.success || !organizationData || !organizationData.departments?.length) {
         throw new Error(response.message || 'No departments found for this organization.');
       }
 
-      setDepartmentOptions(response.data.departments);
+      setDepartmentOptions(organizationData.departments);
       setOrganizationStatus({
         state: 'valid',
-        message: `${response.data.organization.displayName} verified. Select a department.`,
+        message: `${organizationData.organization.displayName} verified. Select a department.`,
       });
 
       setFormData(prev => ({
         ...prev,
-        department: response.data.departments[0]?.name || '',
+        department: organizationData.departments[0]?.name || '',
       }));
     } catch (lookupError) {
       setOrganizationStatus({
@@ -255,99 +253,44 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
         return;
       }
 
-      // Step 1: Generate RSA key pair (but don't store private key yet)
-      setIsGeneratingKeys(true);
-      setKeyGenerationStatus('🔑 Generating secure RSA key pair...');
+      const registrationResponse = await authService.register({
+        // Basic Authentication
+        username: formData.username,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        email: formData.email,
+        
+        // Personal Information
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        jobTitle: formData.jobTitle,
+        department: formData.department,
+        
+        // Role and Organization
+        role: formData.role,
+        organizationName: formData.organizationName,
+        
+        // Contact Preferences
+        emailNotifications: formData.emailNotifications,
+        smsNotifications: formData.smsNotifications,
+        marketingEmails: formData.marketingEmails
+      });
       
-      try {
-        // Generate keys but don't store private key yet
-        const keyPair = await cryptoService.generateKeyPair();
-        const publicKeyPem = await cryptoService.exportPublicKeyAsPem(keyPair.publicKey);
-
-        setKeyGenerationStatus('✅ Keys generated successfully!');
-        
-        // Step 2: Register user account first
-        setKeyGenerationStatus('📝 Creating user account...');
-        
-        const registrationResponse = await authService.register({
-          // Basic Authentication
-          username: formData.username,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword,
-          email: formData.email,
-          
-          // Personal Information
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          jobTitle: formData.jobTitle,
-          department: formData.department,
-          
-          // Role and Organization
-          role: formData.role,
-          organizationName: formData.organizationName,
-          
-          // Contact Preferences
-          emailNotifications: formData.emailNotifications,
-          smsNotifications: formData.smsNotifications,
-          marketingEmails: formData.marketingEmails
-        });
-        
-        if (!registrationResponse.success) {
-          throw new Error(registrationResponse.message || 'User registration failed');
-        }
-
-        setKeyGenerationStatus('🔐 Uploading public key to server...');
-        
-        // Step 3: Upload public key to backend
-        const keyUploadResult = await authService.uploadPublicKey(
-          publicKeyPem,
-          formData.organizationName
-        );
-
-        if (!keyUploadResult.success) {
-          // If key upload fails, we should ideally rollback user creation
-          // For now, we'll just show an error
-          throw new Error(`Public key upload failed: ${keyUploadResult.message}. User account was created but key management is not available.`);
-        }
-
-        setKeyGenerationStatus('💾 Storing private key securely...');
-        
-        // Step 4: Only now store the private key since public key upload succeeded
-        await cryptoService.storeEncryptedPrivateKey(
-          keyPair.privateKey,
-          formData.password,
-          formData.organizationName,
-          registrationResponse.data?.userId || ''
-        );
-
-        const localServerInfo = registrationResponse.data?.localServer;
-
-        if (localServerInfo?.baseUrl) {
-          setKeyGenerationStatus('🔄 Provisioning local private-key-server account...');
-          await syncWithLocalKeyServer(localServerInfo);
-        }
-
-        setKeyGenerationStatus('✅ Registration completed successfully!');
-        
-        if (onAccountCreated) {
-          onAccountCreated(formData);
-        }
-        setShowSuccess(true);
-
-      } catch (keyError) {
-        console.error('Registration process failed:', keyError);
-        setError(`Registration failed: ${keyError instanceof Error ? keyError.message : 'Unknown error'}`);
-        
-        // If user was created but key operations failed, show warning
-        if (keyError instanceof Error && keyError.message.includes('User account was created')) {
-          setError(`Registration completed with warnings: ${keyError.message}`);
-          setShowSuccess(true); // Still show success since user was created
-        }
-      } finally {
-        setIsGeneratingKeys(false);
-        setKeyGenerationStatus('');
+      if (!registrationResponse.success) {
+        throw new Error(registrationResponse.message || 'User registration failed');
       }
+
+      const localServerInfo = registrationResponse.data?.localServer;
+
+      if (localServerInfo?.baseUrl) {
+        await syncWithLocalKeyServer(localServerInfo);
+      }
+
+      if (onAccountCreated) {
+        onAccountCreated(formData);
+      }
+      setShowSuccess(true);
     } catch (err) {
       console.error('Account creation failed:', err);
       setError('An error occurred. Please try again.');
@@ -652,11 +595,6 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
             </div>
           )}
 
-          {keyGenerationStatus && (
-            <div className="key-generation-status">
-              <p className="key-generation-status-text">{keyGenerationStatus}</p>
-            </div>
-          )}
           {localSyncStatus && (
             <div className="key-generation-status secondary">
               <p className="key-generation-status-text">{localSyncStatus}</p>
@@ -665,10 +603,10 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
 
           <button
             type="submit"
-            disabled={isLoading || isGeneratingKeys}
+            disabled={isLoading}
             className="create-account-button"
           >
-            {isGeneratingKeys ? 'Generating Keys...' : isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
       </div>

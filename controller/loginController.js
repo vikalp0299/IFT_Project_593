@@ -313,7 +313,7 @@ async function registerFunction(req, res) {
         const localServerPayload = activeLocalServer
             ? {
                 baseUrl: activeLocalServer.baseUrl,
-                organizationName: organization.displayName || organization.name,
+                organizationName: organization.name,
                 departmentName: departmentRecord.displayName,
                 normalizedDepartmentName: departmentRecord.departmentName,
             }

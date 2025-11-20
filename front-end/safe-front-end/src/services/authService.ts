@@ -17,6 +17,8 @@ interface UserData {
   lastName: string;
   role: string;
   organizationName: string;
+  organizationId?: string;
+  organizationDisplayName?: string;
 }
 
 interface LoginResponse {
@@ -506,6 +508,13 @@ class AuthService {
             : 'Unable to look up organization departments right now.',
       };
     }
+  }
+
+  public async fetchOrganizations(
+    excludeSelf = true
+  ): Promise<ApiResponse<{ organizations: { id: string; name: string; displayName: string }[] }>> {
+    const query = excludeSelf ? '?excludeSelf=true' : '';
+    return this.authenticatedRequest(`/org/list${query}`);
   }
 
   public async confirmLocalAccount(payload: {

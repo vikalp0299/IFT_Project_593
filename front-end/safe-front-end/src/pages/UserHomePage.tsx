@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { decryptFile, downloadBlob } from '../utils/fileDecryption';
 import './UserHomePage.css';
 
 interface UserData {
@@ -26,28 +27,84 @@ interface FileData {
     firstName: string;
     lastName: string;
   } | null;
-  isShared: boolean;
+  isShared?: boolean;
+  isEncrypted?: boolean;
+  accessRights?: Array<{
+    organizationName: string;
+    departmentName: string;
+  }>;
+  sharedBy?: {
+    organizationName: string;
+    departmentName: string;
+  };
+}
+
+interface OrganizationSummary {
+  id: string;
+  name: string;
+  displayName: string;
+}
+
+interface DepartmentSummary {
+  id: string;
+  name: string;
+  displayName: string;
+}
+
+interface AccessAssignment {
+  organizationId: string;
+  organizationName: string;
+  organizationDisplayName: string;
+  departmentId: string;
+  departmentName: string;
+  departmentDisplayName: string;
 }
 
 export const UserHomePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [files, setFiles] = useState<FileData[]>([]);
+  const [filesSharedByMyDepartment, setFilesSharedByMyDepartment] = useState<FileData[]>([]);
+  const [filesSharedWithMyDepartment, setFilesSharedWithMyDepartment] = useState<FileData[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [filesPerPage] = useState(10);
   const [isDragging, setIsDragging] = useState(false);
-  const [ttlDays, setTtlDays] = useState('');
-  const [ttlHours, setTtlHours] = useState('');
-  const [ttlMinutes, setTtlMinutes] = useState('');
-  const [organizationSearch, setOrganizationSearch] = useState('');
-  const [departments, setDepartments] = useState<string[]>([]);
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const [ttlDays, setTtlDays] = useState('1');
+  const [ttlHours, setTtlHours] = useState('0');
+  const [ttlMinutes, setTtlMinutes] = useState('0');
+  const [availableOrganizations, setAvailableOrganizations] = useState<OrganizationSummary[]>([]);
+  const [organizationsLoading, setOrganizationsLoading] = useState(false);
+  const [selectedAccessOrgId, setSelectedAccessOrgId] = useState('');
+  const [availableDepartments, setAvailableDepartments] = useState<DepartmentSummary[]>([]);
+  const [selectedAccessDepartmentId, setSelectedAccessDepartmentId] = useState('');
+  const [accessAssignments, setAccessAssignments] = useState<AccessAssignment[]>([]);
+  const [accessErrors, setAccessErrors] = useState<string | null>(null);
+  const [editAgreementRequired, setEditAgreementRequired] = useState(false);
+  const [selectedAgreementOrgIds, setSelectedAgreementOrgIds] = useState<string[]>([]);
+  const [sharedByPage, setSharedByPage] = useState(1);
+  const [sharedWithPage, setSharedWithPage] = useState(1);
+  const [userPrivateKeyServerSession, setUserPrivateKeyServerSession] = useState<{
+    baseUrl: string;
+    token: string;
+    user: {
+      id: string;
+      username: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      department: string;
+      organizationName: string;
+    };
+  } | null>(null);
+  const [isPrivateKeyServerModalOpen, setIsPrivateKeyServerModalOpen] = useState(false);
+  const [privateKeyServerLoginData, setPrivateKeyServerLoginData] = useState({
+    username: '',
+    password: '',
+  });
+  const [isPrivateKeyServerLoggingIn, setIsPrivateKeyServerLoggingIn] = useState(false);
+  const [privateKeyServerLoginError, setPrivateKeyServerLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -62,17 +119,119 @@ export const UserHomePage = () => {
     }
     setLoading(false);
     fetchFiles();
+    // Ensure user is registered on private-key-server
+    ensurePrivateKeyServerAuth();
   }, [navigate]);
+
+  // Ensure user is registered and logged into private-key-server
+  const ensurePrivateKeyServerAuth = async () => {
+    try {
+      if (!user) return;
+
+      // Get user's full profile including department from main server
+      let userDepartment = '';
+      try {
+        const userProfileResponse = await authService.authenticatedRequest<{
+          department?: string;
+          organizationName?: string;
+        }>('/auth/me');
+        
+        if (userProfileResponse.success && userProfileResponse.data) {
+          userDepartment = userProfileResponse.data.department || '';
+        }
+      } catch (profileError) {
+        console.warn('Could not fetch user profile:', profileError);
+      }
+
+      // Get local server URL for user's organization
+      const localServerResponse = await authService.authenticatedRequest<{
+        baseUrl: string;
+        isActive: boolean;
+      }>('/org/local-server');
+
+      if (!localServerResponse.success || !localServerResponse.data?.baseUrl) {
+        console.warn('Private-key-server not configured for organization');
+        return;
+      }
+
+      const privateKeyServerUrl = localServerResponse.data.baseUrl;
+      
+      // Check if user exists on private-key-server
+      try {
+        const { privateKeyServerClient } = await import('../services/privateKeyServerClient');
+        
+        const userStatus = await privateKeyServerClient.getUserStatus(
+          privateKeyServerUrl,
+          user.organizationName,
+          user.username
+        );
+
+        if (!userStatus.success || !userStatus.data?.exists) {
+          // User doesn't exist - register them
+          if (userDepartment) {
+            try {
+              // Generate a temporary password for registration
+              const tempPassword = `temp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+              
+              const registerResponse = await privateKeyServerClient.registerUser(privateKeyServerUrl, {
+                username: user.username,
+                email: user.email,
+                password: tempPassword,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                jobTitle: user.role || 'Employee',
+                phone: '',
+                departmentName: userDepartment,
+                organizationName: user.organizationName || '',
+                role: user.role || 'Employee',
+              });
+
+              if (registerResponse.success && registerResponse.data?.token) {
+                // Auto-login after registration
+                setUserPrivateKeyServerSession({
+                  baseUrl: privateKeyServerUrl,
+                  token: registerResponse.data.token,
+                  user: registerResponse.data.user,
+                });
+                console.log('User registered and logged into private-key-server');
+                return;
+              }
+            } catch (registerError: any) {
+              console.warn('Could not register user on private-key-server:', registerError.message);
+            }
+          }
+        } else {
+          // User exists - try to login (we'll use a default password or prompt user)
+          // For now, we'll use the main server JWT token for authentication
+          // But we can add a login flow if needed
+          console.log('User exists on private-key-server');
+        }
+      } catch (error: any) {
+        console.warn('Error checking user status on private-key-server:', error.message);
+      }
+    } catch (error) {
+      console.warn('Error ensuring private-key-server authentication:', error);
+      // Don't block the UI - user can still try to download using main server JWT
+    }
+  };
 
   const fetchFiles = async () => {
     try {
       setFilesLoading(true);
       setError(null);
       
-      const response = await authService.authenticatedRequest<{ files: FileData[] }>('/api/getfiles');
+      const response = await authService.authenticatedRequest<{
+        filesSharedByMyDepartment: { count: number; files: FileData[] };
+        filesSharedWithMyDepartment: { count: number; files: FileData[] };
+        totalCount: number;
+      }>('/api/getfiles');
       
       if (response.success && response.data) {
-        setFiles(response.data.files || []);
+        setFilesSharedByMyDepartment(response.data.filesSharedByMyDepartment?.files || []);
+        setFilesSharedWithMyDepartment(response.data.filesSharedWithMyDepartment?.files || []);
+        // Reset pagination when files change
+        setSharedByPage(1);
+        setSharedWithPage(1);
       } else {
         setError(response.message || 'Failed to fetch files');
       }
@@ -81,6 +240,35 @@ export const UserHomePage = () => {
       setError('Failed to load files. Please try again.');
     } finally {
       setFilesLoading(false);
+    }
+  };
+
+  const loadOrganizations = async () => {
+    try {
+      setOrganizationsLoading(true);
+      const response = await authService.fetchOrganizations(true);
+      if (response.success && response.data?.organizations) {
+        const normalizedOrgs: OrganizationSummary[] = response.data.organizations
+          .map((org: { id?: string; _id?: string; organizationId?: string; name?: string; displayName?: string }) => {
+            const resolvedId = org.id || org._id || org.organizationId || '';
+            const resolvedName = org.name?.trim() || '';
+            const resolvedDisplayName = org.displayName?.trim() || resolvedName;
+            return {
+              id: resolvedId,
+              name: resolvedName,
+              displayName: resolvedDisplayName || resolvedName,
+            };
+          })
+          .filter((org) => org.id && org.name);
+        setAvailableOrganizations(normalizedOrgs);
+      } else {
+        setAvailableOrganizations([]);
+      }
+    } catch (error) {
+      console.error('Failed to load organizations:', error);
+      setAvailableOrganizations([]);
+    } finally {
+      setOrganizationsLoading(false);
     }
   };
 
@@ -94,8 +282,81 @@ export const UserHomePage = () => {
     }
   };
 
+  const handlePrivateKeyServerLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPrivateKeyServerLoggingIn(true);
+    setPrivateKeyServerLoginError(null);
+
+    try {
+      if (!user) {
+        throw new Error('User information not available');
+      }
+
+      // Get local server URL for user's organization
+      const localServerResponse = await authService.authenticatedRequest<{
+        baseUrl: string;
+        isActive: boolean;
+      }>('/org/local-server');
+
+      if (!localServerResponse.success || !localServerResponse.data?.baseUrl) {
+        throw new Error('Private-key-server not configured for your organization');
+      }
+
+      const privateKeyServerUrl = localServerResponse.data.baseUrl;
+      const { privateKeyServerClient } = await import('../services/privateKeyServerClient');
+
+      const loginResponse = await privateKeyServerClient.loginUser(
+        privateKeyServerUrl,
+        {
+          username: privateKeyServerLoginData.username,
+          password: privateKeyServerLoginData.password,
+        },
+        {
+          organizationName: user.organizationName,
+        }
+      );
+
+      if (loginResponse.success && loginResponse.data?.token) {
+        setUserPrivateKeyServerSession({
+          baseUrl: privateKeyServerUrl,
+          token: loginResponse.data.token,
+          user: loginResponse.data.user,
+        });
+        setPrivateKeyServerLoginData({ username: '', password: '' });
+        setIsPrivateKeyServerModalOpen(false);
+        console.log('Successfully logged into private-key-server');
+      } else {
+        throw new Error('Login failed');
+      }
+    } catch (error: any) {
+      console.error('Private-key-server login error:', error);
+      setPrivateKeyServerLoginError(
+        error.message || 'Failed to login to private-key-server. Please check your credentials.'
+      );
+    } finally {
+      setIsPrivateKeyServerLoggingIn(false);
+    }
+  };
+
+  const handlePrivateKeyServerLogout = async () => {
+    if (!userPrivateKeyServerSession) return;
+
+    try {
+      const { privateKeyServerClient } = await import('../services/privateKeyServerClient');
+      await privateKeyServerClient.logoutUser(
+        userPrivateKeyServerSession.baseUrl,
+        userPrivateKeyServerSession.token
+      );
+    } catch (error) {
+      console.warn('Failed to logout from private-key-server:', error);
+    } finally {
+      setUserPrivateKeyServerSession(null);
+    }
+  };
+
   const handleUploadClick = () => {
     setUploadModalOpen(true);
+    loadOrganizations().catch(() => undefined);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,30 +395,103 @@ export const UserHomePage = () => {
     }
   };
 
-  const handleOrganizationSearch = async () => {
-    if (!organizationSearch.trim()) {
+  const handleSelectAccessOrganization = async (organizationId: string) => {
+    setSelectedAccessOrgId(organizationId);
+    setSelectedAccessDepartmentId('');
+    setAvailableDepartments([]);
+    if (!organizationId) {
       return;
     }
-    
-    setIsSearching(true);
-    // TODO: Add backend API call here
-    // For now, simulate with mock data
-    setTimeout(() => {
-      // Mock departments - replace with actual API call
-      setDepartments(['IT', 'HR', 'Finance', 'Marketing', 'Operations']);
-      setIsSearching(false);
-    }, 500);
+    const org = availableOrganizations.find((o) => o.id === organizationId);
+    if (!org) {
+      return;
+    }
+    try {
+      const response = await authService.fetchOrganizationDepartments(org.name);
+      if (response.success && response.data?.departments) {
+        setAvailableDepartments(
+          response.data.departments.map((dept) => ({
+            id: dept.id,
+            name: dept.name,
+            displayName: dept.displayName,
+          }))
+        );
+      } else {
+        setAvailableDepartments([]);
+      }
+    } catch (error) {
+      console.error('Failed to load departments:', error);
+      setAvailableDepartments([]);
+    }
+  };
+
+  const handleAddAccessRule = () => {
+    setAccessErrors(null);
+    if (!selectedAccessOrgId || !selectedAccessDepartmentId) {
+      setAccessErrors('Select both organization and department.');
+      return;
+    }
+    const org = availableOrganizations.find((o) => o.id === selectedAccessOrgId);
+    const dept = availableDepartments.find((d) => d.id === selectedAccessDepartmentId);
+    if (!org || !dept) {
+      setAccessErrors('Invalid organization or department selection.');
+      return;
+    }
+    const duplicate = accessAssignments.some(
+      (entry) =>
+        entry.organizationId === org.id && entry.departmentId === dept.id
+    );
+    if (duplicate) {
+      setAccessErrors('This organization and department are already included.');
+      return;
+    }
+    setAccessAssignments((prev) => [
+      ...prev,
+      {
+        organizationId: org.id,
+        organizationName: org.name,
+        organizationDisplayName: org.displayName,
+        departmentId: dept.id,
+        departmentName: dept.name,
+        departmentDisplayName: dept.displayName,
+      },
+    ]);
+    setSelectedAccessDepartmentId('');
+  };
+
+  const handleRemoveAccessRule = (organizationId: string, departmentId: string) => {
+    setAccessAssignments((prev) =>
+      prev.filter(
+        (entry) =>
+          !(
+            entry.organizationId === organizationId &&
+            entry.departmentId === departmentId
+          )
+      )
+    );
+  };
+
+  const handleToggleAgreementOrg = (organizationId: string) => {
+    setSelectedAgreementOrgIds((prev) =>
+      prev.includes(organizationId)
+        ? prev.filter((id) => id !== organizationId)
+        : [...prev, organizationId]
+    );
   };
 
   const handleCloseModal = () => {
     setUploadModalOpen(false);
     setSelectedFile(null);
-    setTtlDays('');
-    setTtlHours('');
-    setTtlMinutes('');
-    setOrganizationSearch('');
-    setDepartments([]);
-    setSelectedDepartment('');
+    setTtlDays('1');
+    setTtlHours('0');
+    setTtlMinutes('0');
+    setSelectedAccessOrgId('');
+    setAvailableDepartments([]);
+    setSelectedAccessDepartmentId('');
+    setAccessAssignments([]);
+    setAccessErrors(null);
+    setEditAgreementRequired(false);
+    setSelectedAgreementOrgIds([]);
     setIsDragging(false);
   };
 
@@ -167,11 +501,16 @@ export const UserHomePage = () => {
       return;
     }
 
+    setAccessErrors(null);
+    if (accessAssignments.length === 0) {
+      setAccessErrors('Add at least one organization and department.');
+      return;
+    }
+
     try {
-      // Initialize upload
       const initResponse = await authService.authenticatedRequest<{ uploadId: string }>('/api/uploads/init', {
         method: 'POST',
-        body: JSON.stringify({ filename: selectedFile.name })
+        body: JSON.stringify({ filename: selectedFile.name }),
       });
 
       if (!initResponse.success || !initResponse.data?.uploadId) {
@@ -179,10 +518,9 @@ export const UserHomePage = () => {
       }
 
       const uploadId = initResponse.data.uploadId;
-      const chunkSize = 5 * 1024 * 1024; // 5MB chunks
+      const chunkSize = 5 * 1024 * 1024;
       const totalChunks = Math.ceil(selectedFile.size / chunkSize);
 
-      // Upload chunks
       for (let i = 0; i < totalChunks; i++) {
         const start = i * chunkSize;
         const end = Math.min(start + chunkSize, selectedFile.size);
@@ -196,9 +534,9 @@ export const UserHomePage = () => {
         const chunkResponse = await fetch('http://localhost:8000/api/uploads/chunk', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${authService.getAccessToken()}`
+            Authorization: `Bearer ${authService.getAccessToken()}`,
           },
-          body: chunkFormData
+          body: chunkFormData,
         });
 
         if (!chunkResponse.ok) {
@@ -206,20 +544,57 @@ export const UserHomePage = () => {
         }
       }
 
-      // Complete upload
+      const holdMs =
+        (parseInt(ttlDays || '0', 10) * 24 * 60 * 60 +
+          parseInt(ttlHours || '0', 10) * 60 * 60 +
+          parseInt(ttlMinutes || '0', 10) * 60) *
+        1000;
+
+      const accessRightsPayload = accessAssignments.map((entry) => ({
+        organizationId: entry.organizationId,
+        organizationName: entry.organizationName,
+        organizationDisplayName: entry.organizationDisplayName,
+        departmentId: entry.departmentId,
+        departmentName: entry.departmentName,
+        departmentDisplayName: entry.departmentDisplayName,
+      }));
+
+      const agreementPayload =
+        editAgreementRequired && selectedAgreementOrgIds.length > 0
+          ? selectedAgreementOrgIds
+              .map((orgId) => {
+                const org = availableOrganizations.find((o) => o.id === orgId);
+                if (!org) {
+                  return null;
+                }
+                return {
+                  organizationId: org.id,
+                  organizationName: org.name,
+                };
+              })
+              .filter(
+                (entry): entry is { organizationId: string; organizationName: string } =>
+                  entry !== null
+              )
+          : [];
+
       const completeResponse = await authService.authenticatedRequest('/api/uploads/complete', {
         method: 'POST',
         body: JSON.stringify({
           uploadId,
           originalName: selectedFile.name,
-          size: selectedFile.size
-        })
+          size: selectedFile.size,
+          timeToHoldMs: holdMs > 0 ? holdMs : undefined,
+          accessRights: accessRightsPayload,
+          editAgreementRequired,
+          editAgreementOrganizations: agreementPayload,
+        }),
       });
 
       if (completeResponse.success) {
         alert('File uploaded successfully!');
         handleCloseModal();
-        fetchFiles(); // Refresh file list
+        fetchFiles();
       } else {
         throw new Error(completeResponse.message || 'Failed to complete upload');
       }
@@ -231,32 +606,134 @@ export const UserHomePage = () => {
 
   const handleDownload = async (file: FileData) => {
     try {
-      // For now, we'll use the file path to download
-      // In a real implementation, you'd have a download endpoint
-      const response = await fetch(`http://localhost:8000/api/download/${file.id}`, {
+      // Step 1: Get encrypted file and encrypted symmetric key from main server
+      const response = await authService.authenticatedRequest<{
+        encryptedFile: string;
+        encryptedSymmetricKey: string;
+        organizationId: string;
+        organizationName: string;
+        departmentId: string;
+        departmentName: string;
+        userOrganizationId: string;
+        userOrganizationName: string;
+        userDepartmentName: string;
+        iv: string;
+        authTag: string;
+        algorithm: string;
+        filename: string;
+        mimetype: string;
+        privateKeyServerUrl: string;
+      }>(`/api/download/${file.id}`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${authService.getAccessToken()}`
-        }
       });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = file.originalname;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        // Fallback: try to download from path
-        alert('Download endpoint not available. File path: ' + file.path);
+      if (!response.success || !response.data) {
+        throw new Error(response.message || 'Failed to download file');
+      }
+
+      const {
+        encryptedFile,
+        encryptedSymmetricKey,
+        organizationId,
+        organizationName,
+        departmentId,
+        departmentName,
+        userOrganizationId,
+        userOrganizationName,
+        userDepartmentName,
+        iv,
+        authTag,
+        filename,
+        mimetype,
+        privateKeyServerUrl,
+      } = response.data;
+
+      // Check if file is encrypted
+      if (!encryptedFile || !encryptedSymmetricKey || !iv || !authTag) {
+        throw new Error('File encryption data is missing');
+      }
+
+      if (!privateKeyServerUrl) {
+        throw new Error('Private-key-server URL is not configured for your organization');
+      }
+
+      // Step 2: Contact private-key-server directly to decrypt the symmetric key
+      // Use private-key-server user token for authentication
+      let decryptedSymmetricKey: string;
+      
+      // Must have private-key-server user token - users must be logged into private-key-server
+      if (!userPrivateKeyServerSession?.token) {
+        throw new Error('Not authenticated with private-key-server. Please ensure you are logged in.');
+      }
+      
+      const authToken = userPrivateKeyServerSession.token;
+      
+      try {
+        const decryptResponse = await fetch(
+          `${privateKeyServerUrl}/private-key/decrypt-symmetric-key`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`, // Send token (either private-key-server user token or main server JWT)
+            },
+            body: JSON.stringify({
+              encryptedSymmetricKey,
+              organizationId,
+              organizationName,
+              departmentId,
+              departmentName,
+              // Note: User info is NOT sent - private-key-server gets it from JWT token for security
+            }),
+          }
+        );
+
+        if (!decryptResponse.ok) {
+          let errorData: any = {};
+          try {
+            const text = await decryptResponse.text();
+            if (text) {
+              errorData = JSON.parse(text);
+            }
+          } catch (parseError) {
+            // If parsing fails, use empty object
+          }
+          
+          if (decryptResponse.status === 401) {
+            throw new Error(errorData.message || 'Not authenticated with private-key-server. Please ensure you are logged in.');
+          } else if (decryptResponse.status === 403) {
+            throw new Error(errorData.message || 'Access denied: You do not have permission to decrypt this file');
+          } else {
+            throw new Error(errorData.message || `Private-key-server returned status ${decryptResponse.status}`);
+          }
+        }
+
+        const decryptData = await decryptResponse.json();
+        if (!decryptData.success || !decryptData.data?.symmetricKey) {
+          throw new Error('Symmetric key not found in response from private-key-server');
+        }
+
+        decryptedSymmetricKey = decryptData.data.symmetricKey;
+      } catch (error) {
+        console.error('Error decrypting symmetric key via private-key-server:', error);
+        throw new Error(
+          `Failed to decrypt symmetric key: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+
+      // Step 3: Decrypt file client-side using the decrypted symmetric key
+      try {
+        const decryptedBlob = await decryptFile(encryptedFile, decryptedSymmetricKey, iv, authTag);
+        downloadBlob(decryptedBlob, filename || file.originalname);
+      } catch (decryptError) {
+        console.error('File decryption error:', decryptError);
+        throw new Error(
+          `Failed to decrypt file: ${decryptError instanceof Error ? decryptError.message : 'Unknown error'}`
+        );
       }
     } catch (err) {
       console.error('Download error:', err);
-      alert('Failed to download file');
+      alert(err instanceof Error ? err.message : 'Failed to download file');
     }
   };
 
@@ -273,25 +750,121 @@ export const UserHomePage = () => {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
-  // Pagination logic
-  const indexOfLastFile = currentPage * filesPerPage;
-  const indexOfFirstFile = indexOfLastFile - filesPerPage;
-  const currentFiles = files.slice(indexOfFirstFile, indexOfLastFile);
-  const totalPages = Math.ceil(files.length / filesPerPage);
+  // Helper function to render file list with pagination
+  const renderFileList = (
+    fileList: FileData[], 
+    emptyMessage: string, 
+    showDownloadButton: boolean,
+    sectionId: string,
+    currentPage: number,
+    setCurrentPage: (page: number) => void
+  ) => {
+    const filesPerPage = 10;
+    const totalPages = Math.ceil(fileList.length / filesPerPage);
+    const indexOfLastFile = currentPage * filesPerPage;
+    const indexOfFirstFile = indexOfLastFile - filesPerPage;
+    const currentFiles = fileList.slice(indexOfFirstFile, indexOfLastFile);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // Scroll to top of files section when page changes
-    const filesSection = document.querySelector('.files-section');
-    if (filesSection) {
-      filesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (fileList.length === 0) {
+      return (
+        <div className="files-empty">
+          <div className="empty-icon">📁</div>
+          <p>{emptyMessage}</p>
+        </div>
+      );
     }
-  };
 
-  // Reset to page 1 when files change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [files.length]);
+    return (
+      <div className="files-list-container">
+        <div className="files-list">
+          {currentFiles.map((file) => (
+            <div key={file.id} className="file-item">
+              <div className="file-info">
+                <div className="file-icon">📄</div>
+                <div className="file-details">
+                  <h3 className="file-name">{file.originalname}</h3>
+                  <div className="file-meta-grid">
+                    {file.uploader && (
+                      <div className="file-meta-item">
+                        <span className="file-meta-label">Uploaded by:</span>
+                        <span className="file-meta-value">
+                          {file.uploader.firstName} {file.uploader.lastName} ({file.uploader.username})
+                        </span>
+                      </div>
+                    )}
+                    {file.sharedBy && (
+                      <div className="file-meta-item">
+                        <span className="file-meta-label">Shared by:</span>
+                        <span className="file-meta-value">
+                          {file.sharedBy.organizationName} - {file.sharedBy.departmentName}
+                        </span>
+                      </div>
+                    )}
+                    {file.accessRights && file.accessRights.length > 0 && (
+                      <div className="file-meta-item">
+                        <span className="file-meta-label">Shared with:</span>
+                        <div className="file-access-rights">
+                          {file.accessRights.map((access, idx) => (
+                            <span key={idx} className="access-badge">
+                              {access.organizationName} - {access.departmentName}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="file-meta-item">
+                      <span className="file-meta-label">Size:</span>
+                      <span className="file-meta-value">{formatFileSize(file.size)}</span>
+                    </div>
+                    <div className="file-meta-item">
+                      <span className="file-meta-label">Uploaded:</span>
+                      <span className="file-meta-value">{formatDate(file.uploadedAt)}</span>
+                    </div>
+                    {file.isEncrypted && (
+                      <div className="file-meta-item">
+                        <span className="file-encrypted">🔒 Encrypted</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {showDownloadButton && (
+                <button
+                  onClick={() => handleDownload(file)}
+                  className="download-button-gradient"
+                  title="Download file"
+                >
+                  <span className="download-icon">⬇️</span>
+                  <span className="download-text">Download</span>
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="pagination-button"
+            >
+              Previous
+            </button>
+            <span className="pagination-info">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="pagination-button"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   if (loading) {
     return (
@@ -306,107 +879,181 @@ export const UserHomePage = () => {
 
   return (
     <div className="user-homepage-container">
+      {/* Private-Key-Server Authentication Modal */}
+      {isPrivateKeyServerModalOpen && (
+        <div className="modal-overlay pks-modal-overlay" onClick={() => !isPrivateKeyServerLoggingIn && setIsPrivateKeyServerModalOpen(false)}>
+          <div className="modal-content pks-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Authenticate with Private-Key-Server</h2>
+              <button
+                className="modal-close-button"
+                onClick={() => setIsPrivateKeyServerModalOpen(false)}
+                disabled={isPrivateKeyServerLoggingIn}
+              >
+                ×
+              </button>
+            </div>
+            <form onSubmit={handlePrivateKeyServerLogin} className="modal-form">
+              <div className="form-group">
+                <label htmlFor="pks-username">Username</label>
+                <input
+                  id="pks-username"
+                  type="text"
+                  value={privateKeyServerLoginData.username}
+                  onChange={(e) =>
+                    setPrivateKeyServerLoginData({ ...privateKeyServerLoginData, username: e.target.value })
+                  }
+                  required
+                  disabled={isPrivateKeyServerLoggingIn}
+                  placeholder="Enter your username"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="pks-password">Password</label>
+                <input
+                  id="pks-password"
+                  type="password"
+                  value={privateKeyServerLoginData.password}
+                  onChange={(e) =>
+                    setPrivateKeyServerLoginData({ ...privateKeyServerLoginData, password: e.target.value })
+                  }
+                  required
+                  disabled={isPrivateKeyServerLoggingIn}
+                  placeholder="Enter your password"
+                />
+              </div>
+              {privateKeyServerLoginError && (
+                <div className="error-message">{privateKeyServerLoginError}</div>
+              )}
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="button-secondary"
+                  onClick={() => setIsPrivateKeyServerModalOpen(false)}
+                  disabled={isPrivateKeyServerLoggingIn}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="button-primary" disabled={isPrivateKeyServerLoggingIn}>
+                  {isPrivateKeyServerLoggingIn ? 'Logging in...' : 'Login'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <header className="user-homepage-header">
         <div className="header-content">
           <h1>Welcome, {user?.firstName} {user?.lastName}</h1>
           <p className="organization-name">{user?.organizationName}</p>
         </div>
-        <button onClick={handleLogout} className="logout-button">
-          Logout
-        </button>
+        <div className="header-actions">
+          {userPrivateKeyServerSession ? (
+            <div className="private-key-server-status">
+              <span className="status-indicator connected">●</span>
+              <span>Connected to Private-Key-Server</span>
+              <button
+                onClick={handlePrivateKeyServerLogout}
+                className="button-small button-secondary"
+                title="Disconnect from private-key-server"
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsPrivateKeyServerModalOpen(true)}
+              className="button-primary"
+              title="Authenticate with private-key-server to enable file downloads"
+            >
+              Connect to Private-Key-Server
+            </button>
+          )}
+          <button onClick={handleLogout} className="logout-button">
+            Logout
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}
       <main className="user-homepage-main">
-        <div className={`user-content ${files.length === 0 && !filesLoading && !error ? 'centered-layout' : 'normal-layout'}`}>
+        <div className={`user-content ${
+          filesSharedByMyDepartment.length === 0 && 
+          filesSharedWithMyDepartment.length === 0 && 
+          !filesLoading && 
+          !error 
+            ? 'centered-layout' 
+            : 'normal-layout'
+        }`}>
           {/* Action Buttons */}
           <div className="action-buttons">
             <button onClick={handleUploadClick} className="action-button upload-button">
               <span className="button-icon">📤</span>
               <span className="button-text">Upload</span>
             </button>
-            <button onClick={fetchFiles} className="action-button download-button">
-              <span className="button-icon">📥</span>
-              <span className="button-text">Download</span>
+            <button onClick={fetchFiles} className="action-button refresh-button">
+              <span className="button-icon">🔄</span>
+              <span className="button-text">Refresh</span>
             </button>
           </div>
 
-          {/* Files List */}
-          <div className="files-section">
-            <h2 className="files-section-title">Files Shared With You</h2>
-            
-            {filesLoading ? (
-              <div className="files-loading">
-                <div className="spinner"></div>
-                <p>Loading files...</p>
-              </div>
-            ) : error ? (
-              <div className="files-error">
-                <p>{error}</p>
-                <button onClick={fetchFiles} className="retry-button">Retry</button>
-              </div>
-            ) : files.length === 0 ? (
-              <div className="files-empty">
-                <div className="empty-icon">📁</div>
-                <p>No files available</p>
-                <p className="empty-subtitle">Upload files to get started</p>
-              </div>
-            ) : (
-              <>
-                <div className="files-list-container">
-                  <div className="files-list">
-                    {currentFiles.map((file) => (
-                      <div key={file.id} className="file-item">
-                        <div className="file-info">
-                          <div className="file-icon">📄</div>
-                          <div className="file-details">
-                            <h3 className="file-name">{file.originalname}</h3>
-                            <p className="file-meta">
-                              {formatFileSize(file.size)} • {formatDate(file.uploadedAt)}
-                              {file.uploader && (
-                                <span> • Uploaded by {file.uploader.firstName} {file.uploader.lastName}</span>
-                              )}
-                              {file.isShared && <span className="shared-badge">Shared</span>}
-                            </p>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => handleDownload(file)} 
-                          className="download-file-button"
-                        >
-                          Download
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="pagination">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="pagination-button"
-                    >
-                      Previous
-                    </button>
-                    <div className="pagination-info">
-                      Page {currentPage} of {totalPages}
-                    </div>
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="pagination-button"
-                    >
-                      Next
-                    </button>
-                  </div>
+          {/* Files Sections */}
+          {filesLoading ? (
+            <div className="files-loading">
+              <div className="spinner"></div>
+              <p>Loading files...</p>
+            </div>
+          ) : error ? (
+            <div className="files-error">
+              <p>{error}</p>
+              <button onClick={fetchFiles} className="retry-button">Retry</button>
+            </div>
+          ) : (
+            <div className="files-sections-container">
+              {/* Files Shared BY My Department */}
+              <div className="files-section">
+                <h2 className="files-section-title">
+                  Files Shared By My Department
+                  <span className="file-count-badge">
+                    {filesSharedByMyDepartment.length}
+                  </span>
+                </h2>
+                <p className="files-section-description">
+                  Files uploaded by members of your department and organization
+                </p>
+                {renderFileList(
+                  filesSharedByMyDepartment,
+                  'No files uploaded by your department yet',
+                  false, // No download button for files owned by same organization
+                  'shared-by',
+                  sharedByPage,
+                  setSharedByPage
                 )}
-              </>
-            )}
-          </div>
+              </div>
+
+              {/* Files Shared WITH My Department */}
+              <div className="files-section">
+                <h2 className="files-section-title">
+                  Files Shared With My Department
+                  <span className="file-count-badge">
+                    {filesSharedWithMyDepartment.length}
+                  </span>
+                </h2>
+                <p className="files-section-description">
+                  Files shared with your department from other organizations
+                </p>
+                {renderFileList(
+                  filesSharedWithMyDepartment,
+                  'No files shared with your department from other organizations',
+                  true, // Show download button for files from other organizations
+                  'shared-with',
+                  sharedWithPage,
+                  setSharedWithPage
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -498,50 +1145,120 @@ export const UserHomePage = () => {
               </div>
             </div>
 
-            {/* Organization Search */}
-            <div className="organization-search-section">
-              <label className="org-search-label">Search Organization</label>
-              <div className="org-search-input-group">
+            {/* Access Rights */}
+            <div className="access-rights-section">
+              <h3>Access Rights</h3>
+              <p className="section-description">
+                Select organizations and departments that can read this file.
+              </p>
+              <div className="access-input-grid">
+                <div className="access-input-group">
+                  <label>Select Organization</label>
+                  <select
+                    value={selectedAccessOrgId}
+                    onChange={(e) => handleSelectAccessOrganization(e.target.value)}
+                    className="access-select"
+                    disabled={organizationsLoading}
+                  >
+                    <option value="">
+                      {organizationsLoading ? 'Loading organizations...' : 'Choose organization'}
+                    </option>
+                    {availableOrganizations.map((org) => (
+                      <option key={org.id} value={org.id}>
+                        {org.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="access-input-group">
+                  <label>Select Department</label>
+                  <select
+                    value={selectedAccessDepartmentId}
+                    onChange={(e) => setSelectedAccessDepartmentId(e.target.value)}
+                    className="access-select"
+                    disabled={!selectedAccessOrgId || availableDepartments.length === 0}
+                  >
+                    <option value="">
+                      {selectedAccessOrgId
+                        ? availableDepartments.length
+                          ? 'Choose department'
+                          : 'No departments available'
+                        : 'Select organization first'}
+                    </option>
+                    {availableDepartments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className="add-access-button"
+                  onClick={handleAddAccessRule}
+                  disabled={!selectedAccessOrgId || !selectedAccessDepartmentId}
+                >
+                  Add Access
+                </button>
+              </div>
+              {accessErrors && <p className="access-error">{accessErrors}</p>}
+              {accessAssignments.length > 0 && (
+                <div className="access-list">
+                  {accessAssignments.map((entry) => (
+                    <div
+                      key={`${entry.organizationId}-${entry.departmentId}`}
+                      className="access-list-item"
+                    >
+                      <div>
+                        <strong>{entry.organizationDisplayName}</strong> — {entry.departmentDisplayName}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveAccessRule(entry.organizationId, entry.departmentId)}
+                        className="remove-access-button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Edit Agreement */}
+            <div className="edit-agreement-section">
+              <label className="checkbox-label">
                 <input
-                  type="text"
-                  value={organizationSearch}
-                  onChange={(e) => setOrganizationSearch(e.target.value)}
-                  placeholder="Enter organization name"
-                  className="org-search-input"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleOrganizationSearch();
+                  type="checkbox"
+                  checked={editAgreementRequired}
+                  onChange={(e) => {
+                    setEditAgreementRequired(e.target.checked);
+                    if (!e.target.checked) {
+                      setSelectedAgreementOrgIds([]);
                     }
                   }}
                 />
-                <button
-                  onClick={handleOrganizationSearch}
-                  className="search-button"
-                  disabled={!organizationSearch.trim() || isSearching}
-                >
-                  {isSearching ? 'Searching...' : 'Search'}
-                </button>
-              </div>
+                <span>Require edit agreement from organizations</span>
+              </label>
+              {editAgreementRequired && (
+                <div className="agreement-org-list">
+                  {availableOrganizations.length === 0 ? (
+                    <p className="agreement-helper">No organizations available.</p>
+                  ) : (
+                    availableOrganizations.map((org) => (
+                      <label key={org.id} className="checkbox-label org-checkbox">
+                        <input
+                          type="checkbox"
+                          checked={selectedAgreementOrgIds.includes(org.id)}
+                          onChange={() => handleToggleAgreementOrg(org.id)}
+                        />
+                        <span>{org.displayName}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
-
-            {/* Department Dropdown */}
-            {departments.length > 0 && (
-              <div className="department-section">
-                <label className="department-label">Select Department</label>
-                <select
-                  value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="department-select"
-                >
-                  <option value="">Select a department</option>
-                  {departments.map((dept, index) => (
-                    <option key={index} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             {/* Modal Actions */}
             <div className="modal-actions">

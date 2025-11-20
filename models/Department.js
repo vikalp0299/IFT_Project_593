@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto';
 
 const departmentSchema = new mongoose.Schema(
   {
@@ -34,23 +33,9 @@ const departmentSchema = new mongoose.Schema(
       maxlength: 150,
     },
     publicKey: {
-      pem: {
-        type: String,
-        required: true,
-      },
-      keyType: {
-        type: String,
-        default: 'RSA-OAEP',
-      },
-      keySize: {
-        type: Number,
-        default: 2048,
-      },
-      fingerprint: {
-        type: String,
-        required: true,
-        unique: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PublicKey',
+      required: true,
     },
     createdBy: {
       userId: {
@@ -78,33 +63,29 @@ const departmentSchema = new mongoose.Schema(
 );
 
 departmentSchema.index({ organization: 1, departmentName: 1 }, { unique: true });
-departmentSchema.index({ 'publicKey.fingerprint': 1 }, { unique: true });
 
 departmentSchema.pre('save', function save(next) {
   this.departmentName = this.departmentName.toLowerCase();
   this.organizationName = this.organizationName.toLowerCase();
-  if (!this.publicKey.fingerprint && this.publicKey?.pem) {
-    this.publicKey.fingerprint = crypto
-      .createHash('sha256')
-      .update(this.publicKey.pem)
-      .digest('hex');
-  }
   next();
 });
 
 departmentSchema.methods.toResponse = function toResponse() {
+  const populatedKey = this.populated('publicKey') ? this.publicKey : null;
   return {
     id: this._id,
     organization: this.organization,
     organizationName: this.organizationName,
     departmentName: this.departmentName,
     displayName: this.displayName,
-    publicKey: {
-      pem: this.publicKey.pem,
-      keyType: this.publicKey.keyType,
-      keySize: this.publicKey.keySize,
-      fingerprint: this.publicKey.fingerprint,
-    },
+    publicKey: populatedKey
+      ? {
+          keyId: populatedKey.keyId,
+          keyType: populatedKey.keyType,
+          keySize: populatedKey.keySize,
+          createdAt: populatedKey.createdAt,
+        }
+      : this.publicKey,
     createdBy: this.createdBy,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
@@ -112,6 +93,36 @@ departmentSchema.methods.toResponse = function toResponse() {
 };
 
 const Department = mongoose.model('Department', departmentSchema);
+
+let departmentIndexesEnsured = false;
+
+const ensureDepartmentIndexes = async () => {
+  if (departmentIndexesEnsured) {
+    return;
+  }
+  try {
+    const indexes = await Department.collection.indexes();
+    const legacyIndex = indexes.find((idx) => idx.name === 'departmentName_1');
+    if (legacyIndex) {
+      await Department.collection.dropIndex('departmentName_1');
+    }
+    await Department.collection.createIndex(
+      { organization: 1, departmentName: 1 },
+      { unique: true, name: 'organization_department_unique_idx' }
+    );
+    departmentIndexesEnsured = true;
+  } catch (error) {
+    console.error('Failed to ensure department indexes:', error.message);
+  }
+};
+
+if (mongoose.connection.readyState === 1) {
+  ensureDepartmentIndexes().catch(() => undefined);
+} else {
+  mongoose.connection.once('connected', () => {
+    ensureDepartmentIndexes().catch(() => undefined);
+  });
+}
 
 export default Department;
 

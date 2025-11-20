@@ -22,7 +22,8 @@ export const generateTokens = (user) => {
     email: user.email,
     role: user.role,
     organizationId: user.organization,
-    organizationName: user.organizationName
+    organizationName: user.organizationName,
+    department: user.department // Include department for private-key-server verification
   };
 
   const accessToken = jwt.sign(payload, JWT_SECRET, { 
@@ -153,6 +154,7 @@ export const authenticateToken = async (req, res, next) => {
       role: user.role,
       organizationId: user.organization,
       organizationName: user.organizationName,
+      department: user.department, // Department name (string)
       permissions: user.permissions || []
     };
 

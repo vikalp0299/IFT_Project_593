@@ -2,38 +2,58 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 
 const publicKeySchema = new mongoose.Schema({
-  // Primary association - Organization
+  // Organization association
   organization: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
     required: true,
-    index: true
+    index: true,
   },
-  
-  // Secondary association - User within organization
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  
-  // Organization and User names for easier queries
+
   organizationName: {
     type: String,
     required: true,
     trim: true,
-    index: true
+    lowercase: true,
+    index: true,
   },
-  
-  username: {
+
+  // Department association
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    required: true,
+    index: true,
+  },
+
+  departmentName: {
     type: String,
     required: true,
     trim: true,
     lowercase: true,
-    index: true
+    index: true,
   },
-  
+
+  // Actor metadata
+  createdBy: {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+  },
   // Public key data
   publicKeyPem: {
     type: String,
@@ -115,9 +135,16 @@ const publicKeySchema = new mongoose.Schema({
 });
 
 // Compound indexes for efficient queries
-publicKeySchema.index({ organization: 1, user: 1, isActive: 1 }, { unique: true });
-publicKeySchema.index({ organizationName: 1, username: 1, isActive: 1 });
 publicKeySchema.index({ keyFingerprint: 1 }, { unique: true });
+publicKeySchema.index(
+  { organization: 1, department: 1, isActive: 1 },
+  {
+    unique: true,
+    name: 'organization_department_active_unique',
+    partialFilterExpression: { isActive: true },
+  }
+);
+publicKeySchema.index({ departmentName: 1, organizationName: 1 });
 
 // Pre-save middleware to generate fingerprint
 publicKeySchema.pre('save', function(next) {
@@ -145,26 +172,25 @@ publicKeySchema.post('save', function(doc) {
 });
 
 // Static methods for key operations
-publicKeySchema.statics.findByOrganization = function(organizationId) {
-  return this.find({ 
-    organization: organizationId, 
-    isActive: true 
-  }).populate('user', 'username email firstName lastName role');
+publicKeySchema.statics.findByOrganization = function (organizationId) {
+  return this.find({
+    organization: organizationId,
+    isActive: true,
+  }).populate('department', 'departmentName displayName');
 };
 
-publicKeySchema.statics.findByUserAndOrganization = function(userId, organizationId) {
-  return this.findOne({ 
-    user: userId, 
-    organization: organizationId, 
-    isActive: true 
-  });
+publicKeySchema.statics.findByDepartment = function (departmentId) {
+  return this.findOne({
+    department: departmentId,
+    isActive: true,
+  }).populate('department organization');
 };
 
-publicKeySchema.statics.findByKeyId = function(keyId) {
-  return this.findOne({ 
-    keyId: keyId, 
-    isActive: true 
-  }).populate('user organization');
+publicKeySchema.statics.findByKeyId = function (keyId) {
+  return this.findOne({
+    keyId,
+    isActive: true,
+  }).populate('department organization');
 };
 
 publicKeySchema.statics.deactivateKey = function(keyId) {
@@ -176,17 +202,18 @@ publicKeySchema.statics.deactivateKey = function(keyId) {
 };
 
 // Instance methods
-publicKeySchema.methods.toSafeObject = function() {
+publicKeySchema.methods.toSafeObject = function () {
   return {
     keyId: this.keyId,
     organizationName: this.organizationName,
-    username: this.username,
+    departmentName: this.departmentName,
     keyType: this.keyType,
     keySize: this.keySize,
     isActive: this.isActive,
     isPrimary: this.isPrimary,
     createdAt: this.createdAt,
-    updatedAt: this.updatedAt
+    updatedAt: this.updatedAt,
+    createdBy: this.createdBy,
   };
 };
 
@@ -209,5 +236,68 @@ publicKeySchema.set('toJSON', { virtuals: true });
 publicKeySchema.set('toObject', { virtuals: true });
 
 const PublicKey = mongoose.model('PublicKey', publicKeySchema);
+
+let publicKeyIndexesEnsured = false;
+
+const ensurePublicKeyIndexes = async () => {
+  if (publicKeyIndexesEnsured) {
+    return;
+  }
+  try {
+    const indexes = await PublicKey.collection.indexes();
+
+    const legacyUserIndex = indexes.find((idx) => idx.name === 'organization_1_user_1_isActive_1');
+    if (legacyUserIndex) {
+      await PublicKey.collection.dropIndex('organization_1_user_1_isActive_1');
+    }
+
+    const legacyUsernameIndex = indexes.find(
+      (idx) => idx.name === 'organizationName_1_username_1_isActive_1'
+    );
+    if (legacyUsernameIndex) {
+      await PublicKey.collection.dropIndex('organizationName_1_username_1_isActive_1');
+    }
+
+    const legacyDeptIndex = indexes.find(
+      (idx) => idx.name === 'organization_department_active_unique'
+    );
+    if (!legacyDeptIndex) {
+      await PublicKey.collection.createIndex(
+        { organization: 1, department: 1, isActive: 1 },
+        {
+          unique: true,
+          name: 'organization_department_active_unique',
+          background: true,
+          partialFilterExpression: { isActive: true },
+        }
+      );
+    }
+
+    const legacyDeptNameIndex = indexes.find(
+      (idx) => idx.name === 'departmentName_1_organizationName_1'
+    );
+    if (!legacyDeptNameIndex) {
+      await PublicKey.collection.createIndex(
+        { departmentName: 1, organizationName: 1 },
+        {
+          name: 'departmentName_1_organizationName_1',
+          background: true,
+        }
+      );
+    }
+
+    publicKeyIndexesEnsured = true;
+  } catch (error) {
+    console.error('Failed to ensure public key indexes:', error.message);
+  }
+};
+
+if (mongoose.connection.readyState === 1) {
+  ensurePublicKeyIndexes().catch(() => undefined);
+} else {
+  mongoose.connection.once('connected', () => {
+    ensurePublicKeyIndexes().catch(() => undefined);
+  });
+}
 
 export default PublicKey;

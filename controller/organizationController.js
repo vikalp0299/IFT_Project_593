@@ -1,11 +1,12 @@
 import { ObjectId } from 'mongodb';
-import crypto from 'crypto';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import { Organization } from '../db.js';
 import Department from '../models/Department.js';
 import { verifyToken,getOrganizationIdFromToken,getUserIdfromToken,getUserRoleFromToken } from '../middleware/auth.js';
 import  Access  from '../models/access.js';
 import { request } from 'express';
+import PublicKey from '../models/PublicKey.js';
 
 // const getOrganizationIdFromToken = (req) => {
 //     const token = req.headers.authorization.split(' ')[1];
@@ -136,6 +137,84 @@ export async function validateOrganization(req, res) {
         message: 'Internal server error'
         });
     }
+}
+
+export async function listOrganizations(req, res) {
+  try {
+    const excludeSelf = req.query.excludeSelf === 'true';
+    const currentOrgName = req.user?.organizationName?.toLowerCase().trim();
+
+    const filter = {};
+    if (excludeSelf && currentOrgName) {
+      filter.name = { $ne: currentOrgName };
+    }
+
+    const organizations = await Organization.find(filter, {
+      _id: 1,
+      name: 1,
+      displayName: 1,
+    })
+      .sort({ displayName: 1 })
+      .lean();
+
+    res.json({
+      success: true,
+      data: {
+        organizations,
+      },
+    });
+  } catch (error) {
+    console.error('listOrganizations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch organizations',
+    });
+  }
+}
+
+/**
+ * Get local server (private-key-server) URL for the authenticated user's organization
+ * GET /org/local-server
+ */
+export async function getLocalServerUrl(req, res) {
+  try {
+    const userId = req.user?.id || req.user?.userId;
+    const organizationId = req.user?.organizationId || req.user?.organization;
+
+    if (!userId || !organizationId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required',
+      });
+    }
+
+    const { default: LocalServer } = await import('../models/LocalServer.js');
+    const localServer = await LocalServer.findOne({
+      organization: organizationId,
+      isActive: true,
+    }).lean();
+
+    if (!localServer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Private-key-server not configured for your organization',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        baseUrl: localServer.baseUrl,
+        isActive: localServer.isActive,
+      },
+    });
+  } catch (error) {
+    console.error('getLocalServerUrl error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch local server URL',
+    });
+  }
 }
 
 
@@ -459,6 +538,10 @@ export async function getOrganizationDepartments(req, res) {
 
     const departments = await Department.find({ organization: organization._id })
       .sort({ displayName: 1 })
+      .populate({
+        path: 'publicKey',
+        select: 'keyId keyType keySize createdAt isActive ownerType',
+      })
       .lean();
 
     return res.json({
@@ -473,6 +556,15 @@ export async function getOrganizationDepartments(req, res) {
           id: dept._id,
           name: dept.departmentName,
           displayName: dept.displayName,
+          publicKey: dept.publicKey
+            ? {
+                keyId: dept.publicKey.keyId,
+                keyType: dept.publicKey.keyType,
+                keySize: dept.publicKey.keySize,
+                createdAt: dept.publicKey.createdAt,
+                isActive: dept.publicKey.isActive,
+              }
+            : null,
         })),
       },
     });
@@ -486,9 +578,9 @@ export async function getOrganizationDepartments(req, res) {
 }
 
 export async function createDepartmentWithPublicKey(req, res) {
+  let publicKeyRecord = null;
   try {
-    const { departmentName, publicKeyPem, keyType = 'RSA-OAEP', keySize = 2048, fingerprint } =
-      req.body || {};
+    const { departmentName, publicKeyPem, keyType = 'RSA-OAEP', keySize = 2048 } = req.body || {};
 
     if (!departmentName || !publicKeyPem) {
       return res.status(400).json({
@@ -508,6 +600,7 @@ export async function createDepartmentWithPublicKey(req, res) {
 
     const normalizedName = departmentName.toLowerCase().trim();
     const displayName = departmentName.trim();
+    const normalizedOrgName = req.user.organizationName?.toLowerCase().trim() || '';
 
     const existing = await Department.findOne({
       organization: req.user.organizationId,
@@ -525,20 +618,30 @@ export async function createDepartmentWithPublicKey(req, res) {
       });
     }
 
-    const keyFingerprint =
-      fingerprint || crypto.createHash('sha256').update(publicKeyPem).digest('hex');
+    const departmentObjectId = new mongoose.Types.ObjectId();
+
+    publicKeyRecord = await PublicKey.create({
+      organization: req.user.organizationId,
+      organizationName: normalizedOrgName,
+      department: departmentObjectId,
+      departmentName: normalizedName,
+      publicKeyPem: publicKeyPem.trim(),
+      keyType,
+      keySize,
+      createdBy: {
+        userId: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+      },
+    });
 
     const department = await Department.create({
+      _id: departmentObjectId,
       organization: req.user.organizationId,
-      organizationName: req.user.organizationName?.toLowerCase() || '',
+      organizationName: normalizedOrgName,
       departmentName: normalizedName,
       displayName,
-      publicKey: {
-        pem: publicKeyPem.trim(),
-        keyType,
-        keySize,
-        fingerprint: keyFingerprint,
-      },
+      publicKey: publicKeyRecord._id,
       createdBy: {
         userId: req.user.id,
         username: req.user.username,
@@ -552,6 +655,14 @@ export async function createDepartmentWithPublicKey(req, res) {
       data: department.toResponse(),
     });
   } catch (error) {
+    if (publicKeyRecord?._id) {
+      try {
+        await PublicKey.deleteOne({ _id: publicKeyRecord._id });
+      } catch (cleanupError) {
+        console.error('Failed to remove orphan public key:', cleanupError.message);
+      }
+    }
+
     console.error('Create department error:', error);
     return res.status(500).json({
       success: false,

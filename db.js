@@ -142,9 +142,7 @@ const organizationSchema = new mongoose.Schema({
   },
   blockchainOrgName: {
     type: String,
-    default: null,
-    unique: true,
-    sparse: true // Allows multiple null values but ensures unique non-null values
+    default: null, // Allows multiple null values but ensures unique non-null values
   }
 }, { timestamps: true });
 
