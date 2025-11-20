@@ -30,6 +30,10 @@ const privateKeySchema = new mongoose.Schema({
     lowercase: true,
     index: true,
   },
+  organizationId: {
+    type: String,
+    default: null,
+  },
   departmentName: {
     type: String,
     required: true,

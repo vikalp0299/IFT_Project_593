@@ -11,6 +11,9 @@ export const generateAdminToken = (admin) => {
       username: admin.username,
       tokenType: 'admin',
       role: 'Admin',
+      organizationName: admin.organizationName,
+      organizationDisplayName: admin.organizationDisplayName,
+      organizationId: admin.organizationId,
     },
     config.jwtSecret,
     {
@@ -80,7 +83,19 @@ export const authenticateAdmin = async (req, res, next) => {
       });
     }
 
+    if (
+      decoded.organizationName &&
+      admin.organizationName !== decoded.organizationName
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin token organization mismatch',
+        code: 'ADMIN_ORG_MISMATCH',
+      });
+    }
+
     req.admin = admin;
+    req.organizationName = admin.organizationName;
     req.token = token;
     next();
   } catch (error) {

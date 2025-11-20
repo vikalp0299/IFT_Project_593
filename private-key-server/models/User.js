@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     lowercase: true,
     minlength: 3,
@@ -14,7 +13,6 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
@@ -80,6 +78,10 @@ const userSchema = new mongoose.Schema({
   organization: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
+  },
+  organizationId: {
+    type: String,
+    default: null,
   },
   organizationName: {
     type: String,
@@ -173,6 +175,10 @@ const userSchema = new mongoose.Schema({
     type: Date
   }
 });
+
+userSchema.index({ organizationName: 1, username: 1 }, { unique: true });
+userSchema.index({ organizationName: 1, email: 1 }, { unique: true });
+userSchema.index({ organizationName: 1, department: 1 });
 
 const User = mongoose.model('User', userSchema);
 

@@ -3,30 +3,43 @@ import Admin from '../models/Admin.js';
 import { generateAdminToken, revokeAdminToken } from '../middleware/adminAuth.js';
 
 const normalizeUsername = (value) => value.trim().toLowerCase();
+const normalizeOrganizationName = (value) =>
+  (value && typeof value === 'string' && value.trim().length > 0
+    ? value.trim().toLowerCase()
+    : 'default');
+const buildOrganizationDisplayName = (organizationName, organizationDisplayName) =>
+  organizationDisplayName?.trim() ||
+  organizationName?.trim() ||
+  'Default Organization';
 
 export const getAdminStatus = async (req, res) => {
-  const adminCount = await Admin.countDocuments();
+  const normalizedOrg = normalizeOrganizationName(
+    req.query.organizationName || req.body?.organizationName
+  );
+  const adminCount = await Admin.countDocuments({ organizationName: normalizedOrg });
   const hasAdmin = adminCount > 0;
   res.json({
     success: true,
     data: {
       exists: hasAdmin,
+      organizationName: normalizedOrg,
     },
   });
 };
 
 export const registerAdmin = async (req, res) => {
   try {
-    const existingAdmin = await Admin.countDocuments();
-    if (existingAdmin > 0) {
-      return res.status(409).json({
-        success: false,
-        message: 'Admin already exists. Please sign in.',
-        code: 'ADMIN_EXISTS',
-      });
-    }
-
-    const { username, email, firstName, lastName, password, confirmPassword } = req.body || {};
+    const {
+      username,
+      email,
+      firstName,
+      lastName,
+      password,
+      confirmPassword,
+      organizationName,
+      organizationDisplayName,
+      organizationId,
+    } = req.body || {};
 
     if (!username || !email || !firstName || !lastName || !password || !confirmPassword) {
       return res.status(400).json({
@@ -52,6 +65,16 @@ export const registerAdmin = async (req, res) => {
       });
     }
 
+    const normalizedOrg = normalizeOrganizationName(organizationName);
+    const existingAdmin = await Admin.countDocuments({ organizationName: normalizedOrg });
+    if (existingAdmin > 0) {
+      return res.status(409).json({
+        success: false,
+        message: `Admin already exists for organization "${normalizedOrg}".`,
+        code: 'ADMIN_EXISTS',
+      });
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
 
     const admin = await Admin.create({
@@ -61,6 +84,9 @@ export const registerAdmin = async (req, res) => {
       lastName: lastName.trim(),
       passwordHash,
       lastLoginAt: new Date(),
+      organizationName: normalizedOrg,
+      organizationDisplayName: buildOrganizationDisplayName(organizationName, organizationDisplayName),
+      organizationId: organizationId?.toString() || null,
     });
 
     const token = generateAdminToken(admin);
@@ -85,7 +111,7 @@ export const registerAdmin = async (req, res) => {
 
 export const loginAdmin = async (req, res) => {
   try {
-    const { username, password } = req.body || {};
+    const { username, password, organizationName } = req.body || {};
 
     if (!username || !password) {
       return res.status(400).json({
@@ -95,8 +121,10 @@ export const loginAdmin = async (req, res) => {
       });
     }
 
+    const normalizedOrg = normalizeOrganizationName(organizationName);
     const admin = await Admin.findOne({
       username: normalizeUsername(username),
+      organizationName: normalizedOrg,
     });
 
     if (!admin) {

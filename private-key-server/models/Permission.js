@@ -9,6 +9,18 @@ const permissionSchema = new mongoose.Schema({
     lowercase: true,
     index: true
   },
+  organizationName: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true,
+    index: true,
+    default: 'default',
+  },
+  organizationId: {
+    type: String,
+    default: null,
+  },
   
   // List of allowed users (can be userId, username, or email)
   allowedUsers: [{
@@ -54,7 +66,7 @@ permissionSchema.pre('save', function(next) {
 });
 
 // Index for faster queries
-permissionSchema.index({ departmentName: 1 }, { unique: true });
+permissionSchema.index({ organizationName: 1, departmentName: 1 }, { unique: true });
 permissionSchema.index({ 'allowedUsers.userId': 1 });
 permissionSchema.index({ 'allowedUsers.username': 1 });
 permissionSchema.index({ 'allowedUsers.userEmail': 1 });

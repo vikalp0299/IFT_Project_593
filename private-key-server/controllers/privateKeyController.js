@@ -1,7 +1,22 @@
 import { generateKeyPairSync } from 'crypto';
+import crypto from 'crypto';
 import PrivateKey from '../models/PrivateKey.js';
 import Permission from '../models/Permission.js';
 import { encryptSecret, decryptSecret } from '../utils/cryptoUtils.js';
+
+const normalize = (value = '') => value.toString().trim().toLowerCase();
+const normalizeOrganizationName = (value) => {
+  if (typeof value === 'string' && value.trim().length > 0) {
+    return value.trim().toLowerCase();
+  }
+  if (value && typeof value.toString === 'function') {
+    const converted = value.toString().trim();
+    if (converted.length > 0) {
+      return converted.toLowerCase();
+    }
+  }
+  return 'default';
+};
 
 /**
  * Store encrypted private key
@@ -29,9 +44,18 @@ export const storePrivateKey = async (req, res) => {
     }
 
     // Check if private key already exists for this department
+    const normalizedOrg = normalizeOrganizationName(organizationName);
+    if (req.admin.organizationName !== normalizedOrg) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin cannot manage another organization',
+        code: 'ADMIN_ORG_CONFLICT',
+      });
+    }
+
     const existingKey = await PrivateKey.findOne({ 
-      departmentName: departmentName.toLowerCase().trim(),
-      organizationName: organizationName.toLowerCase().trim()
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg
     });
 
     if (existingKey) {
@@ -57,8 +81,9 @@ export const storePrivateKey = async (req, res) => {
         authTag: encryptedPayload.authTag,
         fingerprint: encryptedPayload.fingerprint
       },
-      departmentName: departmentName.toLowerCase().trim(),
-      organizationName: organizationName.toLowerCase().trim(),
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg,
+      organizationId: req.admin.organizationId || null,
       displayName: departmentName.trim(),
       storedBy: {
         adminId: req.admin?._id,
@@ -100,6 +125,12 @@ export const storePrivateKey = async (req, res) => {
 export const checkPrivateKeyExists = async (req, res) => {
   try {
     const { departmentName } = req.params;
+    const organizationName =
+      req.query.organizationName ||
+      req.body?.organizationName ||
+      req.headers['x-organization-name'] ||
+      'default';
+    const normalizedOrg = normalizeOrganizationName(organizationName);
 
     if (!departmentName) {
       return res.status(400).json({
@@ -110,14 +141,16 @@ export const checkPrivateKeyExists = async (req, res) => {
     }
 
     const privateKey = await PrivateKey.findOne({ 
-      departmentName: departmentName.toLowerCase().trim() 
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg,
     });
 
     res.json({
       success: true,
       data: {
         exists: !!privateKey,
-        departmentName: departmentName.toLowerCase().trim()
+        departmentName: normalize(departmentName),
+        organizationName: normalizedOrg,
       }
     });
 
@@ -164,8 +197,16 @@ export const createDepartmentWithKeys = async (req, res) => {
       });
     }
 
-    const normalizedName = departmentName.toLowerCase().trim();
-    const normalizedOrgName = organizationName.toLowerCase().trim();
+    const normalizedName = normalize(departmentName);
+    const normalizedOrgName = normalizeOrganizationName(organizationName);
+
+    if (req.admin.organizationName !== normalizedOrgName) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin cannot create departments for another organization',
+        code: 'ADMIN_ORG_CONFLICT',
+      });
+    }
     const displayName = departmentName.trim();
 
     const existingKey = await PrivateKey.findOne({ 
@@ -204,6 +245,7 @@ export const createDepartmentWithKeys = async (req, res) => {
       },
       departmentName: normalizedName,
       organizationName: normalizedOrgName,
+      organizationId: req.admin.organizationId || null,
       displayName,
       storedBy: {
         adminId: req.admin._id,
@@ -236,6 +278,64 @@ export const createDepartmentWithKeys = async (req, res) => {
   }
 };
 
+export const deleteDepartment = async (req, res) => {
+  try {
+    const { organizationName, departmentName } = req.params;
+
+    if (!organizationName || !departmentName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Organization name and department name are required',
+        code: 'MISSING_PARAMETERS',
+      });
+    }
+
+    if (!req.admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'Admin authentication required',
+        code: 'ADMIN_AUTH_REQUIRED',
+      });
+    }
+
+    const normalizedOrg = normalizeOrganizationName(organizationName);
+    const normalizedDept = normalize(departmentName);
+
+    if (req.admin.organizationName !== normalizedOrg) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin cannot delete departments for another organization',
+        code: 'ADMIN_ORG_CONFLICT',
+      });
+    }
+
+    const deleted = await PrivateKey.findOneAndDelete({
+      organizationName: normalizedOrg,
+      departmentName: normalizedDept,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: 'Department not found on private-key-server',
+        code: 'DEPARTMENT_NOT_FOUND',
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Department "${deleted.displayName}" removed from private-key-server`,
+    });
+  } catch (error) {
+    console.error('Delete department error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to delete department on private-key-server',
+      code: 'DELETE_DEPARTMENT_ERROR',
+    });
+  }
+};
+
 /**
  * Get private key for authenticated user
  * GET /private-key/:departmentName
@@ -264,11 +364,24 @@ export const getPrivateKey = async (req, res) => {
       });
     }
 
-    const requestedDepartment = departmentName.toLowerCase().trim();
+    const requestedDepartment = normalize(departmentName);
+    const actorOrg =
+      (req.admin && req.admin.organizationName) ||
+      (req.user && req.user.organizationName) ||
+      null;
+    if (!actorOrg) {
+      return res.status(400).json({
+        success: false,
+        message: 'Organization context required',
+        code: 'MISSING_ORGANIZATION',
+      });
+    }
 
     // Find private key for the department
+    const normalizedActorOrg = normalizeOrganizationName(actorOrg);
     const privateKey = await PrivateKey.findOne({ 
-      departmentName: requestedDepartment 
+      departmentName: requestedDepartment,
+      organizationName: normalizedActorOrg,
     });
 
     if (!privateKey) {
@@ -292,6 +405,7 @@ export const getPrivateKey = async (req, res) => {
         data: {
           privateKey: decryptedKey,
           departmentName: privateKey.departmentName,
+          organizationName: privateKey.organizationName,
           storedBy: privateKey.storedBy,
           storedAt: privateKey.createdAt,
           encryptionFingerprint: privateKey.encryption.fingerprint,
@@ -309,6 +423,7 @@ export const getPrivateKey = async (req, res) => {
         data: {
           privateKey: decryptedKey,
           departmentName: privateKey.departmentName,
+          organizationName: privateKey.organizationName,
           storedBy: privateKey.storedBy,
           storedAt: privateKey.createdAt,
           encryptionFingerprint: privateKey.encryption.fingerprint
@@ -318,7 +433,8 @@ export const getPrivateKey = async (req, res) => {
 
     // User is from different department - check permission list
     const permission = await Permission.findOne({ 
-      departmentName: requestedDepartment 
+      departmentName: requestedDepartment,
+      organizationName: normalizedActorOrg,
     });
 
     if (!permission || !permission.allowedUsers || permission.allowedUsers.length === 0) {
@@ -353,6 +469,7 @@ export const getPrivateKey = async (req, res) => {
       data: {
         privateKey: decryptedKey,
         departmentName: privateKey.departmentName,
+        organizationName: privateKey.organizationName,
         storedBy: privateKey.storedBy,
         storedAt: privateKey.createdAt,
         encryptionFingerprint: privateKey.encryption.fingerprint,
@@ -388,7 +505,8 @@ export const adminTestDecryptPrivateKey = async (req, res) => {
     }
 
     const privateKey = await PrivateKey.findOne({
-      departmentName: departmentName.toLowerCase().trim(),
+      departmentName: normalize(departmentName),
+      organizationName: req.admin?.organizationName || 'default',
     });
 
     if (!privateKey) {
@@ -423,6 +541,190 @@ export const adminTestDecryptPrivateKey = async (req, res) => {
       success: false,
       message: 'Failed to decrypt private key',
       code: 'TEST_DECRYPT_ERROR',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Decrypt symmetric key for file download
+ * POST /private-key/decrypt-symmetric-key
+ * - Verifies user belongs to the organization and department specified in access rights
+ * - Decrypts the encrypted symmetric key using department's private key
+ * - Returns ONLY the decrypted symmetric key (never the private key)
+ */
+export const decryptSymmetricKey = async (req, res) => {
+  try {
+    // Get authenticated user from middleware
+    const authenticatedUser = req.user;
+    if (!authenticatedUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required',
+        code: 'AUTH_REQUIRED',
+      });
+    }
+
+    const {
+      encryptedSymmetricKey,
+      organizationId,
+      organizationName,
+      departmentId,
+      departmentName,
+    } = req.body;
+
+    // Validation
+    if (!encryptedSymmetricKey || !organizationName || !departmentName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: encryptedSymmetricKey, organizationName, departmentName',
+        code: 'MISSING_FIELDS',
+      });
+    }
+
+    // Normalize organization and department names from request
+    const normalizedOrg = normalizeOrganizationName(organizationName);
+    const normalizedDept = normalize(departmentName);
+
+    // Get user's actual organization and department from JWT token (not from request body - prevents spoofing)
+    const userOrgName = authenticatedUser.organizationName
+      ? normalizeOrganizationName(authenticatedUser.organizationName)
+      : null;
+    const userDeptName = authenticatedUser.department
+      ? normalize(authenticatedUser.department)
+      : null;
+
+    if (!userOrgName) {
+      return res.status(400).json({
+        success: false,
+        message: 'User organization information is missing from authentication token',
+        code: 'MISSING_USER_INFO',
+      });
+    }
+
+    // Department might not be in token for older tokens - get it from request body as fallback
+    // The request body contains departmentName from the file's access rights
+    // We'll verify that the user's department (from token or request) matches the file's department
+    // SECURITY: If department is not in token, we'll use the departmentName from request
+    // but we still verify the organization matches (which is in the token)
+    const deptNameToVerify = userDeptName || (departmentName ? normalize(departmentName) : null);
+    
+    if (!deptNameToVerify) {
+      // Log for debugging
+      console.warn('Department missing from token and request:', {
+        hasTokenDept: !!userDeptName,
+        hasRequestDept: !!departmentName,
+        userOrg: userOrgName
+      });
+      
+      return res.status(400).json({
+        success: false,
+        message: 'User department information is required. Please log in again to get an updated token with department information.',
+        code: 'MISSING_DEPARTMENT_INFO',
+      });
+    }
+
+    // CRITICAL SECURITY CHECK: Verify authenticated user belongs to the same organization and department
+    // as specified in the file's access rights (prevent user from spoofing their org/dept)
+    if (normalizedOrg !== userOrgName) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: Authenticated user does not belong to the organization specified in file access rights',
+        code: 'ACCESS_DENIED_ORG',
+      });
+    }
+
+    if (normalizedDept !== deptNameToVerify) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: Authenticated user does not belong to the department specified in file access rights',
+        code: 'ACCESS_DENIED_DEPT',
+      });
+    }
+
+    // Find private key for the department
+    const privateKey = await PrivateKey.findOne({
+      departmentName: normalizedDept,
+      organizationName: normalizedOrg,
+    });
+
+    if (!privateKey) {
+      return res.status(404).json({
+        success: false,
+        message: 'Private key not found for this department',
+        code: 'KEY_NOT_FOUND',
+      });
+    }
+
+    // Decrypt the department's private key
+    const departmentPrivateKeyPem = decryptSecret({
+      ciphertext: privateKey.encryptedPrivateKey,
+      iv: privateKey.encryption.iv,
+      authTag: privateKey.encryption.authTag,
+    });
+
+    // Decrypt the symmetric key using the department's private key
+    let decryptedSymmetricKey;
+    try {
+      const privateKeyObj = crypto.createPrivateKey({
+        key: departmentPrivateKeyPem,
+        format: 'pem',
+        type: 'pkcs8',
+      });
+
+      // SECURITY: Validate encrypted key format before decryption
+      if (!encryptedSymmetricKey || typeof encryptedSymmetricKey !== 'string') {
+        throw new Error('Invalid encrypted symmetric key format');
+      }
+
+      const encryptedBuffer = Buffer.from(encryptedSymmetricKey, 'base64');
+      
+      // SECURITY: Validate buffer size (RSA-OAEP encrypted data should be key size in bytes)
+      // For 2048-bit RSA key, encrypted data should be 256 bytes
+      if (encryptedBuffer.length === 0 || encryptedBuffer.length > 512) {
+        throw new Error('Invalid encrypted symmetric key size');
+      }
+
+      const decrypted = crypto.privateDecrypt(
+        {
+          key: privateKeyObj,
+          padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+          oaepHash: 'sha256',
+        },
+        encryptedBuffer
+      );
+
+      // SECURITY: Validate decrypted key length (must be exactly 32 bytes for AES-256)
+      if (decrypted.length !== 32) {
+        console.error(`Invalid decrypted key length: ${decrypted.length}, expected 32`);
+        throw new Error('Decrypted key length is invalid - possible tampering or wrong key');
+      }
+
+      decryptedSymmetricKey = decrypted.toString('base64');
+    } catch (error) {
+      console.error('Error decrypting symmetric key:', error);
+      return res.status(500).json({
+        success: false,
+        message: `Failed to decrypt symmetric key: ${error.message}`,
+        code: 'DECRYPTION_ERROR',
+      });
+    }
+
+    // Return ONLY the decrypted symmetric key (never the private key)
+    res.json({
+      success: true,
+      message: 'Symmetric key decrypted successfully',
+      data: {
+        symmetricKey: decryptedSymmetricKey, // Base64 encoded 32-byte key
+        algorithm: 'AES-256-GCM',
+      },
+    });
+  } catch (error) {
+    console.error('Decrypt symmetric key error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to decrypt symmetric key',
+      code: 'INTERNAL_ERROR',
       error: error.message,
     });
   }

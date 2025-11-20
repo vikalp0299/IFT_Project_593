@@ -6,6 +6,7 @@ import privateKeyRoutes from './routes/privateKeyRoutes.js';
 import permissionRoutes from './routes/permissionRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import organizationConfigRoutes from './routes/organizationConfigRoutes.js';
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/', adminRoutes);
 app.use('/', userRoutes);
 app.use('/', privateKeyRoutes);
 app.use('/', permissionRoutes);
+app.use('/', organizationConfigRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

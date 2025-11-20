@@ -1,21 +1,11 @@
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import User from '../models/User.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load environment variables from parent directory's .env file
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
+import OrganizationConfig from '../models/OrganizationConfig.js';
+import { authenticateUser } from './userAuth.js';
 
 /**
  * Authentication middleware for private key server
- * Verifies JWT token and attaches user to request
+ * Only accepts private-key-server user tokens
+ * Users must login to private-key-server to get a valid token
  */
 export const authenticateToken = async (req, res, next) => {
   try {
@@ -30,58 +20,38 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    // Verify token
-    let decoded;
+    // First, decode token without verification to determine token type
+    let decodedUnverified;
     try {
-      decoded = jwt.verify(token, JWT_SECRET, {
-        issuer: 'safe-app',
-        audience: 'safe-app-users'
-      });
+      decodedUnverified = jwt.decode(token);
+      if (!decodedUnverified) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token format',
+          code: 'INVALID_TOKEN_FORMAT'
+        });
+      }
     } catch (error) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid or expired token',
-        code: 'INVALID_TOKEN'
+        message: 'Invalid token format',
+        code: 'INVALID_TOKEN_FORMAT'
       });
     }
 
-    // Fetch user from database to ensure they still exist and are active
-    const user = await User.findById(decoded.userId).select('-password');
-    
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found',
-        code: 'USER_NOT_FOUND'
-      });
+    // Check if this is a private-key-server user token (has tokenType: 'user')
+    if (decodedUnverified.tokenType === 'user' && decodedUnverified.iss === 'private-key-server') {
+      // Use user authentication middleware - this is the only accepted method
+      return authenticateUser(req, res, next);
     }
 
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'User account is deactivated',
-        code: 'ACCOUNT_DEACTIVATED'
-      });
-    }
-
-    // Attach user info to request
-    req.user = {
-      id: user._id,
-      userId: user._id,
-      username: user.username,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      organizationId: user.organization,
-      organizationName: user.organizationName,
-      department: user.department,
-      permissions: user.permissions || []
-    };
-
-    req.token = token;
-    next();
-
+    // If not a private-key-server token, reject it
+    // Users should login to private-key-server and use their token
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid token type. Please login to private-key-server to get a valid token.',
+      code: 'INVALID_TOKEN_TYPE'
+    });
   } catch (error) {
     console.error('Authentication error:', error);
     return res.status(401).json({
@@ -91,4 +61,3 @@ export const authenticateToken = async (req, res, next) => {
     });
   }
 };
-

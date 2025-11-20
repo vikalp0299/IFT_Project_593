@@ -3,6 +3,16 @@ import Permission from '../models/Permission.js';
 import PrivateKey from '../models/PrivateKey.js';
 import User from '../models/User.js';
 
+const normalize = (value = '') => value.toString().toLowerCase().trim();
+const getOrganizationContext = (req, fallback = 'default') =>
+  normalize(
+    req.user?.organizationName ||
+      req.admin?.organizationName ||
+      req.body?.organizationName ||
+      req.query?.organizationName ||
+      fallback
+  );
+
 /**
  * Add user to permission list for a department
  * POST /permissions
@@ -11,6 +21,7 @@ export const addUserToPermissionList = async (req, res) => {
   try {
     const { departmentName, userId, username, userEmail } = req.body;
     const addedBy = req.user.id;
+    const normalizedOrg = getOrganizationContext(req);
 
     // Validation
     if (!departmentName) {
@@ -31,7 +42,8 @@ export const addUserToPermissionList = async (req, res) => {
 
     // Check if private key exists for this department
     const privateKey = await PrivateKey.findOne({ 
-      departmentName: departmentName.toLowerCase().trim() 
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg,
     });
 
     if (!privateKey) {
@@ -45,7 +57,10 @@ export const addUserToPermissionList = async (req, res) => {
     // Verify user exists if userId or userEmail is provided
     let userToAdd = null;
     if (userId) {
-      userToAdd = await User.findById(userId);
+      userToAdd = await User.findOne({
+        _id: userId,
+        organizationName: normalizedOrg,
+      });
       if (!userToAdd) {
         return res.status(404).json({
           success: false,
@@ -54,7 +69,10 @@ export const addUserToPermissionList = async (req, res) => {
         });
       }
     } else if (userEmail) {
-      userToAdd = await User.findOne({ email: userEmail.toLowerCase().trim() });
+      userToAdd = await User.findOne({
+        email: userEmail.toLowerCase().trim(),
+        organizationName: normalizedOrg,
+      });
       if (!userToAdd) {
         return res.status(404).json({
           success: false,
@@ -63,7 +81,10 @@ export const addUserToPermissionList = async (req, res) => {
         });
       }
     } else if (username) {
-      userToAdd = await User.findOne({ username: username.toLowerCase().trim() });
+      userToAdd = await User.findOne({
+        username: username.toLowerCase().trim(),
+        organizationName: normalizedOrg,
+      });
       if (!userToAdd) {
         return res.status(404).json({
           success: false,
@@ -75,12 +96,15 @@ export const addUserToPermissionList = async (req, res) => {
 
     // Find or create permission document
     let permission = await Permission.findOne({ 
-      departmentName: departmentName.toLowerCase().trim() 
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg,
     });
 
     if (!permission) {
       permission = new Permission({
-        departmentName: departmentName.toLowerCase().trim(),
+        departmentName: normalize(departmentName),
+        organizationName: normalizedOrg,
+        organizationId: req.user?.organizationId || null,
         allowedUsers: []
       });
     }
@@ -125,6 +149,7 @@ export const addUserToPermissionList = async (req, res) => {
       message: 'User added to permission list successfully',
       data: {
         departmentName: permission.departmentName,
+        organizationName: permission.organizationName,
         user: {
           userId: userData.userId,
           username: userData.username,
@@ -153,6 +178,7 @@ export const addUserToPermissionList = async (req, res) => {
 export const removeUserFromPermissionList = async (req, res) => {
   try {
     const { departmentName, userId, username, userEmail } = req.body;
+    const normalizedOrg = getOrganizationContext(req);
 
     // Validation
     if (!departmentName) {
@@ -173,7 +199,8 @@ export const removeUserFromPermissionList = async (req, res) => {
 
     // Find permission document
     const permission = await Permission.findOne({ 
-      departmentName: departmentName.toLowerCase().trim() 
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg,
     });
 
     if (!permission || !permission.allowedUsers || permission.allowedUsers.length === 0) {
@@ -187,7 +214,9 @@ export const removeUserFromPermissionList = async (req, res) => {
     // Find user in permission list
     const userIndex = permission.allowedUsers.findIndex(allowedUser => {
       if (userId && allowedUser.userId) {
-        return allowedUser.userId.toString() === userId.toString();
+        return (
+          allowedUser.userId.toString() === userId.toString()
+        );
       }
       if (username && allowedUser.username) {
         return allowedUser.username.toLowerCase() === username.toLowerCase().trim();
@@ -216,6 +245,7 @@ export const removeUserFromPermissionList = async (req, res) => {
       message: 'User removed from permission list successfully',
       data: {
         departmentName: permission.departmentName,
+        organizationName: permission.organizationName,
         removedUser: {
           userId: removedUser.userId,
           username: removedUser.username,
@@ -243,6 +273,7 @@ export const removeUserFromPermissionList = async (req, res) => {
 export const getPermissionList = async (req, res) => {
   try {
     const { departmentName } = req.params;
+    const normalizedOrg = getOrganizationContext(req, req.query.organizationName);
 
     if (!departmentName) {
       return res.status(400).json({
@@ -254,7 +285,8 @@ export const getPermissionList = async (req, res) => {
 
     // Find permission document
     const permission = await Permission.findOne({ 
-      departmentName: departmentName.toLowerCase().trim() 
+      departmentName: normalize(departmentName),
+      organizationName: normalizedOrg,
     });
 
     if (!permission) {
@@ -296,6 +328,7 @@ export const getPermissionList = async (req, res) => {
       success: true,
       data: {
         departmentName: permission.departmentName,
+        organizationName: permission.organizationName,
         allowedUsers: allowedUsers,
         totalUsers: allowedUsers.length,
         createdAt: permission.createdAt,
