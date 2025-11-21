@@ -308,6 +308,30 @@ async function registerFunction(req, res) {
 
         await newUser.save();
 
+        // Create blockchain identity for the user if organization has blockchain
+        if (organization.hasBlockchain && organization.blockchainOrgName) {
+            try {
+                const blockChainFunctionHandler = (await import('../blockchain/controllers/blockChainFunctionHandler.js')).default;
+                const blockchainController = new blockChainFunctionHandler();
+                
+                console.log(`Creating blockchain identity for user: ${username} in blockchain organization: ${organization.blockchainOrgName}`);
+                await blockchainController.createUserIdentity(
+                    username.toLowerCase().trim(),
+                    organization.blockchainOrgName.toLowerCase().trim(),
+                    password  // Using the user's password for blockchain identity
+                );
+                console.log(`Blockchain identity created successfully for user: ${username}`);
+            } catch (blockchainError) {
+                // Log the error but don't fail registration
+                // The user account is created, blockchain identity can be created later
+                console.error('Failed to create blockchain identity:', blockchainError.message);
+                console.error('User account created but blockchain identity creation failed');
+                // Optionally, you could update user record with a flag indicating blockchain identity creation failed
+            }
+        } else {
+            console.log(`Organization ${organizationName} does not have blockchain enabled or blockchainOrgName not set. Skipping blockchain identity creation.`);
+        }
+
         // Generate tokens
         const tokens = generateTokens(newUser);
         const localServerPayload = activeLocalServer
