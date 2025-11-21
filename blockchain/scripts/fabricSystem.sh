@@ -178,6 +178,7 @@ function show_help() {
     echo
     echo "  Optional File Parameters:"
     echo "  --multiSigRequired     Whether multi-sig is required (default: false)"
+    echo "  --createdAt            ISO timestamp (optional, will auto-generate if not provided)"
     echo "  --requiredOrgsStr      Comma-separated list of required orgs for multi-sig (e.g., vikMSP,sunMSP)"
     echo "                         Will be converted to JSON array format: [\"vikMSP\",\"sunMSP\"]"
     echo "  --metadata             Additional metadata as JSON object (default: {})"
@@ -804,21 +805,27 @@ function init_ledger_wrapper() {
     local channelName=$4
     local chaincodeName=$5
     
+    # Transform names to Kubernetes format
+    # orgName: org -> org-admin-default
+    # peerName: peer0 -> org-peer0.default
+    local fullOrgName="${orgName}-admin-default"
+    local fullPeerName="${orgName}-${peerName}.default"
+    
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}Initializing Ledger${NC}"
     echo -e "${GREEN}Config File: ${configFile}${NC}"
-    echo -e "${GREEN}Organization: ${orgName}${NC}"
-    echo -e "${GREEN}Peer: ${peerName}${NC}"
+    echo -e "${GREEN}Organization: ${orgName} -> ${fullOrgName}${NC}"
+    echo -e "${GREEN}Peer: ${peerName} -> ${fullPeerName}${NC}"
     echo -e "${GREEN}Channel: ${channelName}${NC}"
     echo -e "${GREEN}Chaincode: ${chaincodeName}${NC}"
     echo -e "${GREEN}========================================${NC}"
     echo
     
-    # Call chaincodeFunction.sh
+    # Call chaincodeFunction.sh with transformed names
     echo -e "${GREEN}Executing chaincode function...${NC}"
-    ./chaincodeFunction.sh --configFile="${configFile}" --orgName="${orgName}" \
-        --peerName="${peerName}" --channelName="${channelName}" \
-        --chaincode="${chaincodeName}" --fcn=InitLedger
+    ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
+        --peerName "${fullPeerName}" --channelName "${channelName}" \
+        --chaincode "${chaincodeName}" --fcn InitLedger
     
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✓ Ledger initialized successfully${NC}"
@@ -842,11 +849,15 @@ function get_all_files_wrapper() {
     local chaincodeName=$5
     local args=$6
     
+    # Transform names to Kubernetes format
+    local fullOrgName="${orgName}-admin-default"
+    local fullPeerName="${orgName}-${peerName}.default"
+    
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}Querying All Files${NC}"
     echo -e "${GREEN}Config File: ${configFile}${NC}"
-    echo -e "${GREEN}Organization: ${orgName}${NC}"
-    echo -e "${GREEN}Peer: ${peerName}${NC}"
+    echo -e "${GREEN}Organization: ${orgName} -> ${fullOrgName}${NC}"
+    echo -e "${GREEN}Peer: ${peerName} -> ${fullPeerName}${NC}"
     echo -e "${GREEN}Channel: ${channelName}${NC}"
     echo -e "${GREEN}Chaincode: ${chaincodeName}${NC}"
     if [ -n "$args" ]; then
@@ -855,17 +866,17 @@ function get_all_files_wrapper() {
     echo -e "${GREEN}========================================${NC}"
     echo
     
-    # Call chaincodeFunction.sh
+    # Call chaincodeFunction.sh with transformed names
     echo -e "${GREEN}Executing chaincode function...${NC}"
     
     if [ -n "$args" ]; then
-        ./chaincodeFunction.sh --configFile="${configFile}" --orgName="${orgName}" \
-            --peerName="${peerName}" --channelName="${channelName}" \
-            --chaincode="${chaincodeName}" --fcn=GetAllFiles --args="${args}"
+        ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
+            --peerName "${fullPeerName}" --channelName "${channelName}" \
+            --chaincode "${chaincodeName}" --fcn GetAllFiles --args "${args}"
     else
-        ./chaincodeFunction.sh --configFile="${configFile}" --orgName="${orgName}" \
-            --peerName="${peerName}" --channelName="${channelName}" \
-            --chaincode="${chaincodeName}" --fcn=GetAllFiles
+        ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
+            --peerName "${fullPeerName}" --channelName "${channelName}" \
+            --chaincode "${chaincodeName}" --fcn GetAllFiles
     fi
     
     if [ $? -eq 0 ]; then
@@ -895,14 +906,19 @@ function create_file_wrapper() {
     local size=$9
     local allowedOrgsStr=${10}
     local multiSigRequired=${11}
-    local requiredOrgsStr=${12}
-    local metadata=${13}
+    local createdAt=${12}
+    local requiredOrgsStr=${13}
+    local metadata=${14}
+    
+    # Transform names to Kubernetes format
+    local fullOrgName="${orgName}-admin-default"
+    local fullPeerName="${orgName}-${peerName}.default"
     
     echo -e "${GREEN}========================================${NC}"
     echo -e "${GREEN}Creating File in Ledger${NC}"
     echo -e "${GREEN}Config File: ${configFile}${NC}"
-    echo -e "${GREEN}Organization: ${orgName}${NC}"
-    echo -e "${GREEN}Peer: ${peerName}${NC}"
+    echo -e "${GREEN}Organization: ${orgName} -> ${fullOrgName}${NC}"
+    echo -e "${GREEN}Peer: ${peerName} -> ${fullPeerName}${NC}"
     echo -e "${GREEN}Channel: ${channelName}${NC}"
     echo -e "${GREEN}Chaincode: ${chaincodeName}${NC}"
     echo -e "${GREEN}========================================${NC}"
@@ -913,6 +929,9 @@ function create_file_wrapper() {
     echo -e "${BLUE}  Size:${NC}             ${size} bytes"
     echo -e "${BLUE}  Allowed Orgs:${NC}     ${allowedOrgsStr}"
     echo -e "${BLUE}  Multi-Sig Req:${NC}    ${multiSigRequired}"
+    if [ -n "$createdAt" ]; then
+        echo -e "${BLUE}  Created At:${NC}       ${createdAt}"
+    fi
     if [ -n "$requiredOrgsStr" ]; then
         echo -e "${BLUE}  Required Orgs:${NC}    ${requiredOrgsStr}"
     fi
@@ -926,24 +945,26 @@ function create_file_wrapper() {
     echo -e "${GREEN}Executing chaincode function...${NC}"
     
     if [ -n "$metadata" ]; then
-        ./chaincodeFunction.sh --configFile="${configFile}" --orgName="${orgName}" \
-            --peerName="${peerName}" --channelName="${channelName}" \
-            --chaincode="${chaincodeName}" --fcn=CreateFile \
-            --fileId="${fileId}" --filename="${filename}" \
-            --ipfsCid="${ipfsCid}" --size="${size}" \
-            --allowedOrgsStr="${allowedOrgsStr}" \
-            --multiSigRequired="${multiSigRequired}" \
-            --requiredOrgsStr="${requiredOrgsStr}" \
-            --metadata="${metadata}"
+        ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
+            --peerName "${fullPeerName}" --channelName "${channelName}" \
+            --chaincode "${chaincodeName}" --fcn CreateFile \
+            --fileId "${fileId}" --filename "${filename}" \
+            --ipfsCid "${ipfsCid}" --size "${size}" \
+            --allowedOrgsStr "${allowedOrgsStr}" \
+            --multiSigRequired "${multiSigRequired}" \
+            --createdAt "${createdAt}" \
+            --requiredOrgsStr "${requiredOrgsStr}" \
+            --metadata "${metadata}"
     else
-        ./chaincodeFunction.sh --configFile="${configFile}" --orgName="${orgName}" \
-            --peerName="${peerName}" --channelName="${channelName}" \
-            --chaincode="${chaincodeName}" --fcn=CreateFile \
-            --fileId="${fileId}" --filename="${filename}" \
-            --ipfsCid="${ipfsCid}" --size="${size}" \
-            --allowedOrgsStr="${allowedOrgsStr}" \
-            --multiSigRequired="${multiSigRequired}" \
-            --requiredOrgsStr="${requiredOrgsStr}"
+        ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
+            --peerName "${fullPeerName}" --channelName "${channelName}" \
+            --chaincode "${chaincodeName}" --fcn CreateFile \
+            --fileId "${fileId}" --filename "${filename}" \
+            --ipfsCid "${ipfsCid}" --size "${size}" \
+            --allowedOrgsStr "${allowedOrgsStr}" \
+            --multiSigRequired "${multiSigRequired}" \
+            --createdAt "${createdAt}" \
+            --requiredOrgsStr "${requiredOrgsStr}"
     fi
     
     if [ $? -eq 0 ]; then
@@ -1393,6 +1414,7 @@ elif [ "$subcommand" == "create-file" ]; then
     configFile="../generated_resources/network-config.yaml"
     chaincodeName="asset"
     multiSigRequired="false"
+    createdAt=""
     requiredOrgsStr=""
     metadata="{}"
     
@@ -1409,6 +1431,7 @@ elif [ "$subcommand" == "create-file" ]; then
             --size) size="$2"; shift ;;
             --allowedOrgsStr) allowedOrgsStr="$2"; shift ;;
             --multiSigRequired) multiSigRequired="$2"; shift ;;
+            --createdAt) createdAt="$2"; shift ;;
             --requiredOrgsStr) requiredOrgsStr="$2"; shift ;;
             --metadata) metadata="$2"; shift ;;
             *) echo -e "${RED}Unknown parameter passed: $1${NC}"; show_help; exit 1 ;;
@@ -1422,7 +1445,7 @@ elif [ "$subcommand" == "create-file" ]; then
         exit 1
     fi
     
-    create_file_wrapper "$configFile" "$orgName" "$peerName" "$channelName" "$chaincodeName" "$fileId" "$filename" "$ipfsCid" "$size" "$allowedOrgsStr" "$multiSigRequired" "$requiredOrgsStr" "$metadata"
+    create_file_wrapper "$configFile" "$orgName" "$peerName" "$channelName" "$chaincodeName" "$fileId" "$filename" "$ipfsCid" "$size" "$allowedOrgsStr" "$multiSigRequired" "$createdAt" "$requiredOrgsStr" "$metadata"
 
 else
     echo -e "${RED}Unknown command: $subcommand${NC}"
