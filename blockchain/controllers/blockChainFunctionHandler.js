@@ -588,5 +588,238 @@ export default class blockChainFunctionHandler {
             });
         }); 
     }
-}
 
+    initLedger(configFile, orgName, peerName, channelName, chaincodeName = 'asset') {
+        console.log("Initializing ledger...");
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const args = [
+                scriptPath,
+                "init-ledger",
+                "--configFile", configFile,
+                "--orgName", orgName,
+                "--peerName", peerName,
+                "--channelName", channelName,
+                "--chaincodeName", chaincodeName
+            ];
+            
+            console.log('Running command:', 'bash', args.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', args, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("Ledger initialized successfully");
+                    resolve({
+                        success: true,
+                        message: "Ledger initialized successfully",
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`Ledger initialization failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`Ledger initialization failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
+
+    getAllFiles(configFile, orgName, peerName, channelName, chaincodeName = 'asset', args = '') {
+        console.log("Retrieving all files from ledger...");
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const scriptArgs = [
+                scriptPath,
+                "get-all-files",
+                "--configFile", configFile,
+                "--orgName", orgName,
+                "--peerName", peerName,
+                "--channelName", channelName,
+                "--chaincodeName", chaincodeName
+            ];
+            
+            if (args) {
+                scriptArgs.push("--args", args);
+            }
+            
+            console.log('Running command:', 'bash', scriptArgs.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', scriptArgs, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("Files retrieved successfully");
+                    
+                    // Parse the JSON output from jq formatted result
+                    let files = [];
+                    try {
+                        // Remove ANSI color codes
+                        const cleanOutput = stdoutData.replace(/\x1B\[[0-9;]*[mGKH]/g, '');
+                        
+                        // Find the JSON array between the markers
+                        const startMarker = 'Files retrieved:';
+                        const endMarker = '✓ GetAllFiles';
+                        const startIdx = cleanOutput.indexOf(startMarker);
+                        const endIdx = cleanOutput.indexOf(endMarker);
+                        
+                        if (startIdx !== -1 && endIdx !== -1) {
+                            const jsonStr = cleanOutput.substring(startIdx + startMarker.length, endIdx).trim();
+                            files = JSON.parse(jsonStr);
+                            console.log(`Successfully parsed ${files.length} files from blockchain`);
+                        } else {
+                            console.warn('Could not find JSON markers in output');
+                        }
+                    } catch (parseError) {
+                        console.error('Failed to parse JSON output:', parseError.message);
+                        console.error('Raw output:', stdoutData);
+                    }
+                    
+                    resolve({
+                        success: true,
+                        message: "Files retrieved successfully",
+                        files: files,
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`Get all files failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`Get all files failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
+
+    createFile(configFile, orgName, peerName, channelName, fileData, chaincodeName = 'asset') {
+        console.log("Creating file in ledger...");
+        
+        // Validate required file parameters
+        const { fileId, filename, ipfsCid, size, allowedOrgsStr } = fileData;
+        if (!fileId || !filename || !ipfsCid || !size || !allowedOrgsStr) {
+            return Promise.reject(new Error('Missing required file parameters: fileId, filename, ipfsCid, size, allowedOrgsStr'));
+        }
+        
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const args = [
+                scriptPath,
+                "create-file",
+                "--configFile", configFile,
+                "--orgName", orgName,
+                "--peerName", peerName,
+                "--channelName", channelName,
+                "--chaincodeName", chaincodeName,
+                "--fileId", fileData.fileId,
+                "--filename", fileData.filename,
+                "--ipfsCid", fileData.ipfsCid,
+                "--size", fileData.size.toString(),
+                "--allowedOrgsStr", fileData.allowedOrgsStr
+            ];
+            
+            // Add optional parameters
+            if (fileData.multiSigRequired !== undefined) {
+                args.push("--multiSigRequired", fileData.multiSigRequired.toString());
+            }
+            if (fileData.createdAt) {
+                args.push("--createdAt", fileData.createdAt);
+            }
+            if (fileData.requiredOrgsStr) {
+                args.push("--requiredOrgsStr", fileData.requiredOrgsStr);
+            }
+            if (fileData.metadata) {
+                args.push("--metadata", typeof fileData.metadata === 'string' ? fileData.metadata : JSON.stringify(fileData.metadata));
+            }
+            
+            console.log('Running command:', 'bash', args.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', args, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("File created successfully");
+                    resolve({
+                        success: true,
+                        message: "File created successfully",
+                        fileId: fileData.fileId,
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`File creation failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`File creation failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
+}
