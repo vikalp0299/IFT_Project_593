@@ -29,6 +29,7 @@ function show_help() {
     echo "  init-ledger                 Initialize ledger with sample data"
     echo "  get-all-files               Query all files from the ledger"
     echo "  create-file                 Create a new file entry in the ledger"
+    echo "  extra-user                  Create blockchain identity for a new user"
     echo
     echo -e "${YELLOW}create-system-org options:${NC}"
     echo "  --orgName           Comma-separated list of peer organizations (e.g., org1 or org1,org2,org3)"
@@ -196,6 +197,16 @@ function show_help() {
     echo "     --size 2048 --allowedOrgsStr vikMSP,sunMSP,org3MSP \\"
     echo "     --multiSigRequired true --requiredOrgsStr vikMSP,sunMSP \\"
     echo "     --metadata '{\"type\":\"contract\",\"version\":\"1.0\",\"department\":\"legal\"}'"
+    echo
+    echo -e "${YELLOW}extra-user options:${NC}"
+    echo "  --username          Username for the blockchain identity (required)"
+    echo "  --orgName           Organization name (required, e.g., org, vik)"
+    echo "  --password          Password for enrollment (default: userpw)"
+    echo "  --namespace         Kubernetes namespace (default: default)"
+    echo
+    echo -e "Example:"
+    echo "  $0 extra-user --username john --orgName org"
+    echo "  $0 extra-user --username jane --orgName vik --password jane123"
     echo -e "${NC}"
     exit 1
 }
@@ -1446,6 +1457,38 @@ elif [ "$subcommand" == "create-file" ]; then
     fi
     
     create_file_wrapper "$configFile" "$orgName" "$peerName" "$channelName" "$chaincodeName" "$fileId" "$filename" "$ipfsCid" "$size" "$allowedOrgsStr" "$multiSigRequired" "$createdAt" "$requiredOrgsStr" "$metadata"
+
+elif [ "$subcommand" == "extra-user" ]; then
+    shift
+    if [ $# -eq 0 ]; then
+        echo -e "${YELLOW}No options provided. Please provide the required options.${NC}"
+        show_help
+        exit 1
+    fi
+    
+    # Set defaults
+    password="userpw"
+    namespace="default"
+    
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --username) username="$2"; shift ;;
+            --orgName) orgName="$2"; shift ;;
+            --password) password="$2"; shift ;;
+            --namespace) namespace="$2"; shift ;;
+            *) echo -e "${RED}Unknown parameter passed: $1${NC}"; show_help; exit 1 ;;
+        esac
+        shift
+    done
+    
+    if [ -z "$username" ] || [ -z "$orgName" ]; then
+        echo -e "${RED}Missing required options. Please provide --username and --orgName.${NC}"
+        show_help
+        exit 1
+    fi
+    
+    # Call extraUser.sh script
+    ./extraUser.sh --username "$username" --orgName "$orgName" --password "$password" --namespace "$namespace"
 
 else
     echo -e "${RED}Unknown command: $subcommand${NC}"

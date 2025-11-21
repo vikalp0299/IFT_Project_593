@@ -822,4 +822,66 @@ export default class blockChainFunctionHandler {
             });
         });
     }
+
+    createUserIdentity(username, orgName, password = 'userpw', namespace = 'default') {
+        console.log(`Creating blockchain identity for user: ${username} in org: ${orgName}...`);
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const args = [
+                scriptPath,
+                "extra-user",
+                "--username", username,
+                "--orgName", orgName,
+                "--password", password,
+                "--namespace", namespace
+            ];
+            
+            console.log('Running command:', 'bash', args.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', args, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("User identity created successfully");
+                    resolve({
+                        success: true,
+                        message: "Blockchain identity created successfully",
+                        username: username,
+                        orgName: orgName,
+                        identityName: `${orgName}-${username}`,
+                        mspId: `${orgName}MSP`,
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`User identity creation failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`User identity creation failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
 }
