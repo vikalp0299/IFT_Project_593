@@ -114,7 +114,7 @@ function externalchaincode_sync() {
     echo -e "${YELLOW}Command: kubectl hlf externalchaincode sync --image=${imageName}:latest --name=${CHAINCODE_NAME} --namespace=default --package-id=${PACKAGE_ID} --tls-required=false --replicas=1${NC}"
     echo
     
-    kubectl hlf externalchaincode sync --image=${imageName}:latest \
+    kubectl hlf externalchaincode sync --image=${imageName} \
         --name=${CHAINCODE_NAME} \
         --namespace=default \
         --package-id=${PACKAGE_ID} \

@@ -248,7 +248,7 @@ export async function createBlockchain(req, res) {
 
             // Step 9: Deploy external chaincode
             sendUpdate('in_progress', 'Deploying external chaincode...', 16*100/22);
-            await controller.deploy_external_chaincode('asset','vparash0299/file-transfer-ccaas','../generated_resources/network-config.yaml');
+            await controller.deploy_external_chaincode('asset','vparash0299/chaincode-debug:1.0.0','../generated_resources/network-config.yaml');
             await sleep(30000); // 30 seconds delay for chaincode deployment
             sendUpdate('in_progress', 'External chaincode deployed successfully', 17*100/22);
 
