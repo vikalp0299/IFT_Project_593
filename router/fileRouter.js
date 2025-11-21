@@ -1,6 +1,6 @@
 //imports
 import express from 'express';
-import { completeUpload, displayAllFiles, initUpload, uploadChunk, getFilesSharedWithUser, downloadFile} from '../controller/fileController.js';
+import { completeUpload, displayAllFiles, initUpload, uploadChunk, getFilesSharedWithUser, downloadFile, proposeFileEdit, approveFileEdit, rejectFileEdit, getPendingEdits, getProposalDetails } from '../controller/fileController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -23,6 +23,13 @@ router.post('/uploads/complete', authenticateToken, completeUpload);
 
 //Download file (requires authentication)
 router.get('/download/:fileId', authenticateToken, downloadFile);
+
+//File edit endpoints (require authentication)
+router.post('/:fileId/propose-edit', authenticateToken, proposeFileEdit);
+router.post('/:fileId/approve-edit', authenticateToken, approveFileEdit);
+router.post('/:fileId/reject-edit', authenticateToken, rejectFileEdit);
+router.get('/pending-edits', authenticateToken, getPendingEdits);
+router.get('/:fileId/proposal/:proposalId', authenticateToken, getProposalDetails);
 
 //exporting the router
 export default router;

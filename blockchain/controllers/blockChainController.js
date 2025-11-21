@@ -248,7 +248,7 @@ export async function createBlockchain(req, res) {
 
             // Step 9: Deploy external chaincode
             sendUpdate('in_progress', 'Deploying external chaincode...', 16*100/22);
-            await controller.deploy_external_chaincode('asset','vparash0299/chaincode-debug:1.0.0','../generated_resources/network-config.yaml');
+            await controller.deploy_external_chaincode('asset','vparash0299/chaincode-debug:1.1.1','../generated_resources/network-config.yaml');
             await sleep(30000); // 30 seconds delay for chaincode deployment
             sendUpdate('in_progress', 'External chaincode deployed successfully', 17*100/22);
 
@@ -455,6 +455,12 @@ export async function joinBlockchain(req, res) {
             sendUpdate('in_progress', 'Updating chaincode version tracker...', 14*100/14);
             const updatedVersion = await updateVersionTracker(creatororg.name);
             console.log(`Version tracker updated: sequence ${updatedVersion.sequence}, version ${updatedVersion.version}`);
+
+            // Update organization blockchain settings
+            organization.hasBlockchain = true;
+            organization.blockchainOrgName = blockchainOrgName;
+            await organization.save();
+            console.log(`Organization ${organization.name} updated with blockchain settings: hasBlockchain=true, blockchainOrgName=${blockchainOrgName}`);
 
             // Clear heartbeat before completing
             clearInterval(heartbeatInterval);

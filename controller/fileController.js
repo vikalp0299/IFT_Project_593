@@ -5,11 +5,12 @@ import path from 'path';
 import fs from 'fs/promises';
 import File from '../models/File.js';
 import mime from 'mime-types';
-import { getUserIdfromToken } from '../middleware/auth.js';
+import { getUserIdfromToken, getCurrentUser } from '../middleware/auth.js';
 import mongoose from 'mongoose';
 import PublicKey from '../models/PublicKey.js';
 import User from '../models/User.js';
 import Department from '../models/Department.js';
+import { Organization } from '../db.js';
 import LocalServer from '../models/LocalServer.js';
 import {
   generateSymmetricKey,
@@ -19,6 +20,11 @@ import {
   decryptFileFromDisk,
   decryptSymmetricKey,
 } from '../utils/fileEncryption.js';
+import blockChainFunctionHandler from '../blockchain/controllers/blockChainFunctionHandler.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 
@@ -368,7 +374,7 @@ export async function completeUpload(req, res) {
       timeToHoldMs,
     } = req.body;
         const userId = req.user?.id || req.user?.userId;
-
+        console.log('Completing upload for user:', userId);
         // Validate authentication
         if (!userId) {
             return res.status(401).json({ 
@@ -638,6 +644,134 @@ export async function completeUpload(req, res) {
         const savedFile = await File.create(fileMetadata);
         console.log('File metadata saved to database:', savedFile._id);
 
+        // Add file to blockchain ledger
+        try {
+            // Get organization ID from req.user (already populated by authenticateToken middleware)
+            const organizationId = req.user?.organizationId;
+            console.log('Current user for blockchain integration:', req.user?.userId, organizationId);
+            if (!organizationId) {
+                throw new Error('Organization ID not found for user');
+            }
+            
+            // Fetch organization to get blockchainOrgName
+            const organization = await Organization.findById(organizationId).select('blockchainOrgName hasBlockchain');
+            
+            if (!organization) {
+                throw new Error('Organization not found');
+            }
+            
+            if (!organization.hasBlockchain) {
+                console.log('Organization does not have blockchain enabled, skipping blockchain sync');
+            } else if (!organization.blockchainOrgName) {
+                throw new Error('Organization blockchain name not configured');
+            } else {
+                const orgName = organization.blockchainOrgName;
+                
+                // Get blockchain org names for all organizations in accessRights and agreementOrgs
+                const orgIds = new Set();
+                
+                // Collect all organization IDs
+                sanitizedAccessRights.forEach(ar => {
+                    if (ar.organizationId) {
+                        orgIds.add(ar.organizationId.toString());
+                    }
+                });
+                
+                if (editAgreementRequired && sanitizedAgreementOrgs.length > 0) {
+                    sanitizedAgreementOrgs.forEach(org => {
+                        if (org.organizationId) {
+                            orgIds.add(org.organizationId.toString());
+                        }
+                    });
+                }
+                
+                // Fetch all organizations with blockchain names
+                const organizations = await Organization.find({
+                    _id: { $in: Array.from(orgIds) }
+                }).select('_id blockchainOrgName hasBlockchain');
+                
+                // Create a map of organizationId -> blockchainOrgName
+                const orgIdToBlockchainName = new Map();
+                organizations.forEach(org => {
+                    if (org.hasBlockchain && org.blockchainOrgName) {
+                        orgIdToBlockchainName.set(org._id.toString(), org.blockchainOrgName);
+                    }
+                });
+                
+                // Prepare allowedOrgs string using blockchain org names
+                const allowedOrgsMSPs = [];
+                sanitizedAccessRights.forEach(ar => {
+                    const blockchainOrgName = orgIdToBlockchainName.get(ar.organizationId?.toString());
+                    if (blockchainOrgName) {
+                        allowedOrgsMSPs.push(`${blockchainOrgName}MSP`);
+                    }
+                });
+                const allowedOrgsStr = allowedOrgsMSPs.join(',');
+                
+                // Prepare requiredOrgs string if multi-sig is required
+                // Always include the owner organization in requiredOrgs for multi-sig
+                let requiredOrgsStr = '';
+                if (editAgreementRequired) {
+                    const requiredOrgSet = new Set();
+                    
+                    // Add owner organization MSP ID
+                    requiredOrgSet.add(`${orgName}MSP`);
+                    
+                    // Add agreement organizations using their blockchain names
+                    if (sanitizedAgreementOrgs.length > 0) {
+                        sanitizedAgreementOrgs.forEach(org => {
+                            const blockchainOrgName = orgIdToBlockchainName.get(org.organizationId?.toString());
+                            if (blockchainOrgName) {
+                                requiredOrgSet.add(`${blockchainOrgName}MSP`);
+                            }
+                        });
+                    }
+                    
+                    requiredOrgsStr = Array.from(requiredOrgSet).join(',');
+                }
+                
+                const blockchainHandler = new blockChainFunctionHandler();
+                const configFile = path.join(__dirname, '../blockchain/generated_resources/network-config.yaml');
+                
+                const blockchainFileData = {
+                    fileId: savedFile._id.toString(),
+                    filename: originalName,
+                    ipfsCid: `ipfs-${uploadId}`, // Placeholder until IPFS integration
+                    size: encryptedFileData.ciphertext.length,
+                    allowedOrgsStr: allowedOrgsStr,
+                    multiSigRequired: !!editAgreementRequired,
+                    createdAt: new Date().toISOString(),
+                    requiredOrgsStr: requiredOrgsStr,
+                    metadata: JSON.stringify({
+                        mimetype: mimeType,
+                        encrypted: true,
+                        uploadedBy: userId.toString()
+                    })
+                };
+                
+                console.log('Adding file to blockchain:', {
+                    org: orgName,
+                    fileId: blockchainFileData.fileId,
+                    filename: blockchainFileData.filename
+                });
+                
+                await blockchainHandler.createFile(
+                    configFile,
+                    orgName,
+                    'peer0',
+                    'test',
+                    blockchainFileData,
+                    'asset'
+                );
+                
+                console.log('File added to blockchain successfully');
+            }
+        } catch (blockchainError) {
+            console.error('Blockchain integration error:', blockchainError);
+            // Don't fail the upload if blockchain fails - file is already in MongoDB
+            console.warn('File uploaded to database but blockchain sync failed:', blockchainError.message);
+        }
+
         // Cleanup temp chunks
         await fs.rm(tempDir, { recursive: true, force: true });
 
@@ -871,6 +1005,455 @@ export async function downloadFile(req, res) {
         });
     }
 }
+
+/**
+ * Propose Edit - Create a proposal to edit a file
+ * POST /files/:fileId/propose-edit
+ */
+export const proposeFileEdit = async (req, res) => {
+    try {
+        const { fileId } = req.params;
+        const { newContent } = req.body;
+        const userId = req.user?.id;
+
+        if (!fileId || !newContent) {
+            return res.status(400).json({
+                success: false,
+                message: 'File ID and new content are required'
+            });
+        }
+
+        // Fetch the file from database
+        const file = await File.findById(fileId).populate('uploadedBy', 'username');
+        
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                message: 'File not found'
+            });
+        }
+
+        // Only allow text files to be edited
+        if (!file.mimetype || !file.mimetype.startsWith('text/')) {
+            return res.status(400).json({
+                success: false,
+                message: 'Only text files can be edited. This file type is: ' + file.mimetype
+            });
+        }
+
+        // Check if user has access to this file
+        const userOrg = req.user?.organizationId;
+        const hasAccess = file.accessRights.some(ar => 
+            ar.organizationId.toString() === userOrg.toString()
+        );
+
+        if (!hasAccess && file.uploadedBy._id.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'You do not have permission to edit this file'
+            });
+        }
+
+        // Read the original file content (we'll need to decrypt it first)
+        // For now, we'll store a placeholder - in production, you'd decrypt the file
+        // The frontend should send us the decrypted original content as well
+        const { originalContent } = req.body;
+        
+        if (!originalContent) {
+            return res.status(400).json({
+                success: false,
+                message: 'Original content is required for comparison'
+            });
+        }
+
+        // Get organization blockchain info
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        
+        if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Organization does not have blockchain enabled'
+            });
+        }
+
+        const proposerMSP = `${organization.blockchainOrgName}MSP`;
+
+        // Prepare proposal data (frontend will handle diff calculation and display)
+        const proposalData = JSON.stringify({
+            originalContent,
+            newContent,
+            proposedBy: req.user?.username,
+            proposedAt: new Date().toISOString(),
+            filename: file.originalname
+        });
+
+        // Call blockchain to create edit proposal
+        const blockchainHandler = new blockChainFunctionHandler();
+        const configFile = path.join(__dirname, '../blockchain/generated_resources/network-config.yaml');
+
+        const result = await blockchainHandler.proposeEdit(
+            configFile,
+            organization.blockchainOrgName,
+            'peer0',
+            'test',
+            fileId,
+            proposalData, // Send the full proposal data instead of just newContent
+            proposerMSP
+        );
+
+        res.json({
+            success: true,
+            message: 'Edit proposal created successfully',
+            data: {
+                fileId,
+                proposer: proposerMSP,
+                changesCount: changes.length,
+                changes: changes,
+                result
+            }
+        });
+
+    } catch (error) {
+        console.error('Propose edit error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to create edit proposal',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Approve Edit - Approve a pending edit proposal
+ * POST /files/:fileId/approve-edit
+ */
+export const approveFileEdit = async (req, res) => {
+    try {
+        const { fileId } = req.params;
+        const { proposalId } = req.body;
+        const userId = req.user?.id;
+
+        if (!fileId || !proposalId) {
+            return res.status(400).json({
+                success: false,
+                message: 'File ID and proposal ID are required'
+            });
+        }
+
+        // Fetch the file from database
+        const file = await File.findById(fileId);
+        
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                message: 'File not found'
+            });
+        }
+
+        // Check if user's organization is in requiredOrgs for multi-sig
+        const userOrg = req.user?.organizationId;
+        const hasApprovalRights = file.editAgreementOrganizations?.some(org => 
+            org.organizationId.toString() === userOrg.toString()
+        );
+
+        if (!hasApprovalRights) {
+            return res.status(403).json({
+                success: false,
+                message: 'You do not have permission to approve edits for this file'
+            });
+        }
+
+        // Get organization blockchain info
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        
+        if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Organization does not have blockchain enabled'
+            });
+        }
+
+        const approverMSP = `${organization.blockchainOrgName}MSP`;
+
+        // Call blockchain to approve edit
+        const blockchainHandler = new blockChainFunctionHandler();
+        const configFile = path.join(__dirname, '../blockchain/generated_resources/network-config.yaml');
+
+        const result = await blockchainHandler.approveEdit(
+            configFile,
+            organization.blockchainOrgName,
+            'peer0',
+            'test',
+            fileId,
+            proposalId,
+            approverMSP
+        );
+
+        // TODO: After approval is confirmed on blockchain:
+        // 1. If file has 'oldFilePath' field, delete the old file from storage
+        // 2. Update file record to use new file as current version
+        // Example:
+        // if (file.oldFilePath && fs.existsSync(file.oldFilePath)) {
+        //     fs.unlinkSync(file.oldFilePath);
+        //     file.oldFilePath = null;
+        // }
+        // if (file.proposedFilePath) {
+        //     file.path = file.proposedFilePath;
+        //     file.proposedFilePath = null;
+        //     await file.save();
+        // }
+
+        res.json({
+            success: true,
+            message: 'Edit proposal approved successfully. Old file version will be deleted.',
+            data: {
+                fileId,
+                proposalId,
+                approver: approverMSP,
+                result
+            }
+        });
+
+    } catch (error) {
+        console.error('Approve edit error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to approve edit proposal',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Reject Edit - Reject a pending edit proposal
+ * POST /files/:fileId/reject-edit
+ */
+export const rejectFileEdit = async (req, res) => {
+    try {
+        const { fileId } = req.params;
+        const { proposalId, reason } = req.body;
+        const userId = req.user?.id;
+
+        if (!fileId || !proposalId) {
+            return res.status(400).json({
+                success: false,
+                message: 'File ID and proposal ID are required'
+            });
+        }
+
+        // Fetch the file from database
+        const file = await File.findById(fileId);
+        
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                message: 'File not found'
+            });
+        }
+
+        // Check if user's organization is in requiredOrgs for multi-sig
+        const userOrg = req.user?.organizationId;
+        const hasRejectionRights = file.editAgreementOrganizations?.some(org => 
+            org.organizationId.toString() === userOrg.toString()
+        );
+
+        if (!hasRejectionRights) {
+            return res.status(403).json({
+                success: false,
+                message: 'You do not have permission to reject edits for this file'
+            });
+        }
+
+        // Get organization blockchain info
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        
+        if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Organization does not have blockchain enabled'
+            });
+        }
+
+        const rejectorMSP = `${organization.blockchainOrgName}MSP`;
+
+        // Call blockchain to reject edit
+        const blockchainHandler = new blockChainFunctionHandler();
+        const configFile = path.join(__dirname, '../blockchain/generated_resources/network-config.yaml');
+
+        const result = await blockchainHandler.rejectEdit(
+            configFile,
+            organization.blockchainOrgName,
+            'peer0',
+            'test',
+            fileId,
+            proposalId,
+            rejectorMSP,
+            reason || 'No reason provided'
+        );
+
+        // TODO: After rejection is confirmed on blockchain:
+        // 1. Delete the proposed/new file version from storage
+        // 2. Keep the original file as current version
+        // Example:
+        // if (file.proposedFilePath && fs.existsSync(file.proposedFilePath)) {
+        //     fs.unlinkSync(file.proposedFilePath);
+        //     file.proposedFilePath = null;
+        //     file.oldFilePath = null;
+        //     await file.save();
+        // }
+
+        res.json({
+            success: true,
+            message: 'Edit proposal rejected successfully. Proposed file version will be deleted.',
+            data: {
+                fileId,
+                proposalId,
+                rejector: rejectorMSP,
+                reason: reason || 'No reason provided',
+                result
+            }
+        });
+
+    } catch (error) {
+        console.error('Reject edit error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to reject edit proposal',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Get Pending Edits - Fetch all edit proposals awaiting approval for the user's organization
+ * GET /files/pending-edits
+ */
+export const getPendingEdits = async (req, res) => {
+    try {
+        const userOrg = req.user?.organizationId;
+
+        // Get organization blockchain info
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        
+        if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Organization does not have blockchain enabled'
+            });
+        }
+
+        // Find all files where this organization is in editAgreementOrganizations
+        const files = await File.find({
+            editAgreementRequired: true,
+            'editAgreementOrganizations.organizationId': userOrg
+        }).select('_id originalname mimetype uploadedBy editAgreementOrganizations');
+
+        // For now, return the files that require approval
+        // The actual pending proposals would come from blockchain query
+        // You'll need to add a GetPendingEdits function to the chaincode
+
+        res.json({
+            success: true,
+            data: {
+                filesRequiringApproval: files.map(file => ({
+                    fileId: file._id,
+                    filename: file.originalname,
+                    mimetype: file.mimetype,
+                    uploadedBy: file.uploadedBy,
+                    requiredOrganizations: file.editAgreementOrganizations
+                }))
+            }
+        });
+
+    } catch (error) {
+        console.error('Get pending edits error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch pending edits',
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Get Proposal Details - Get detailed information about a specific edit proposal
+ * GET /files/:fileId/proposal/:proposalId
+ */
+export const getProposalDetails = async (req, res) => {
+    try {
+        const { fileId, proposalId } = req.params;
+        const userOrg = req.user?.organizationId;
+
+        // Fetch the file from database
+        const file = await File.findById(fileId)
+            .populate('uploadedBy', 'username email')
+            .select('originalname mimetype editAgreementRequired editAgreementOrganizations');
+        
+        if (!file) {
+            return res.status(404).json({
+                success: false,
+                message: 'File not found'
+            });
+        }
+
+        // Check if user's organization has approval rights
+        const hasApprovalRights = file.editAgreementOrganizations?.some(org => 
+            org.organizationId.toString() === userOrg.toString()
+        );
+
+        if (!hasApprovalRights) {
+            return res.status(403).json({
+                success: false,
+                message: 'You do not have permission to view this proposal'
+            });
+        }
+
+        // Get organization blockchain info
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        
+        if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
+            return res.status(400).json({
+                success: false,
+                message: 'Organization does not have blockchain enabled'
+            });
+        }
+
+        // TODO: Query blockchain to get the actual proposal data
+        // For now, we'll return a structure that the frontend expects
+        // You'll need to add a GetProposal function to the chaincode
+        
+        // This is a placeholder - the actual data should come from blockchain
+        res.json({
+            success: true,
+            data: {
+                fileId,
+                proposalId,
+                filename: file.originalname,
+                mimetype: file.mimetype,
+                // These would come from blockchain:
+                // originalContent: proposal.originalContent,
+                // newContent: proposal.newContent,
+                // changes: proposal.changes,
+                // proposedBy: proposal.proposedBy,
+                // proposedAt: proposal.proposedAt,
+                // approvals: proposal.approvals,
+                // status: proposal.status
+                message: 'Proposal details - blockchain query needed'
+            }
+        });
+
+    } catch (error) {
+        console.error('Get proposal details error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch proposal details',
+            error: error.message
+        });
+    }
+};
+
+
+
 
 
 

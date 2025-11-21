@@ -118,6 +118,8 @@ async function loginFunction(req, res) {
 async function registerFunction(req, res) {
     // Implement comprehensive registration logic here
     try {
+        console.log('Registration request body:', JSON.stringify(req.body, null, 2));
+        
         const {
             // Basic Authentication
             username,
@@ -192,6 +194,7 @@ async function registerFunction(req, res) {
         }
         
         if (errors.length > 0) {
+            console.log('Validation errors:', errors);
             return res.status(400).json({
                 success: false,
                 message: 'Validation failed',

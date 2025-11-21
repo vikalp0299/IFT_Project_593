@@ -22,7 +22,7 @@ show_help() {
     echo "  --peerName       Peer name"
     echo "  --channelName    Channel name"
     echo "  --chaincode      Chaincode name"
-    echo "  --fcn            Function to execute (InitLedger, GetAllFiles, CreateFile)"
+    echo "  --fcn            Function to execute (InitLedger, GetAllFiles, CreateFile, ProposeEdit, ApproveEdit, RejectEdit)"
     echo
     echo -e "${YELLOW}Function-Specific Parameters:${NC}"
     echo
@@ -43,6 +43,22 @@ show_help() {
     echo "  --createdAt      ISO timestamp (optional, will auto-generate if not provided)"
     echo "  --requiredOrgsStr   Comma-separated org list for required approvals (optional)"
     echo "  --metadata       JSON metadata string (optional)"
+    echo
+    echo -e "${BLUE}ProposeEdit:${NC}"
+    echo "  --fileId         File identifier to edit"
+    echo "  --newContent     New content for the file"
+    echo "  --proposer       Proposer's MSP ID (e.g., vikMSP)"
+    echo
+    echo -e "${BLUE}ApproveEdit:${NC}"
+    echo "  --fileId         File identifier"
+    echo "  --proposalId     Proposal ID to approve"
+    echo "  --approver       Approver's MSP ID (e.g., sunMSP)"
+    echo
+    echo -e "${BLUE}RejectEdit:${NC}"
+    echo "  --fileId         File identifier"
+    echo "  --proposalId     Proposal ID to reject"
+    echo "  --rejector       Rejector's MSP ID (e.g., sunMSP)"
+    echo "  --reason         Reason for rejection (optional)"
     echo
     echo -e "${YELLOW}Examples:${NC}"
     echo "  # Initialize Ledger"
@@ -89,6 +105,12 @@ while [[ "$#" -gt 0 ]]; do
         --createdAt) createdAt="$2"; shift ;;
         --requiredOrgsStr) requiredOrgsStr="$2"; shift ;;
         --metadata) metadata="$2"; shift ;;
+        --newContent) newContent="$2"; shift ;;
+        --proposer) proposer="$2"; shift ;;
+        --proposalId) proposalId="$2"; shift ;;
+        --approver) approver="$2"; shift ;;
+        --rejector) rejector="$2"; shift ;;
+        --reason) reason="$2"; shift ;;
         *) echo -e "${RED}Unknown parameter: $1${NC}"; show_help; exit 1 ;;
     esac
     shift
@@ -221,10 +243,113 @@ case "$fcn" in
             exit 1
         fi
         ;;
+    
+    ProposeEdit)
+        echo -e "${GREEN}Proposing edit for file...${NC}"
+        
+        # Validate required parameters
+        if [ -z "$fileId" ] || [ -z "$newContent" ] || [ -z "$proposer" ]; then
+            echo -e "${RED}Error: Missing required parameters for ProposeEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId, --newContent, --proposer${NC}"
+            exit 1
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        echo -e "  proposer: ${proposer}"
+        echo -e "  newContent length: ${#newContent} chars"
+        
+        # Invoke ProposeEdit chaincode
+        kubectl hlf chaincode invoke --config="${configFile}" \
+            --user="${orgName}" --peer="${peerName}" \
+            --chaincode="${chaincode}" --channel="${channelName}" \
+            --fcn=ProposeEdit \
+            -a "${fileId}" \
+            -a "${newContent}" \
+            -a "${proposer}"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Edit proposal created successfully${NC}"
+        else
+            echo -e "${RED}✗ Edit proposal failed${NC}"
+            exit 1
+        fi
+        ;;
+    
+    ApproveEdit)
+        echo -e "${GREEN}Approving edit proposal...${NC}"
+        
+        # Validate required parameters
+        if [ -z "$fileId" ] || [ -z "$proposalId" ] || [ -z "$approver" ]; then
+            echo -e "${RED}Error: Missing required parameters for ApproveEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId, --proposalId, --approver${NC}"
+            exit 1
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        echo -e "  proposalId: ${proposalId}"
+        echo -e "  approver: ${approver}"
+        
+        # Invoke ApproveEdit chaincode
+        kubectl hlf chaincode invoke --config="${configFile}" \
+            --user="${orgName}" --peer="${peerName}" \
+            --chaincode="${chaincode}" --channel="${channelName}" \
+            --fcn=ApproveEdit \
+            -a "${fileId}" \
+            -a "${proposalId}" \
+            -a "${approver}"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Edit proposal approved successfully${NC}"
+        else
+            echo -e "${RED}✗ Edit approval failed${NC}"
+            exit 1
+        fi
+        ;;
+    
+    RejectEdit)
+        echo -e "${GREEN}Rejecting edit proposal...${NC}"
+        
+        # Validate required parameters
+        if [ -z "$fileId" ] || [ -z "$proposalId" ] || [ -z "$rejector" ]; then
+            echo -e "${RED}Error: Missing required parameters for RejectEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId, --proposalId, --rejector${NC}"
+            exit 1
+        fi
+        
+        # Default reason if not provided
+        if [ -z "$reason" ]; then
+            reason="No reason provided"
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        echo -e "  proposalId: ${proposalId}"
+        echo -e "  rejector: ${rejector}"
+        echo -e "  reason: ${reason}"
+        
+        # Invoke RejectEdit chaincode
+        kubectl hlf chaincode invoke --config="${configFile}" \
+            --user="${orgName}" --peer="${peerName}" \
+            --chaincode="${chaincode}" --channel="${channelName}" \
+            --fcn=RejectEdit \
+            -a "${fileId}" \
+            -a "${proposalId}" \
+            -a "${rejector}" \
+            -a "${reason}"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Edit proposal rejected successfully${NC}"
+        else
+            echo -e "${RED}✗ Edit rejection failed${NC}"
+            exit 1
+        fi
+        ;;
         
     *)
         echo -e "${RED}Error: Unknown function '${fcn}'${NC}"
-        echo -e "${YELLOW}Supported functions: InitLedger, GetAllFiles, CreateFile${NC}"
+        echo -e "${YELLOW}Supported functions: InitLedger, GetAllFiles, CreateFile, ProposeEdit, ApproveEdit, RejectEdit${NC}"
         show_help
         exit 1
         ;;
