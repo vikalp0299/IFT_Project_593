@@ -170,6 +170,29 @@ if [ $? -eq 0 ]; then
     echo "  - Query blockchain data"
     echo "  - Interact with chaincode as user: ${username}"
     echo
+    
+    # Update network-config.yaml automatically
+    echo -e "${YELLOW}Step 3: Updating network-config.yaml...${NC}"
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    UPDATE_SCRIPT="${SCRIPT_DIR}/updateNetworkConfig.sh"
+    
+    if [ -f "$UPDATE_SCRIPT" ]; then
+        echo "Adding user to network configuration file..."
+        if "$UPDATE_SCRIPT" "$username" "$orgName" "$namespace"; then
+            echo -e "${GREEN}✓ Network configuration updated${NC}"
+        else
+            echo -e "${YELLOW}Warning: Failed to update network-config.yaml${NC}"
+            echo -e "${YELLOW}You may need to add the user manually or run:${NC}"
+            echo -e "${YELLOW}  ./updateNetworkConfig.sh $username $orgName $namespace${NC}"
+        fi
+    else
+        echo -e "${YELLOW}Note: updateNetworkConfig.sh not found${NC}"
+        echo -e "${YELLOW}User identity created but not added to network-config.yaml${NC}"
+        echo -e "${YELLOW}To add manually, run:${NC}"
+        echo -e "${YELLOW}  ./updateNetworkConfig.sh $username $orgName $namespace${NC}"
+    fi
+    echo
+    
     exit 0
 else
     echo

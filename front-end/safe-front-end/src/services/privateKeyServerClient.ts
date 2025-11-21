@@ -206,26 +206,6 @@ export const privateKeyServerClient = {
       baseUrl,
       `/users/status?${organizationName ? `organizationName=${encodeURIComponent(organizationName)}&` : ''}${username ? `username=${encodeURIComponent(username)}` : ''}`
     ),
-  registerUser: (
-    baseUrl: string,
-    payload: {
-      username: string;
-      email: string;
-      password: string;
-      firstName: string;
-      lastName: string;
-      jobTitle: string;
-      phone: string;
-      departmentName: string;
-      organizationName: string;
-      organizationId?: string;
-      role?: string;
-    }
-  ) =>
-    jsonRequest(baseUrl, '/users/register', {
-      method: 'POST',
-      body: payload,
-    }),
   loginUser: (
     baseUrl: string,
     payload: { username: string; password: string },
