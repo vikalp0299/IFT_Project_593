@@ -1013,13 +1013,13 @@ export async function downloadFile(req, res) {
 export const proposeFileEdit = async (req, res) => {
     try {
         const { fileId } = req.params;
-        const { newContent } = req.body;
+        const { newContent, originalContent, encryptedNewFile } = req.body;
         const userId = req.user?.id;
 
-        if (!fileId || !newContent) {
+        if (!fileId || !newContent || !originalContent) {
             return res.status(400).json({
                 success: false,
-                message: 'File ID and new content are required'
+                message: 'File ID, original content, and new content are required'
             });
         }
 
@@ -1030,6 +1030,15 @@ export const proposeFileEdit = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 message: 'File not found'
+            });
+        }
+
+        // Check if there's already an active proposal
+        if (file.activeProposalId) {
+            return res.status(400).json({
+                success: false,
+                message: 'There is already an active edit proposal for this file',
+                proposalId: file.activeProposalId
             });
         }
 
@@ -1054,18 +1063,6 @@ export const proposeFileEdit = async (req, res) => {
             });
         }
 
-        // Read the original file content (we'll need to decrypt it first)
-        // For now, we'll store a placeholder - in production, you'd decrypt the file
-        // The frontend should send us the decrypted original content as well
-        const { originalContent } = req.body;
-        
-        if (!originalContent) {
-            return res.status(400).json({
-                success: false,
-                message: 'Original content is required for comparison'
-            });
-        }
-
         // Get organization blockchain info
         const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
         
@@ -1078,13 +1075,35 @@ export const proposeFileEdit = async (req, res) => {
 
         const proposerMSP = `${organization.blockchainOrgName}MSP`;
 
+        // Generate proposal ID (will be set by blockchain, but we need one for file paths)
+        const proposalId = `proposal_${fileId}_${Date.now()}`;
+
+        // Store the new encrypted file if provided
+        if (encryptedNewFile) {
+            // Save the new encrypted file to a temporary location
+            const uploadsDir = path.join(__dirname, '../uploads');
+            const proposedFilePath = path.join(uploadsDir, userId.toString(), `${proposalId}_proposed`);
+            
+            // Ensure directory exists
+            await fs.mkdir(path.dirname(proposedFilePath), { recursive: true });
+            
+            // Write the encrypted file
+            await fs.writeFile(proposedFilePath, Buffer.from(encryptedNewFile, 'base64'));
+            
+            // Update file record with proposal paths
+            file.oldFilePath = file.path; // Backup current file path
+            file.proposedFilePath = proposedFilePath; // New proposed file path
+            file.activeProposalId = proposalId;
+        }
+
         // Prepare proposal data (frontend will handle diff calculation and display)
         const proposalData = JSON.stringify({
             originalContent,
             newContent,
             proposedBy: req.user?.username,
             proposedAt: new Date().toISOString(),
-            filename: file.originalname
+            filename: file.originalname,
+            proposalId
         });
 
         // Call blockchain to create edit proposal
@@ -1097,18 +1116,20 @@ export const proposeFileEdit = async (req, res) => {
             'peer0',
             'test',
             fileId,
-            proposalData, // Send the full proposal data instead of just newContent
+            proposalData,
             proposerMSP
         );
+
+        // Save file with proposal tracking
+        await file.save();
 
         res.json({
             success: true,
             message: 'Edit proposal created successfully',
             data: {
                 fileId,
+                proposalId,
                 proposer: proposerMSP,
-                changesCount: changes.length,
-                changes: changes,
                 result
             }
         });
@@ -1189,27 +1210,44 @@ export const approveFileEdit = async (req, res) => {
             approverMSP
         );
 
-        // TODO: After approval is confirmed on blockchain:
-        // 1. If file has 'oldFilePath' field, delete the old file from storage
-        // 2. Update file record to use new file as current version
-        // Example:
-        // if (file.oldFilePath && fs.existsSync(file.oldFilePath)) {
-        //     fs.unlinkSync(file.oldFilePath);
-        //     file.oldFilePath = null;
-        // }
-        // if (file.proposedFilePath) {
-        //     file.path = file.proposedFilePath;
-        //     file.proposedFilePath = null;
-        //     await file.save();
-        // }
+        // Check if all required orgs have approved (blockchain will indicate this)
+        // If approved by all, clean up files
+        const isFullyApproved = result.output && result.output.includes('updated with approval from all');
+        
+        if (isFullyApproved && file.proposedFilePath) {
+            // Delete old file from storage
+            if (file.oldFilePath) {
+                try {
+                    await fs.unlink(file.oldFilePath);
+                    console.log('Old file deleted:', file.oldFilePath);
+                } catch (err) {
+                    console.warn('Failed to delete old file:', err.message);
+                }
+            }
+            
+            // Switch to new file as current version
+            file.path = file.proposedFilePath;
+            file.proposedFilePath = null;
+            file.oldFilePath = null;
+            file.activeProposalId = null;
+            await file.save();
+            
+            console.log('File updated to new version:', file.path);
+        } else {
+            // Still waiting for more approvals, keep both files
+            console.log('Approval recorded, waiting for other organizations');
+        }
 
         res.json({
             success: true,
-            message: 'Edit proposal approved successfully. Old file version will be deleted.',
+            message: isFullyApproved 
+                ? 'Edit approved by all organizations. File updated to new version.' 
+                : 'Your approval has been recorded. Waiting for other organizations.',
             data: {
                 fileId,
                 proposalId,
                 approver: approverMSP,
+                fullyApproved: isFullyApproved,
                 result
             }
         });
@@ -1291,20 +1329,27 @@ export const rejectFileEdit = async (req, res) => {
             reason || 'No reason provided'
         );
 
-        // TODO: After rejection is confirmed on blockchain:
-        // 1. Delete the proposed/new file version from storage
-        // 2. Keep the original file as current version
-        // Example:
-        // if (file.proposedFilePath && fs.existsSync(file.proposedFilePath)) {
-        //     fs.unlinkSync(file.proposedFilePath);
-        //     file.proposedFilePath = null;
-        //     file.oldFilePath = null;
-        //     await file.save();
-        // }
+        // Delete the proposed/new file version from storage
+        if (file.proposedFilePath) {
+            try {
+                await fs.unlink(file.proposedFilePath);
+                console.log('Proposed file deleted:', file.proposedFilePath);
+            } catch (err) {
+                console.warn('Failed to delete proposed file:', err.message);
+            }
+        }
+        
+        // Clear proposal tracking and keep original file
+        file.proposedFilePath = null;
+        file.oldFilePath = null;
+        file.activeProposalId = null;
+        await file.save();
+        
+        console.log('Proposal rejected. Original file retained:', file.path);
 
         res.json({
             success: true,
-            message: 'Edit proposal rejected successfully. Proposed file version will be deleted.',
+            message: 'Edit proposal rejected. Proposed changes have been discarded.',
             data: {
                 fileId,
                 proposalId,
@@ -1342,24 +1387,29 @@ export const getPendingEdits = async (req, res) => {
             });
         }
 
-        // Find all files where this organization is in editAgreementOrganizations
+        // Find all files where:
+        // 1. editAgreementRequired = true (multi-sig files)
+        // 2. activeProposalId exists (has pending proposal)
+        // 3. User's org is in editAgreementOrganizations (has approval rights)
         const files = await File.find({
             editAgreementRequired: true,
+            activeProposalId: { $ne: null },
             'editAgreementOrganizations.organizationId': userOrg
-        }).select('_id originalname mimetype uploadedBy editAgreementOrganizations');
-
-        // For now, return the files that require approval
-        // The actual pending proposals would come from blockchain query
-        // You'll need to add a GetPendingEdits function to the chaincode
+        })
+        .populate('uploadedBy', 'username email')
+        .select('_id originalname mimetype uploadedBy editAgreementOrganizations activeProposalId uploadedAt')
+        .lean();
 
         res.json({
             success: true,
             data: {
-                filesRequiringApproval: files.map(file => ({
+                pendingEdits: files.map(file => ({
                     fileId: file._id,
                     filename: file.originalname,
                     mimetype: file.mimetype,
                     uploadedBy: file.uploadedBy,
+                    uploadedAt: file.uploadedAt,
+                    proposalId: file.activeProposalId,
                     requiredOrganizations: file.editAgreementOrganizations
                 }))
             }
@@ -1418,29 +1468,54 @@ export const getProposalDetails = async (req, res) => {
             });
         }
 
-        // TODO: Query blockchain to get the actual proposal data
-        // For now, we'll return a structure that the frontend expects
-        // You'll need to add a GetProposal function to the chaincode
+        // Query blockchain using existing GetEditApprovals function
+        const blockchainHandler = new blockChainFunctionHandler();
+        const configFile = path.join(__dirname, '../blockchain/generated_resources/network-config.yaml');
         
-        // This is a placeholder - the actual data should come from blockchain
-        res.json({
-            success: true,
-            data: {
-                fileId,
-                proposalId,
-                filename: file.originalname,
-                mimetype: file.mimetype,
-                // These would come from blockchain:
-                // originalContent: proposal.originalContent,
-                // newContent: proposal.newContent,
-                // changes: proposal.changes,
-                // proposedBy: proposal.proposedBy,
-                // proposedAt: proposal.proposedAt,
-                // approvals: proposal.approvals,
-                // status: proposal.status
-                message: 'Proposal details - blockchain query needed'
+        try {
+            const result = await blockchainHandler.queryChaincode(
+                configFile,
+                organization.blockchainOrgName,
+                'peer0',
+                'test',
+                'asset',
+                'GetEditApprovals',
+                [fileId]
+            );
+
+            const proposalInfo = JSON.parse(result);
+            
+            // Parse proposal metadata to get content
+            let proposalData = {};
+            if (proposalInfo.editProposal && proposalInfo.editProposal.proposedMetadata) {
+                proposalData = JSON.parse(proposalInfo.editProposal.proposedMetadata);
             }
-        });
+
+            res.json({
+                success: true,
+                data: {
+                    fileId,
+                    proposalId,
+                    filename: file.originalname,
+                    mimetype: file.mimetype,
+                    originalContent: proposalData.originalContent || '',
+                    newContent: proposalData.newContent || '',
+                    proposedBy: proposalData.proposedBy || '',
+                    proposedAt: proposalData.proposedAt || '',
+                    approvals: proposalInfo.editApprovals || {},
+                    requiredOrgs: proposalInfo.requiredOrgs || [],
+                    approvalStatus: proposalInfo.approvalStatus || []
+                }
+            });
+
+        } catch (blockchainError) {
+            console.error('Blockchain query error:', blockchainError);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to query blockchain for proposal details',
+                error: blockchainError.message
+            });
+        }
 
     } catch (error) {
         console.error('Get proposal details error:', error);

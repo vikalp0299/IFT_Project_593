@@ -1027,12 +1027,12 @@ function propose_edit_wrapper() {
     echo -e "${GREEN}Executing chaincode function...${NC}"
     ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
         --peerName "${fullPeerName}" --channelName "${channelName}" \
-        --chaincode "${chaincodeName}" --fcn ProposeEdit \
-        --fileId "${fileId}" --newContent "${newContent}" --proposer "${proposer}"
+        --chaincode "${chaincodeName}" --fcn UpdateFile \
+        --fileId "${fileId}" --ipfsCid "proposal-${fileId}" --size "0" --metadata "${newContent}"
     
     if [ $? -eq 0 ]; then
         echo
-        echo -e "${GREEN}✓ Edit proposal created successfully${NC}"
+        echo -e "${GREEN}✓ Edit proposal created successfully (auto-approved by ${proposer})${NC}"
     else
         echo -e "${RED}Failed to create edit proposal${NC}"
         exit 1
@@ -1076,12 +1076,12 @@ function approve_edit_wrapper() {
     echo -e "${GREEN}Executing chaincode function...${NC}"
     ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
         --peerName "${fullPeerName}" --channelName "${channelName}" \
-        --chaincode "${chaincodeName}" --fcn ApproveEdit \
-        --fileId "${fileId}" --proposalId "${proposalId}" --approver "${approver}"
+        --chaincode "${chaincodeName}" --fcn UpdateFile \
+        --fileId "${fileId}" --ipfsCid "proposal-${fileId}" --size "0" --metadata "${proposalId}"
     
     if [ $? -eq 0 ]; then
         echo
-        echo -e "${GREEN}✓ Edit proposal approved successfully${NC}"
+        echo -e "${GREEN}✓ Approval recorded by ${approver}${NC}"
     else
         echo -e "${RED}Failed to approve edit proposal${NC}"
         exit 1
@@ -1128,8 +1128,7 @@ function reject_edit_wrapper() {
     ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
         --peerName "${fullPeerName}" --channelName "${channelName}" \
         --chaincode "${chaincodeName}" --fcn RejectEdit \
-        --fileId "${fileId}" --proposalId "${proposalId}" \
-        --rejector "${rejector}" --reason "${reason}"
+        --fileId "${fileId}"
     
     if [ $? -eq 0 ]; then
         echo

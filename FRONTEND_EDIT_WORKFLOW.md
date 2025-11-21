@@ -3,7 +3,14 @@
 ## Overview
 This document provides pseudo code for implementing the file edit proposal workflow in the frontend.
 
-**Important: File Lifecycle**
+**Security Model: In-App Editor**
+- Users MUST edit files within the application (no download/upload)
+- "Edit" button only appears for text files
+- File is fetched, decrypted, and displayed in an in-app editor
+- This prevents file substitution attacks
+- Reviewers see side-by-side comparison with highlighted changes
+
+**File Lifecycle:**
 - When a user proposes an edit, they upload a NEW encrypted file version
 - The backend stores BOTH the old and new file versions temporarily
 - **If approved**: Old file is deleted, new file becomes the current version
@@ -11,9 +18,103 @@ This document provides pseudo code for implementing the file edit proposal workf
 
 ---
 
-## 1. Edit File Flow
+## 1. Edit File Flow (In-App Editor)
 
-### Step 1: Fetch and Decrypt File
+### Step 1: Show Edit Button (Only for Text Files)
+```javascript
+function FileListItem({ file }) {
+  // Only show Edit button for text files
+  const isTextFile = file.mimetype && file.mimetype.startsWith('text/');
+  const canEdit = isTextFile && userHasEditPermission(file);
+
+  return (
+    <div className="file-item">
+      <span>{file.filename}</span>
+      <div className="actions">
+        <button onClick={() => downloadFile(file._id)}>Download</button>
+        {canEdit && (
+          <button onClick={() => openInAppEditor(file._id)}>
+            Edit
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+### Step 2: Open In-App Editor
+```javascript
+async function openInAppEditor(fileId) {
+  try {
+    // 1. Fetch encrypted file from backend
+    const response = await fetch(`/api/files/download/${fileId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const { encryptedFile, symmetricKey } = await response.json();
+    
+    // 2. Decrypt the file content
+    const decryptedContent = await decryptFile(encryptedFile, symmetricKey);
+    
+    // 3. Convert to text
+    const originalContent = await decryptedContent.text();
+    
+    // 4. Open editor modal/page with the content
+    showEditorModal({
+      fileId,
+      filename: file.filename,
+      originalContent,
+      onSave: (newContent) => submitEditProposal(fileId, originalContent, newContent)
+    });
+    
+  } catch (error) {
+    showError('Failed to load file for editing: ' + error.message);
+  }
+}
+
+// Example editor component
+function EditorModal({ fileId, filename, originalContent, onSave }) {
+  const [content, setContent] = useState(originalContent);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    setHasChanges(content !== originalContent);
+  }, [content, originalContent]);
+
+  return (
+    <div className="editor-modal">
+      <h2>Editing: {filename}</h2>
+      
+      {/* Simple textarea - or use Monaco Editor for better UX */}
+      <textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        rows={20}
+        cols={80}
+        className="file-editor"
+      />
+      
+      <div className="actions">
+        <button 
+          onClick={() => onSave(content)}
+          disabled={!hasChanges}
+        >
+          Submit for Approval
+        </button>
+        <button onClick={closeModal}>Cancel</button>
+      </div>
+      
+      {hasChanges && (
+        <div className="warning">
+          ⚠️ Changes will require approval from all required organizations
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Step 3: Submit Edit Proposal
 ```javascript
 async function initiateFileEdit(fileId) {
   // 1. Fetch encrypted file from backend
@@ -36,48 +137,57 @@ async function initiateFileEdit(fileId) {
 }
 ```
 
-### Step 2: User Edits & Submits Proposal
+### Step 3: Submit Edit Proposal
 ```javascript
 async function submitEditProposal(fileId, originalContent, newContent) {
-  // 1. Encrypt the new edited content
-  const publicKey = await fetchFilePublicKey(fileId); // Get the file's encryption key
-  const encryptedNewFile = await encryptFile(newContent, publicKey);
-  
-  // 2. Upload the new encrypted file version to backend
-  // This creates a temporary "proposed version" stored separately
-  const uploadResponse = await uploadProposedVersion(fileId, encryptedNewFile);
-  
-  // 3. Send both original and new content for proposal (decrypted for comparison)
-  const response = await fetch(`/api/files/${fileId}/propose-edit`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      originalContent: originalContent,  // Decrypted original (for blockchain record)
-      newContent: newContent,             // Decrypted edited version (for blockchain record)
-      proposedFilePath: uploadResponse.path  // Path to encrypted new file on server
-    })
-  });
-  
-  const result = await response.json();
-  
-  if (result.success) {
-    showNotification('Edit proposal submitted successfully! New file version uploaded.');
-    showNotification('Waiting for approval from required organizations...');
-    showDiffPreview(originalContent, newContent);
-  } else {
-    showError(result.message);
+  try {
+    // 1. Encrypt the new edited content
+    const publicKey = await fetchFilePublicKey(fileId);
+    const encryptedNewFile = await encryptFile(newContent, publicKey);
+    
+    // 2. Upload the new encrypted file version
+    const uploadResponse = await uploadProposedVersion(fileId, encryptedNewFile);
+    
+    // 3. Submit proposal with both decrypted versions
+    const response = await fetch(`/api/files/${fileId}/propose-edit`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        originalContent: originalContent,  // Decrypted original (for blockchain)
+        newContent: newContent,             // Decrypted new version (for blockchain)
+        proposedFilePath: uploadResponse.path  // Path to encrypted new file
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      showNotification('Edit proposal submitted successfully!');
+      showNotification('Your organization has automatically approved.');
+      showNotification('Waiting for approval from other required organizations...');
+      
+      // Close editor
+      closeEditor();
+      
+      // Optionally show what was submitted
+      showProposalSummary(fileId, result.data.proposalId);
+    } else {
+      showError(result.message);
+    }
+  } catch (error) {
+    showError('Failed to submit proposal: ' + error.message);
   }
 }
 ```
 
-**Important Notes:**
-- The NEW encrypted file is uploaded to the server as a separate version
-- Backend keeps BOTH old and new encrypted files until proposal is resolved
-- Only decrypted content is sent in the proposal for blockchain transparency
-- The actual encrypted files remain on the server/IPFS
+**Security Benefits of In-App Editor:**
+- ✅ User cannot download and substitute a different file
+- ✅ Edit button is tied to specific fileId
+- ✅ All edits happen within the controlled environment
+- ✅ Reviewers see the exact file that was edited
 
 ---
 

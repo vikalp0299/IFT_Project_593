@@ -885,12 +885,15 @@ export default class blockChainFunctionHandler {
         });
     }
 
-    proposeEdit(configFile, orgName, peerName, channelName, fileId, newContent, proposerMSP, chaincodeName = 'asset') {
+    proposeEdit(configFile, orgName, peerName, channelName, chaincodeName, fileId, proposalData) {
         console.log("Proposing file edit...");
         
-        if (!fileId || !newContent || !proposerMSP) {
-            return Promise.reject(new Error('Missing required parameters: fileId, newContent, proposerMSP'));
+        if (!fileId || !proposalData) {
+            return Promise.reject(new Error('Missing required parameters: fileId, proposalData'));
         }
+        
+        // Extract proposer from proposalData or default to orgMSP
+        const proposerMSP = `${orgName}MSP`;
         
         return new Promise((resolve, reject) => {
             const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
@@ -903,7 +906,7 @@ export default class blockChainFunctionHandler {
                 "--channelName", channelName,
                 "--chaincodeName", chaincodeName,
                 "--fileId", fileId,
-                "--newContent", newContent,
+                "--newContent", proposalData,
                 "--proposer", proposerMSP
             ];
             
@@ -953,12 +956,14 @@ export default class blockChainFunctionHandler {
         });
     }
 
-    approveEdit(configFile, orgName, peerName, channelName, fileId, proposalId, approverMSP, chaincodeName = 'asset') {
+    approveEdit(configFile, orgName, peerName, channelName, chaincodeName, fileId, proposalId) {
         console.log("Approving edit proposal...");
         
-        if (!fileId || !proposalId || !approverMSP) {
-            return Promise.reject(new Error('Missing required parameters: fileId, proposalId, approverMSP'));
+        if (!fileId || !proposalId) {
+            return Promise.reject(new Error('Missing required parameters: fileId, proposalId'));
         }
+        
+        const approverMSP = `${orgName}MSP`;
         
         return new Promise((resolve, reject) => {
             const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
@@ -1022,12 +1027,14 @@ export default class blockChainFunctionHandler {
         });
     }
 
-    rejectEdit(configFile, orgName, peerName, channelName, fileId, proposalId, rejectorMSP, reason = 'No reason provided', chaincodeName = 'asset') {
+    rejectEdit(configFile, orgName, peerName, channelName, chaincodeName, fileId, proposalId, reason = 'No reason provided') {
         console.log("Rejecting edit proposal...");
         
-        if (!fileId || !proposalId || !rejectorMSP) {
-            return Promise.reject(new Error('Missing required parameters: fileId, proposalId, rejectorMSP'));
+        if (!fileId || !proposalId) {
+            return Promise.reject(new Error('Missing required parameters: fileId, proposalId'));
         }
+        
+        const rejectorMSP = `${orgName}MSP`;
         
         return new Promise((resolve, reject) => {
             const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
@@ -1092,5 +1099,68 @@ export default class blockChainFunctionHandler {
             });
         });
     }
+
+    /**
+     * Query Chaincode - Generic query function for any chaincode query
+     */
+    queryChaincode(configFile, orgName, peerName, channelName, chaincodeName, functionName, args = []) {
+        console.log(`Querying chaincode function: ${functionName}`);
+        
+        return new Promise((resolve, reject) => {
+            // Build kubectl hlf chaincode query command
+            const fullOrgName = `${orgName}-admin-default`;
+            const fullPeerName = `${orgName}-${peerName}.default`;
+            
+            const kubectlArgs = [
+                'hlf', 'chaincode', 'query',
+                '--config', configFile,
+                '--user', fullOrgName,
+                '--peer', fullPeerName,
+                '--chaincode', chaincodeName,
+                '--channel', channelName,
+                '--fcn', functionName
+            ];
+            
+            // Add arguments
+            args.forEach(arg => {
+                kubectlArgs.push('-a', arg);
+            });
+            
+            console.log('Running kubectl command:', 'kubectl', kubectlArgs.join(' '));
+
+            const child = spawn('kubectl', kubectlArgs, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+            });
+
+            child.on('close', (code) => {
+                if (code === 0) {
+                    console.log('Query successful');
+                    resolve(stdoutData.trim());
+                } else {
+                    console.error(`Query failed with code ${code}`);
+                    console.error('stderr:', stderrData);
+                    reject(new Error(`Query failed: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
 }
+
 

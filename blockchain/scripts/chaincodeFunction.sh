@@ -44,10 +44,12 @@ show_help() {
     echo "  --requiredOrgsStr   Comma-separated org list for required approvals (optional)"
     echo "  --metadata       JSON metadata string (optional)"
     echo
-    echo -e "${BLUE}ProposeEdit:${NC}"
+    echo -e "${BLUE}UpdateFile (used for both proposing and approving edits):${NC}"
     echo "  --fileId         File identifier to edit"
-    echo "  --newContent     New content for the file"
-    echo "  --proposer       Proposer's MSP ID (e.g., vikMSP)"
+    echo "  --ipfsCid        New IPFS CID (or proposal data as JSON string)"
+    echo "  --size           New file size in bytes"
+    echo "  --metadata       Optional metadata (JSON string)"
+    echo
     echo
     echo -e "${BLUE}ApproveEdit:${NC}"
     echo "  --fileId         File identifier"
@@ -244,66 +246,46 @@ case "$fcn" in
         fi
         ;;
     
-    ProposeEdit)
-        echo -e "${GREEN}Proposing edit for file...${NC}"
+    UpdateFile)
+        echo -e "${GREEN}Updating file (propose/approve edit)...${NC}"
         
         # Validate required parameters
-        if [ -z "$fileId" ] || [ -z "$newContent" ] || [ -z "$proposer" ]; then
-            echo -e "${RED}Error: Missing required parameters for ProposeEdit${NC}"
-            echo -e "${YELLOW}Required: --fileId, --newContent, --proposer${NC}"
+        if [ -z "$fileId" ] || [ -z "$ipfsCid" ] || [ -z "$size" ]; then
+            echo -e "${RED}Error: Missing required parameters for UpdateFile${NC}"
+            echo -e "${YELLOW}Required: --fileId, --ipfsCid, --size${NC}"
             exit 1
         fi
         
         echo -e "${BLUE}Parameters:${NC}"
         echo -e "  fileId: ${fileId}"
-        echo -e "  proposer: ${proposer}"
-        echo -e "  newContent length: ${#newContent} chars"
+        echo -e "  ipfsCid: ${ipfsCid}"
+        echo -e "  size: ${size}"
+        [ -n "$metadata" ] && echo -e "  metadata: ${metadata}"
         
-        # Invoke ProposeEdit chaincode
-        kubectl hlf chaincode invoke --config="${configFile}" \
-            --user="${orgName}" --peer="${peerName}" \
-            --chaincode="${chaincode}" --channel="${channelName}" \
-            --fcn=ProposeEdit \
-            -a "${fileId}" \
-            -a "${newContent}" \
-            -a "${proposer}"
-        
-        if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓ Edit proposal created successfully${NC}"
+        # Invoke UpdateFile chaincode
+        if [ -n "$metadata" ]; then
+            kubectl hlf chaincode invoke --config="${configFile}" \
+                --user="${orgName}" --peer="${peerName}" \
+                --chaincode="${chaincode}" --channel="${channelName}" \
+                --fcn=UpdateFile \
+                -a "${fileId}" \
+                -a "${ipfsCid}" \
+                -a "${size}" \
+                -a "${metadata}"
         else
-            echo -e "${RED}✗ Edit proposal failed${NC}"
-            exit 1
-        fi
-        ;;
-    
-    ApproveEdit)
-        echo -e "${GREEN}Approving edit proposal...${NC}"
-        
-        # Validate required parameters
-        if [ -z "$fileId" ] || [ -z "$proposalId" ] || [ -z "$approver" ]; then
-            echo -e "${RED}Error: Missing required parameters for ApproveEdit${NC}"
-            echo -e "${YELLOW}Required: --fileId, --proposalId, --approver${NC}"
-            exit 1
+            kubectl hlf chaincode invoke --config="${configFile}" \
+                --user="${orgName}" --peer="${peerName}" \
+                --chaincode="${chaincode}" --channel="${channelName}" \
+                --fcn=UpdateFile \
+                -a "${fileId}" \
+                -a "${ipfsCid}" \
+                -a "${size}"
         fi
         
-        echo -e "${BLUE}Parameters:${NC}"
-        echo -e "  fileId: ${fileId}"
-        echo -e "  proposalId: ${proposalId}"
-        echo -e "  approver: ${approver}"
-        
-        # Invoke ApproveEdit chaincode
-        kubectl hlf chaincode invoke --config="${configFile}" \
-            --user="${orgName}" --peer="${peerName}" \
-            --chaincode="${chaincode}" --channel="${channelName}" \
-            --fcn=ApproveEdit \
-            -a "${fileId}" \
-            -a "${proposalId}" \
-            -a "${approver}"
-        
         if [ $? -eq 0 ]; then
-            echo -e "${GREEN}✓ Edit proposal approved successfully${NC}"
+            echo -e "${GREEN}✓ UpdateFile executed successfully${NC}"
         else
-            echo -e "${RED}✗ Edit approval failed${NC}"
+            echo -e "${RED}✗ UpdateFile failed${NC}"
             exit 1
         fi
         ;;
@@ -311,33 +293,22 @@ case "$fcn" in
     RejectEdit)
         echo -e "${GREEN}Rejecting edit proposal...${NC}"
         
-        # Validate required parameters
-        if [ -z "$fileId" ] || [ -z "$proposalId" ] || [ -z "$rejector" ]; then
-            echo -e "${RED}Error: Missing required parameters for RejectEdit${NC}"
-            echo -e "${YELLOW}Required: --fileId, --proposalId, --rejector${NC}"
+        # Validate required parameters  
+        if [ -z "$fileId" ]; then
+            echo -e "${RED}Error: Missing required parameter for RejectEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId${NC}"
             exit 1
-        fi
-        
-        # Default reason if not provided
-        if [ -z "$reason" ]; then
-            reason="No reason provided"
         fi
         
         echo -e "${BLUE}Parameters:${NC}"
         echo -e "  fileId: ${fileId}"
-        echo -e "  proposalId: ${proposalId}"
-        echo -e "  rejector: ${rejector}"
-        echo -e "  reason: ${reason}"
         
-        # Invoke RejectEdit chaincode
+        # Invoke RejectEdit chaincode (only needs fileId)
         kubectl hlf chaincode invoke --config="${configFile}" \
             --user="${orgName}" --peer="${peerName}" \
             --chaincode="${chaincode}" --channel="${channelName}" \
             --fcn=RejectEdit \
-            -a "${fileId}" \
-            -a "${proposalId}" \
-            -a "${rejector}" \
-            -a "${reason}"
+            -a "${fileId}"
         
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}✓ Edit proposal rejected successfully${NC}"

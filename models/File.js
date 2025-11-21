@@ -148,6 +148,19 @@ const fileSchema = new mongoose.Schema({
       },
     },
   ],
+  // Edit proposal tracking
+  activeProposalId: {
+    type: String, // Blockchain proposal ID
+    default: null,
+  },
+  proposedFilePath: {
+    type: String, // Path to the proposed new encrypted file version
+    default: null,
+  },
+  oldFilePath: {
+    type: String, // Path to the old encrypted file (backup during proposal)
+    default: null,
+  },
 });
 
 const File = mongoose.model('File', fileSchema);
