@@ -117,6 +117,17 @@ export const UserHomePage = () => {
     if (currentUser) {
       setUser(currentUser);
     }
+    
+    // Load private-key-server session from localStorage
+    const storedSession = localStorage.getItem('privateKeyServerSession');
+    if (storedSession) {
+      try {
+        setUserPrivateKeyServerSession(JSON.parse(storedSession));
+      } catch (e) {
+        console.warn('Failed to parse stored session', e);
+      }
+    }
+    
     setLoading(false);
     fetchFiles();
     // Ensure user is registered on private-key-server
@@ -188,11 +199,14 @@ export const UserHomePage = () => {
 
               if (registerResponse.success && registerResponse.data?.token) {
                 // Auto-login after registration
-                setUserPrivateKeyServerSession({
+                const sessionData = {
                   baseUrl: privateKeyServerUrl,
                   token: registerResponse.data.token,
                   user: registerResponse.data.user,
-                });
+                };
+                setUserPrivateKeyServerSession(sessionData);
+                // Store in localStorage for access from other pages
+                localStorage.setItem('privateKeyServerSession', JSON.stringify(sessionData));
                 console.log('User registered and logged into private-key-server');
                 return;
               }
@@ -317,11 +331,14 @@ export const UserHomePage = () => {
       );
 
       if (loginResponse.success && loginResponse.data?.token) {
-        setUserPrivateKeyServerSession({
+        const sessionData = {
           baseUrl: privateKeyServerUrl,
           token: loginResponse.data.token,
           user: loginResponse.data.user,
-        });
+        };
+        setUserPrivateKeyServerSession(sessionData);
+        // Store in localStorage for access from other pages
+        localStorage.setItem('privateKeyServerSession', JSON.stringify(sessionData));
         setPrivateKeyServerLoginData({ username: '', password: '' });
         setIsPrivateKeyServerModalOpen(false);
         console.log('Successfully logged into private-key-server');
@@ -351,6 +368,7 @@ export const UserHomePage = () => {
       console.warn('Failed to logout from private-key-server:', error);
     } finally {
       setUserPrivateKeyServerSession(null);
+      localStorage.removeItem('privateKeyServerSession');
     }
   };
 
@@ -828,16 +846,28 @@ export const UserHomePage = () => {
                   </div>
                 </div>
               </div>
-              {showDownloadButton && (
-                <button
-                  onClick={() => handleDownload(file)}
-                  className="download-button-gradient"
-                  title="Download file"
-                >
-                  <span className="download-icon">⬇️</span>
-                  <span className="download-text">Download</span>
-                </button>
-              )}
+              <div className="file-actions">
+                {file.mimetype && file.mimetype.startsWith('text/') && (
+                  <button
+                    onClick={() => navigate(`/edit-file/${file.id}`)}
+                    className="edit-button"
+                    title="Edit file"
+                  >
+                    <span className="edit-icon">✏️</span>
+                    <span className="edit-text">Edit</span>
+                  </button>
+                )}
+                {showDownloadButton && (
+                  <button
+                    onClick={() => handleDownload(file)}
+                    className="download-button-gradient"
+                    title="Download file"
+                  >
+                    <span className="download-icon">⬇️</span>
+                    <span className="download-text">Download</span>
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -949,6 +979,13 @@ export const UserHomePage = () => {
           <p className="organization-name">{user?.organizationName}</p>
         </div>
         <div className="header-actions">
+          <button 
+            onClick={() => navigate('/pending-approvals')} 
+            className="pending-approvals-button"
+            title="View pending file edit approvals"
+          >
+            📋 Pending Approvals
+          </button>
           {userPrivateKeyServerSession ? (
             <div className="private-key-server-status">
               <span className="status-indicator connected">●</span>

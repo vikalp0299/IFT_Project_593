@@ -530,6 +530,33 @@ export async function completeUpload(req, res) {
                 .filter(Boolean)
             : [];
 
+        // If edit agreement is required, automatically add uploader's organization
+        if (editAgreementRequired) {
+          const uploaderOrgId = req.user?.organizationId;
+          if (uploaderOrgId) {
+            // Check if uploader's org is already in the list
+            const uploaderOrgIdStr = uploaderOrgId.toString();
+            const alreadyIncluded = sanitizedAgreementOrgs.some(
+              org => org.organizationId.toString() === uploaderOrgIdStr
+            );
+            
+            if (!alreadyIncluded) {
+              // Fetch uploader's organization details
+              const uploaderOrg = await Organization.findById(uploaderOrgId)
+                .select('name displayName');
+              
+              if (uploaderOrg) {
+                sanitizedAgreementOrgs.push({
+                  organizationId: new mongoose.Types.ObjectId(uploaderOrgId),
+                  organizationName: uploaderOrg.name.toLowerCase().trim(),
+                  organizationDisplayName: uploaderOrg.displayName?.trim() || uploaderOrg.name,
+                });
+                console.log(`Added uploader's organization (${uploaderOrg.name}) to editAgreementOrganizations`);
+              }
+            }
+          }
+        }
+
         if (sanitizedAccessRights.length === 0) {
           return res.status(400).json({
             success: false,
@@ -699,14 +726,31 @@ export async function completeUpload(req, res) {
                 });
                 
                 // Prepare allowedOrgs string using blockchain org names
-                const allowedOrgsMSPs = [];
+                const allowedOrgsMSPsSet = new Set();
+                
+                // Add organizations from access rights
                 sanitizedAccessRights.forEach(ar => {
                     const blockchainOrgName = orgIdToBlockchainName.get(ar.organizationId?.toString());
                     if (blockchainOrgName) {
-                        allowedOrgsMSPs.push(`${blockchainOrgName}MSP`);
+                        allowedOrgsMSPsSet.add(`${blockchainOrgName}MSP`);
                     }
                 });
-                const allowedOrgsStr = allowedOrgsMSPs.join(',');
+                
+                // If edit agreement is required, also add agreement organizations to allowedOrgs
+                // (they need access to propose/approve edits)
+                if (editAgreementRequired && sanitizedAgreementOrgs.length > 0) {
+                    sanitizedAgreementOrgs.forEach(org => {
+                        const blockchainOrgName = orgIdToBlockchainName.get(org.organizationId?.toString());
+                        if (blockchainOrgName) {
+                            allowedOrgsMSPsSet.add(`${blockchainOrgName}MSP`);
+                        }
+                    });
+                }
+                
+                // Always include the owner organization in allowedOrgs
+                allowedOrgsMSPsSet.add(`${orgName}MSP`);
+                
+                const allowedOrgsStr = Array.from(allowedOrgsMSPsSet).join(',');
                 
                 // Prepare requiredOrgs string if multi-sig is required
                 // Always include the owner organization in requiredOrgs for multi-sig
@@ -1012,11 +1056,26 @@ export async function downloadFile(req, res) {
  */
 export const proposeFileEdit = async (req, res) => {
     try {
+        console.log('=== proposeFileEdit called ===');
+        console.log('Params:', req.params);
+        console.log('Body keys:', Object.keys(req.body));
+        console.log('User:', req.user);
+        
         const { fileId } = req.params;
         const { newContent, originalContent, encryptedNewFile } = req.body;
         const userId = req.user?.id;
 
+        console.log('Extracted values:', {
+            fileId,
+            hasNewContent: !!newContent,
+            hasOriginalContent: !!originalContent,
+            hasEncryptedFile: !!encryptedNewFile,
+            userId,
+            organizationId: req.user?.organizationId
+        });
+
         if (!fileId || !newContent || !originalContent) {
+            console.log('Missing required fields!');
             return res.status(400).json({
                 success: false,
                 message: 'File ID, original content, and new content are required'
@@ -1024,7 +1083,7 @@ export const proposeFileEdit = async (req, res) => {
         }
 
         // Fetch the file from database
-        const file = await File.findById(fileId).populate('uploadedBy', 'username');
+        const file = await File.findById(fileId).populate('uploader', 'username');
         
         if (!file) {
             return res.status(404).json({
@@ -1056,7 +1115,7 @@ export const proposeFileEdit = async (req, res) => {
             ar.organizationId.toString() === userOrg.toString()
         );
 
-        if (!hasAccess && file.uploadedBy._id.toString() !== userId.toString()) {
+        if (!hasAccess && file.uploader._id.toString() !== userId.toString()) {
             return res.status(403).json({
                 success: false,
                 message: 'You do not have permission to edit this file'
@@ -1078,22 +1137,93 @@ export const proposeFileEdit = async (req, res) => {
         // Generate proposal ID (will be set by blockchain, but we need one for file paths)
         const proposalId = `proposal_${fileId}_${Date.now()}`;
 
-        // Store the new encrypted file if provided
+        // Re-encrypt the new content with proper encryption
         if (encryptedNewFile) {
-            // Save the new encrypted file to a temporary location
             const uploadsDir = path.join(__dirname, '../uploads');
             const proposedFilePath = path.join(uploadsDir, userId.toString(), `${proposalId}_proposed`);
             
             // Ensure directory exists
             await fs.mkdir(path.dirname(proposedFilePath), { recursive: true });
             
-            // Write the encrypted file
-            await fs.writeFile(proposedFilePath, Buffer.from(encryptedNewFile, 'base64'));
+            // STEP 1: Get the original symmetric key by decrypting one of the encrypted keys
+            // Find the user's department encrypted key
+            const userDept = req.user?.department;
+            const encryptedKeyEntry = file.encryptedSymmetricKeys.find(
+                k => k.departmentName === userDept && k.organizationId.toString() === userOrg.toString()
+            );
+            
+            if (!encryptedKeyEntry) {
+                throw new Error('Cannot find encryption key for your department');
+            }
+            
+            // Get private key from private-key-server to decrypt symmetric key
+            const privateKeyServerUrl = process.env.PRIVATE_KEY_SERVER_URL || 'http://localhost:8001';
+            const privateKeyToken = req.headers['x-private-key-token'];
+            
+            if (!privateKeyToken) {
+                throw new Error('Private key server token required. Please login to private-key-server.');
+            }
+            
+            const privateKeyResponse = await fetch(`${privateKeyServerUrl}/private-key/decrypt-symmetric-key`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${privateKeyToken}`
+                },
+                body: JSON.stringify({
+                    encryptedSymmetricKey: encryptedKeyEntry.encryptedKey,
+                    organizationId: encryptedKeyEntry.organizationId.toString(),
+                    organizationName: encryptedKeyEntry.organizationName,
+                    departmentId: encryptedKeyEntry.departmentId.toString(),
+                    departmentName: encryptedKeyEntry.departmentName
+                })
+            });
+            
+            if (!privateKeyResponse.ok) {
+                const errorData = await privateKeyResponse.json();
+                console.error('Private key server error:', errorData);
+                throw new Error(`Failed to decrypt symmetric key: ${errorData.message || 'Unknown error'}`);
+            }
+            
+            const privateKeyResult = await privateKeyResponse.json();
+            console.log('Private key server response:', privateKeyResult);
+            
+            const decryptedSymmetricKey = privateKeyResult.data?.symmetricKey;
+            if (!decryptedSymmetricKey) {
+                throw new Error('Symmetric key not found in private-key-server response');
+            }
+            
+            const symmetricKey = Buffer.from(decryptedSymmetricKey, 'base64');
+            
+            // STEP 2: Encrypt the new content with the symmetric key
+            const crypto = await import('crypto');
+            const algorithm = 'aes-256-gcm';
+            const iv = crypto.randomBytes(12); // AES-GCM uses 12-byte IV
+            const cipher = crypto.createCipheriv(algorithm, symmetricKey, iv);
+            
+            // Decode the base64 plaintext content
+            const plaintextBuffer = Buffer.from(encryptedNewFile, 'base64');
+            
+            let encrypted = cipher.update(plaintextBuffer);
+            encrypted = Buffer.concat([encrypted, cipher.final()]);
+            const authTag = cipher.getAuthTag();
+            
+            // STEP 3: Write the encrypted file
+            await fs.writeFile(proposedFilePath, encrypted);
+            
+            // STEP 4: Store the new encryption metadata
+            file.proposedEncryption = {
+                algorithm: 'AES-256-GCM',
+                iv: iv.toString('base64'),
+                authTag: authTag.toString('base64')
+            };
             
             // Update file record with proposal paths
-            file.oldFilePath = file.path; // Backup current file path
-            file.proposedFilePath = proposedFilePath; // New proposed file path
+            file.oldFilePath = file.path;
+            file.proposedFilePath = proposedFilePath;
             file.activeProposalId = proposalId;
+            
+            console.log('New file encrypted and saved with new IV/authTag');
         }
 
         // Prepare proposal data (frontend will handle diff calculation and display)
@@ -1115,9 +1245,9 @@ export const proposeFileEdit = async (req, res) => {
             organization.blockchainOrgName,
             'peer0',
             'test',
+            'asset',  // chaincodeName
             fileId,
-            proposalData,
-            proposerMSP
+            proposalData
         );
 
         // Save file with proposal tracking
@@ -1135,11 +1265,15 @@ export const proposeFileEdit = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Propose edit error:', error);
+        console.error('=== Propose edit error ===');
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Error details:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to create edit proposal',
-            error: error.message
+            error: error.message,
+            details: error.toString()
         });
     }
 };
@@ -1205,14 +1339,20 @@ export const approveFileEdit = async (req, res) => {
             organization.blockchainOrgName,
             'peer0',
             'test',
+            'asset',  // chaincodeName
             fileId,
-            proposalId,
-            approverMSP
+            proposalId
         );
 
         // Check if all required orgs have approved (blockchain will indicate this)
         // If approved by all, clean up files
-        const isFullyApproved = result.output && result.output.includes('updated with approval from all');
+        console.log('Blockchain result output:', result.output);
+        const isFullyApproved = result.output && (
+            result.output.includes('updated with approval from all') ||
+            result.output.includes('updated successfully with approval')
+        );
+        console.log('Is fully approved?', isFullyApproved);
+        console.log('Has proposedFilePath?', !!file.proposedFilePath);
         
         if (isFullyApproved && file.proposedFilePath) {
             // Delete old file from storage
@@ -1227,6 +1367,14 @@ export const approveFileEdit = async (req, res) => {
             
             // Switch to new file as current version
             file.path = file.proposedFilePath;
+            
+            // Update encryption metadata to the proposed version
+            if (file.proposedEncryption) {
+                file.encryption = file.proposedEncryption;
+                file.proposedEncryption = undefined;
+                console.log('Updated encryption metadata (IV/authTag) to proposed version');
+            }
+            
             file.proposedFilePath = null;
             file.oldFilePath = null;
             file.activeProposalId = null;
@@ -1396,8 +1544,8 @@ export const getPendingEdits = async (req, res) => {
             activeProposalId: { $ne: null },
             'editAgreementOrganizations.organizationId': userOrg
         })
-        .populate('uploadedBy', 'username email')
-        .select('_id originalname mimetype uploadedBy editAgreementOrganizations activeProposalId uploadedAt')
+        .populate('uploader', 'username email')
+        .select('_id originalname mimetype uploader editAgreementOrganizations activeProposalId uploadedAt')
         .lean();
 
         res.json({
@@ -1407,7 +1555,7 @@ export const getPendingEdits = async (req, res) => {
                     fileId: file._id,
                     filename: file.originalname,
                     mimetype: file.mimetype,
-                    uploadedBy: file.uploadedBy,
+                    uploadedBy: file.uploader,
                     uploadedAt: file.uploadedAt,
                     proposalId: file.activeProposalId,
                     requiredOrganizations: file.editAgreementOrganizations
@@ -1436,7 +1584,7 @@ export const getProposalDetails = async (req, res) => {
 
         // Fetch the file from database
         const file = await File.findById(fileId)
-            .populate('uploadedBy', 'username email')
+            .populate('uploader', 'username email')
             .select('originalname mimetype editAgreementRequired editAgreementOrganizations');
         
         if (!file) {

@@ -113,6 +113,7 @@ while [[ "$#" -gt 0 ]]; do
         --approver) approver="$2"; shift ;;
         --rejector) rejector="$2"; shift ;;
         --reason) reason="$2"; shift ;;
+        --proposedAt) proposedAt="$2"; shift ;;
         *) echo -e "${RED}Unknown parameter: $1${NC}"; show_help; exit 1 ;;
     esac
     shift
@@ -256,14 +257,23 @@ case "$fcn" in
             exit 1
         fi
         
+        # Extract proposedAt timestamp from metadata JSON if not explicitly provided
+        if [ -z "$proposedAt" ] && [ -n "$metadata" ]; then
+            proposedAt=$(echo "$metadata" | grep -o '"proposedAt":"[^"]*"' | cut -d'"' -f4)
+        fi
+        
         echo -e "${BLUE}Parameters:${NC}"
         echo -e "  fileId: ${fileId}"
         echo -e "  ipfsCid: ${ipfsCid}"
         echo -e "  size: ${size}"
         [ -n "$metadata" ] && echo -e "  metadata: ${metadata}"
+        [ -n "$proposedAt" ] && echo -e "  proposedAt: ${proposedAt}"
         
-        # Invoke UpdateFile chaincode
+        # Always pass 5 parameters when metadata is present (chaincode expects 5 params)
         if [ -n "$metadata" ]; then
+            # Use empty string for proposedAt if not available
+            timestamp="${proposedAt:-}"
+            echo -e "${YELLOW}Executing: kubectl hlf chaincode invoke --config=\"${configFile}\" --user=\"${orgName}\" --peer=\"${peerName}\" --chaincode=\"${chaincode}\" --channel=\"${channelName}\" --fcn=UpdateFile -a \"${fileId}\" -a \"${ipfsCid}\" -a \"${size}\" -a \"${metadata}\" -a \"${timestamp}\"${NC}"
             kubectl hlf chaincode invoke --config="${configFile}" \
                 --user="${orgName}" --peer="${peerName}" \
                 --chaincode="${chaincode}" --channel="${channelName}" \
@@ -271,8 +281,10 @@ case "$fcn" in
                 -a "${fileId}" \
                 -a "${ipfsCid}" \
                 -a "${size}" \
-                -a "${metadata}"
+                -a "${metadata}" \
+                -a "${timestamp}"
         else
+            echo -e "${YELLOW}Executing: kubectl hlf chaincode invoke --config=\"${configFile}\" --user=\"${orgName}\" --peer=\"${peerName}\" --chaincode=\"${chaincode}\" --channel=\"${channelName}\" --fcn=UpdateFile -a \"${fileId}\" -a \"${ipfsCid}\" -a \"${size}\"${NC}"
             kubectl hlf chaincode invoke --config="${configFile}" \
                 --user="${orgName}" --peer="${peerName}" \
                 --chaincode="${chaincode}" --channel="${channelName}" \
@@ -286,6 +298,38 @@ case "$fcn" in
             echo -e "${GREEN}✓ UpdateFile executed successfully${NC}"
         else
             echo -e "${RED}✗ UpdateFile failed${NC}"
+            exit 1
+        fi
+        ;;
+    
+    ApproveEdit)
+        echo -e "${GREEN}Approving edit proposal...${NC}"
+        
+        # Validate required parameters
+        if [ -z "$fileId" ] || [ -z "$proposalId" ]; then
+            echo -e "${RED}Error: Missing required parameters for ApproveEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId, --proposalId${NC}"
+            exit 1
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        echo -e "  proposalId: ${proposalId}"
+        
+        echo -e "${YELLOW}Executing: kubectl hlf chaincode invoke --config=\"${configFile}\" --user=\"${orgName}\" --peer=\"${peerName}\" --chaincode=\"${chaincode}\" --channel=\"${channelName}\" --fcn=ApproveEdit -a \"${fileId}\" -a \"${proposalId}\"${NC}"
+        
+        # Invoke ApproveEdit chaincode (only needs fileId and proposalId)
+        kubectl hlf chaincode invoke --config="${configFile}" \
+            --user="${orgName}" --peer="${peerName}" \
+            --chaincode="${chaincode}" --channel="${channelName}" \
+            --fcn=ApproveEdit \
+            -a "${fileId}" \
+            -a "${proposalId}"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ ApproveEdit executed successfully${NC}"
+        else
+            echo -e "${RED}✗ ApproveEdit failed${NC}"
             exit 1
         fi
         ;;

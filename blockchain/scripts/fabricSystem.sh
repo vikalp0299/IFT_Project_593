@@ -1076,8 +1076,8 @@ function approve_edit_wrapper() {
     echo -e "${GREEN}Executing chaincode function...${NC}"
     ./chaincodeFunction.sh --configFile "${configFile}" --orgName "${fullOrgName}" \
         --peerName "${fullPeerName}" --channelName "${channelName}" \
-        --chaincode "${chaincodeName}" --fcn UpdateFile \
-        --fileId "${fileId}" --ipfsCid "proposal-${fileId}" --size "0" --metadata "${proposalId}"
+        --chaincode "${chaincodeName}" --fcn ApproveEdit \
+        --fileId "${fileId}" --proposalId "${proposalId}"
     
     if [ $? -eq 0 ]; then
         echo

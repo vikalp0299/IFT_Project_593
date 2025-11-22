@@ -1,0 +1,107 @@
+.diff-viewer {
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  background: #fff;
+}
+
+.diff-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  background: #f6f8fa;
+  border-bottom: 1px solid #e1e4e8;
+  font-weight: 600;
+  padding: 8px 12px;
+  color: #24292e;
+}
+
+.diff-header-old,
+.diff-header-new {
+  padding: 0 12px;
+}
+
+.diff-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.diff-line {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 24px;
+}
+
+.diff-line:hover {
+  background: #f8f9fa;
+}
+
+.diff-line-number {
+  padding: 4px 8px;
+  text-align: right;
+  color: #999;
+  background: #fafbfc;
+  border-right: 1px solid #e1e4e8;
+  user-select: none;
+  font-size: 12px;
+}
+
+.diff-line-old,
+.diff-line-new {
+  padding: 4px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.diff-line-old {
+  border-right: 1px solid #e1e4e8;
+}
+
+/* Line type styles */
+.diff-line-unchanged {
+  background: white;
+}
+
+.diff-line-added .diff-line-old {
+  background: #f0f0f0;
+}
+
+.diff-line-added .diff-line-new {
+  background: #e6ffed;
+}
+
+.diff-line-removed .diff-line-old {
+  background: #ffeef0;
+}
+
+.diff-line-removed .diff-line-new {
+  background: #f0f0f0;
+}
+
+.diff-line-modified .diff-line-old {
+  background: #fff8dc;
+}
+
+.diff-line-modified .diff-line-new {
+  background: #e6f7ff;
+}
+
+/* Highlighting for changed text */
+.highlight-added {
+  background-color: #acf2bd;
+  padding: 2px 0;
+}
+
+.highlight-removed {
+  background-color: #fdb8c0;
+  padding: 2px 0;
+  text-decoration: line-through;
+}
+
+.empty-line {
+  color: transparent;
+  user-select: none;
+}

@@ -268,7 +268,8 @@ export class FileTransfer extends Contract {
     fileId: string,
     newIpfsCid: string,
     newSize: string,
-    metadata?: string
+    metadata?: string,
+    proposedAt?: string
   ): Promise<string> {
     const fileBytes = await ctx.stub.getState(fileId);
     if (!fileBytes || fileBytes.length === 0) {
@@ -321,7 +322,7 @@ export class FileTransfer extends Contract {
       proposedSize: parseInt(newSize),
       proposedMetadata: metadata,
       proposedBy: callerMSP,
-      proposedAt: new Date().toISOString(),
+      proposedAt: proposedAt || new Date().toISOString(),
     };
 
     // Record this org's approval
@@ -337,7 +338,8 @@ export class FileTransfer extends Contract {
       fileAsset.ipfsCid = newIpfsCid;
       fileAsset.size = parseInt(newSize);
       fileAsset.metadata = metadata || fileAsset.metadata;
-      fileAsset.updatedAt = new Date().toISOString();
+      // Use the proposal timestamp to ensure deterministic execution
+      fileAsset.updatedAt = fileAsset.editProposal?.proposedAt || new Date().toISOString();
       
       // Update version: increment by 0.1 until x.10, then increment major version
       const currentVersion = fileAsset.version || 1;
@@ -357,6 +359,101 @@ export class FileTransfer extends Contract {
 
       await ctx.stub.putState(fileId, Buffer.from(JSON.stringify(fileAsset)) as Uint8Array);
       return `Important file ${fileId} updated with approval from all required organizations`;
+    } else {
+      // Wait for more approvals
+      await ctx.stub.putState(fileId, Buffer.from(JSON.stringify(fileAsset)) as Uint8Array);
+      const approvedCount = Object.keys(fileAsset.editApprovals).length;
+      const totalRequired = fileAsset.requiredOrgs.length;
+      return `Approval recorded from ${callerMSP}. ${approvedCount}/${totalRequired} organizations approved.`;
+    }
+  }
+
+  /**
+   * ApproveEdit - Dedicated function for approving an existing edit proposal
+   * Simpler than UpdateFile - just records approval without creating new proposals
+   */
+  async ApproveEdit(
+    ctx: Context,
+    fileId: string,
+    proposalId: string
+  ): Promise<string> {
+    const fileBytes = await ctx.stub.getState(fileId);
+    if (!fileBytes || fileBytes.length === 0) {
+      throw new Error(`File ${fileId} not found`);
+    }
+
+    const fileAsset: FileAsset = JSON.parse(fileBytes.toString());
+    const callerMSP = ctx.clientIdentity.getMSPID();
+
+    // Access control: caller must be in allowedOrgs
+    if (!fileAsset.allowedOrgs.includes(callerMSP)) {
+      throw new Error(`Access denied for organization ${callerMSP}`);
+    }
+
+    // Must be a multi-sig file
+    if (!fileAsset.multiSigRequired) {
+      throw new Error('File does not require multi-sig approval');
+    }
+
+    // Must have required orgs configured
+    if (!fileAsset.requiredOrgs || fileAsset.requiredOrgs.length === 0) {
+      throw new Error('Multi-sig required but requiredOrgs not set');
+    }
+
+    // Must have an active proposal
+    if (!fileAsset.editProposal) {
+      throw new Error('No active edit proposal to approve');
+    }
+
+    // Verify the proposal ID matches (optional validation)
+    // This ensures the approver is approving the correct proposal
+
+    // Initialize approvals if not present
+    if (!fileAsset.editApprovals) {
+      fileAsset.editApprovals = {};
+    }
+
+    // Check if already approved
+    if (fileAsset.editApprovals[callerMSP]) {
+      return `Organization ${callerMSP} has already approved this edit`;
+    }
+
+    // Record this org's approval
+    fileAsset.editApprovals[callerMSP] = true;
+
+    // Check if all required orgs have approved
+    const allApproved = fileAsset.requiredOrgs.every(
+      (org) => !!fileAsset.editApprovals && fileAsset.editApprovals[org]
+    );
+
+    if (allApproved) {
+      // Apply the update from the proposal
+      if (fileAsset.editProposal) {
+        fileAsset.ipfsCid = fileAsset.editProposal.proposedIpfsCid;
+        fileAsset.size = fileAsset.editProposal.proposedSize;
+        fileAsset.metadata = fileAsset.editProposal.proposedMetadata || fileAsset.metadata;
+        // Use the proposal timestamp to ensure deterministic execution across all peers
+        fileAsset.updatedAt = fileAsset.editProposal.proposedAt;
+        
+        // Update version
+        const currentVersion = fileAsset.version || 1;
+        const major = Math.floor(currentVersion);
+        const minor = Math.round((currentVersion - major) * 10);
+        if (minor >= 9) {
+          fileAsset.version = major + 1;
+        } else {
+          fileAsset.version = parseFloat((major + (minor + 1) / 10).toFixed(1));
+        }
+        
+        fileAsset.editedBy = fileAsset.editProposal.proposedBy;
+      }
+
+      // Reset approvals for next edit cycle
+      fileAsset.editApprovals = {};
+      fileAsset.editProposal = undefined;
+
+      await ctx.stub.putState(fileId, Buffer.from(JSON.stringify(fileAsset)) as Uint8Array);
+      return `File ${fileId} updated successfully with approval from all required organizations`;
     } else {
       // Wait for more approvals
       await ctx.stub.putState(fileId, Buffer.from(JSON.stringify(fileAsset)) as Uint8Array);

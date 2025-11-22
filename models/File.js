@@ -161,6 +161,18 @@ const fileSchema = new mongoose.Schema({
     type: String, // Path to the old encrypted file (backup during proposal)
     default: null,
   },
+  proposedEncryption: {
+    algorithm: {
+      type: String,
+      enum: ['AES-256-GCM'],
+    },
+    iv: {
+      type: String, // Base64 encoded IV for proposed file
+    },
+    authTag: {
+      type: String, // Base64 encoded auth tag for proposed file
+    },
+  },
 });
 
 const File = mongoose.model('File', fileSchema);

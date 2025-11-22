@@ -1,0 +1,290 @@
+.proposal-review-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.page-header h1 {
+  margin: 0 0 16px 0;
+  color: #24292e;
+  font-size: 28px;
+}
+
+.file-info h2 {
+  margin: 0 0 8px 0;
+  color: #0969da;
+  font-size: 22px;
+}
+
+.metadata {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.separator {
+  color: #d1d5da;
+}
+
+.error-message {
+  background: #ffeef0;
+  border: 1px solid #ff8b94;
+  color: #d73a49;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.approval-status {
+  background: #f6f8fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.approval-status h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #24292e;
+}
+
+.approval-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.approval-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: white;
+  border: 2px solid #e1e4e8;
+}
+
+.approval-item.approved {
+  border-color: #2ea44f;
+  background: #dafbe1;
+}
+
+.approval-item.pending {
+  border-color: #fb8500;
+  background: #fff3cd;
+}
+
+.org-name {
+  font-weight: 600;
+  color: #24292e;
+}
+
+.approval-indicator {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.approval-item.approved .approval-indicator {
+  color: #2ea44f;
+}
+
+.approval-item.pending .approval-indicator {
+  color: #fb8500;
+}
+
+.changes-summary {
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.changes-summary h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #24292e;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border-radius: 6px;
+  background: #f6f8fa;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.stat-added {
+  background: #dafbe1;
+}
+
+.stat-added .stat-value {
+  color: #2ea44f;
+}
+
+.stat-removed {
+  background: #ffeef0;
+}
+
+.stat-removed .stat-value {
+  color: #d73a49;
+}
+
+.stat-modified {
+  background: #fff3cd;
+}
+
+.stat-modified .stat-value {
+  color: #fb8500;
+}
+
+.diff-section {
+  margin-bottom: 32px;
+}
+
+.diff-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #24292e;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  background: #f6f8fa;
+  border-radius: 8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #2ea44f;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2c974b;
+}
+
+.btn-primary:disabled {
+  background: #94d3a2;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #24292e;
+  border: 1px solid #d1d5da;
+}
+
+.btn-secondary:hover {
+  background: #e9ecef;
+}
+
+.btn-danger {
+  background: #d73a49;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #cb2431;
+}
+
+.btn-danger:disabled {
+  background: #ffb3ba;
+  cursor: not-allowed;
+}
+
+.reject-section {
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.reject-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: #c53030;
+}
+
+.reject-reason-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5da;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.reject-reason-input:focus {
+  outline: 2px solid #0969da;
+  outline-offset: -2px;
+}
+
+.reject-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 48px;
+  font-size: 18px;
+}
+
+.loading {
+  color: #666;
+}
+
+.error {
+  background: #ffeef0;
+  border: 1px solid #ff8b94;
+  color: #d73a49;
+  border-radius: 6px;
+}

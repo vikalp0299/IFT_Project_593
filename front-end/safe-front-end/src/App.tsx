@@ -9,6 +9,9 @@ import { AdminHomePage } from './pages/AdminHomePage';
 import { UserHomePage } from './pages/UserHomePage';
 import { CreateBlockchain } from './pages/CreateBlockchain';
 import { JoinBlockchain } from './pages/JoinBlockchain';
+import TextEditorPage from './pages/TextEditorPage';
+import PendingApprovalsPage from './pages/PendingApprovalsPage';
+import ProposalReviewPage from './pages/ProposalReviewPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleBasedRoute, HomeRouteRedirect } from './components/RoleBasedRoute';
 
@@ -49,6 +52,32 @@ function App() {
             element={
               <ProtectedRoute>
                 <UserHomePage />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* File Edit Routes */}
+          <Route 
+            path="/edit-file/:fileId" 
+            element={
+              <ProtectedRoute>
+                <TextEditorPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/pending-approvals" 
+            element={
+              <ProtectedRoute>
+                <PendingApprovalsPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/proposal-review/:fileId/:proposalId" 
+            element={
+              <ProtectedRoute>
+                <ProposalReviewPage />
               </ProtectedRoute>
             } 
           />
