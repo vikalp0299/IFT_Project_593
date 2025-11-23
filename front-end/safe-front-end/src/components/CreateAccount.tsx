@@ -404,7 +404,7 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
                 onFocus={() => setShowPasswordRequirements(true)}
                 onBlur={() => setShowPasswordRequirements(false)}
                 placeholder="Create a password"
-                className={`create-account-input ${passwordErrors.length > 0 ? 'error' : ''}`}
+                className="create-account-input"
                 required
               />
             </div>
@@ -420,34 +420,41 @@ export const CreateAccount: React.FC<CreateAccountProps> = ({
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 placeholder="Confirm your password"
-                className={`create-account-input ${formData.password !== formData.confirmPassword && formData.confirmPassword ? 'error' : ''}`}
+                className="create-account-input"
                 required
               />
             </div>
             
-            {/* Password Requirements */}
-            {(showPasswordRequirements || passwordErrors.length > 0) && (
-              <div className="password-requirements">
-                <p className="requirements-title">Password Requirements:</p>
-                <ul className="requirements-list">
-                  <li className={formData.password.length >= 8 ? 'valid' : 'invalid'}>
-                    ✓ At least 8 characters long
-                  </li>
-                  <li className={/[A-Z]/.test(formData.password) ? 'valid' : 'invalid'}>
-                    ✓ At least one uppercase letter (A-Z)
-                  </li>
-                  <li className={/[a-z]/.test(formData.password) ? 'valid' : 'invalid'}>
-                    ✓ At least one lowercase letter (a-z)
-                  </li>
-                  <li className={/\d/.test(formData.password) ? 'valid' : 'invalid'}>
-                    ✓ At least one number (0-9)
-                  </li>
-                  <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'valid' : 'invalid'}>
-                    ✓ At least one special character (!@#$%^&*...)
-                  </li>
-                </ul>
-              </div>
-            )}
+            {/* Password Requirements - Always rendered to prevent layout shift */}
+            <div 
+              className="password-requirements" 
+              style={{ 
+                opacity: (showPasswordRequirements || passwordErrors.length > 0) ? 1 : 0,
+                visibility: (showPasswordRequirements || passwordErrors.length > 0) ? 'visible' : 'hidden',
+                height: (showPasswordRequirements || passwordErrors.length > 0) ? 'auto' : '0',
+                overflow: 'hidden',
+                transition: 'opacity 0.2s ease, height 0.2s ease'
+              }}
+            >
+              <p className="requirements-title">Password Requirements:</p>
+              <ul className="requirements-list">
+                <li className={formData.password.length >= 8 ? 'valid' : 'invalid'}>
+                  ✓ At least 8 characters long
+                </li>
+                <li className={/[A-Z]/.test(formData.password) ? 'valid' : 'invalid'}>
+                  ✓ At least one uppercase letter (A-Z)
+                </li>
+                <li className={/[a-z]/.test(formData.password) ? 'valid' : 'invalid'}>
+                  ✓ At least one lowercase letter (a-z)
+                </li>
+                <li className={/\d/.test(formData.password) ? 'valid' : 'invalid'}>
+                  ✓ At least one number (0-9)
+                </li>
+                <li className={/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'valid' : 'invalid'}>
+                  ✓ At least one special character (!@#$%^&*...)
+                </li>
+              </ul>
+            </div>
           </div>
 
           {/* Personal Information Section */}

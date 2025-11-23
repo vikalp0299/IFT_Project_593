@@ -82,6 +82,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-height: fit-content;
 }
 
 .create-account-label {
@@ -95,7 +96,9 @@
 
 .create-account-input {
   width: 100%;
-  height: 48px;
+  height: 48px !important;
+  max-height: 48px !important;
+  min-height: 48px;
   padding: 12px 16px;
   border: 2px solid #E5E7EB;
   border-radius: 12px;
@@ -105,6 +108,7 @@
   transition: all 0.2s ease;
   box-sizing: border-box;
   outline: none;
+  line-height: normal;
 }
 
 .create-account-input:focus {
@@ -208,8 +212,8 @@
 
 .create-account-footer-text {
   font-size: 14px;
-  font-weight: 400;
-  color: #6B7280;
+  font-weight: 500;
+  color: #1F2937;
   margin: 0;
   line-height: 1.4;
 }
@@ -295,19 +299,23 @@
 
 /* Password Requirements Styles */
 .password-requirements {
-  margin-top: 12px;
-  padding: 16px;
+  margin-top: 8px;
+  padding: 12px 16px;
   background-color: #F8FAFC;
   border: 2px solid #E2E8F0;
   border-radius: 12px;
   font-size: 14px;
+  grid-column: 1 / -1;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .requirements-title {
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
   font-weight: 600;
   color: #374151;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .requirements-list {
@@ -317,10 +325,10 @@
 }
 
 .requirements-list li {
-  margin: 6px 0;
+  margin: 4px 0;
   display: flex;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   transition: color 0.2s ease;
 }
@@ -336,6 +344,9 @@
 .create-account-input.error {
   border-color: #DC2626;
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  background-color: #FFFFFF;
+  height: 48px;
+  max-height: 48px;
 }
 
 /* Responsive Design */
@@ -390,23 +401,29 @@
   gap: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #374151;
+  color: #1F2937;
+  font-weight: 500;
 }
 
 .checkbox-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
   accent-color: #3b82f6;
+  cursor: pointer;
 }
 
 .checkbox-text {
   user-select: none;
+  color: #1F2937;
+  font-weight: 500;
 }
 
 /* Textarea styling */
 .create-account-input[rows] {
   resize: vertical;
   min-height: 80px;
+  max-height: 200px;
+  height: auto;
   font-family: inherit;
   line-height: 1.5;
 }

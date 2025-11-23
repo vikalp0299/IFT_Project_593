@@ -1129,6 +1129,34 @@ export async function downloadFile(req, res) {
             });
         }
 
+        // SECURITY: Validate encryption metadata lengths
+        const ivBuffer = Buffer.from(file.encryption.iv, 'base64');
+        const authTagBuffer = Buffer.from(file.encryption.authTag, 'base64');
+        
+        console.log('Encryption metadata validation:', {
+            ivLength: ivBuffer.length,
+            authTagLength: authTagBuffer.length,
+            encryptedFileSize: encryptedFileContent.length,
+            storageType: file.storageType,
+            ipfsCid: file.ipfsCid
+        });
+
+        if (ivBuffer.length !== 12) {
+            console.error(`Invalid IV length: ${ivBuffer.length} bytes (expected 12)`);
+            return res.status(500).json({
+                success: false,
+                message: `Invalid IV length in stored file metadata: ${ivBuffer.length} bytes (expected 12)`
+            });
+        }
+
+        if (authTagBuffer.length !== 16) {
+            console.error(`Invalid auth tag length: ${authTagBuffer.length} bytes (expected 16)`);
+            return res.status(500).json({
+                success: false,
+                message: `Invalid auth tag length in stored file metadata: ${authTagBuffer.length} bytes (expected 16)`
+            });
+        }
+
         // Return encrypted file + encrypted symmetric key + encryption metadata to frontend
         // Frontend will contact private-key-server directly to decrypt the symmetric key
         // Then frontend will decrypt the file client-side
@@ -1468,41 +1496,124 @@ export const approveFileEdit = async (req, res) => {
 
         // Check if all required orgs have approved (blockchain will indicate this)
         // If approved by all, clean up files
+        console.log('=== APPROVAL CHECK ===');
+        console.log('Blockchain result:', JSON.stringify(result, null, 2));
         console.log('Blockchain result output:', result.output);
+        console.log('Blockchain result stdout:', result.stdout);
+        
         const isFullyApproved = result.output && (
             result.output.includes('updated with approval from all') ||
-            result.output.includes('updated successfully with approval')
+            result.output.includes('updated successfully with approval') ||
+            result.output.includes('all required approvals received') ||
+            result.output.toLowerCase().includes('fully approved')
         );
         console.log('Is fully approved?', isFullyApproved);
         console.log('Has proposedFilePath?', !!file.proposedFilePath);
+        console.log('Current activeProposalId:', file.activeProposalId);
+        console.log('===================');
         
         if (isFullyApproved && file.proposedFilePath) {
-            // Delete old file from storage
+            console.log('=== STARTING FILE UPDATE PROCESS ===');
+            console.log('Old file path:', file.path);
+            console.log('Old IPFS CID:', file.ipfsCid);
+            console.log('Old storage type:', file.storageType);
+            console.log('Proposed file path:', file.proposedFilePath);
+            
+            // Delete old file from storage (and unpin from IPFS if needed)
             if (file.oldFilePath) {
                 try {
                     await fs.unlink(file.oldFilePath);
-                    console.log('Old file deleted:', file.oldFilePath);
+                    console.log('✅ Old file deleted:', file.oldFilePath);
                 } catch (err) {
-                    console.warn('Failed to delete old file:', err.message);
+                    console.warn('⚠️ Failed to delete old file:', err.message);
                 }
             }
             
+            // Unpin old IPFS file if it exists
+            if (file.ipfsCid && file.storageType === 'ipfs') {
+                try {
+                    await unpinFromIPFS(file.ipfsCid);
+                    console.log('✅ Old IPFS file unpinned:', file.ipfsCid);
+                } catch (err) {
+                    console.warn('⚠️ Failed to unpin old IPFS file:', err.message);
+                }
+            }
+            
+            // Upload new proposed file to IPFS (if IPFS is available)
+            let newIpfsCid = null;
+            let newStorageType = 'local';
+            
+            try {
+                const ipfsAvailable = await isIPFSAvailable();
+                if (ipfsAvailable && file.proposedFilePath) {
+                    console.log('Uploading edited file to IPFS from:', file.proposedFilePath);
+                    
+                    // Verify file exists before uploading
+                    try {
+                        await fs.access(file.proposedFilePath);
+                        const stats = await fs.stat(file.proposedFilePath);
+                        console.log('Proposed file size:', stats.size, 'bytes');
+                    } catch (err) {
+                        throw new Error(`Proposed file not found: ${file.proposedFilePath}`);
+                    }
+                    
+                    const ipfsResult = await uploadToIPFS(file.proposedFilePath, path.basename(file.proposedFilePath));
+                    newIpfsCid = ipfsResult.cid;
+                    newStorageType = 'ipfs';
+                    console.log(`✅ Edited file uploaded to IPFS: ${newIpfsCid}`);
+                } else {
+                    console.log('⚠️ IPFS not available, using local storage for edited file');
+                }
+            } catch (ipfsError) {
+                console.error('❌ IPFS upload failed for edited file:', ipfsError.message);
+                console.error('Falling back to local storage');
+                newStorageType = 'local';
+            }
+            
             // Switch to new file as current version
+            const oldPath = file.path;
+            const oldCid = file.ipfsCid;
+            
             file.path = file.proposedFilePath;
+            file.ipfsCid = newIpfsCid;
+            file.storageType = newStorageType;
+            
+            console.log('Updated file.path:', oldPath, '->', file.path);
+            console.log('Updated file.ipfsCid:', oldCid, '->', file.ipfsCid);
+            console.log('Updated file.storageType:', file.storageType);
             
             // Update encryption metadata to the proposed version
             if (file.proposedEncryption) {
+                console.log('Updating encryption metadata:');
+                console.log('  Old IV:', file.encryption?.iv);
+                console.log('  New IV:', file.proposedEncryption.iv);
+                console.log('  Old authTag:', file.encryption?.authTag);
+                console.log('  New authTag:', file.proposedEncryption.authTag);
+                
                 file.encryption = file.proposedEncryption;
                 file.proposedEncryption = undefined;
-                console.log('Updated encryption metadata (IV/authTag) to proposed version');
+                console.log('✅ Updated encryption metadata (IV/authTag) to proposed version');
             }
             
             file.proposedFilePath = null;
             file.oldFilePath = null;
             file.activeProposalId = null;
-            await file.save();
             
-            console.log('File updated to new version:', file.path);
+            console.log('Saving file to database...');
+            await file.save();
+            console.log('✅ File saved to database');
+            
+            // Verify the save
+            const verifyFile = await File.findById(file._id).select('path ipfsCid storageType encryption activeProposalId');
+            console.log('=== VERIFICATION ===');
+            console.log('Saved file.path:', verifyFile.path);
+            console.log('Saved file.ipfsCid:', verifyFile.ipfsCid);
+            console.log('Saved file.storageType:', verifyFile.storageType);
+            console.log('Saved file.activeProposalId:', verifyFile.activeProposalId);
+            console.log('Saved file.encryption.iv:', verifyFile.encryption?.iv);
+            console.log('===================');
+            
+            console.log('✅ File updated to new version:', file.path, `(IPFS: ${newIpfsCid || 'local only'})`);
         } else {
             // Still waiting for more approvals, keep both files
             console.log('Approval recorded, waiting for other organizations');
