@@ -20,6 +20,12 @@ import {
   decryptFileFromDisk,
   decryptSymmetricKey,
 } from '../utils/fileEncryption.js';
+import { 
+  isIPFSAvailable, 
+  uploadToIPFS, 
+  downloadFromIPFS,
+  unpinFromIPFS 
+} from '../utils/ipfsService.js';
 import blockChainFunctionHandler from '../blockchain/controllers/blockChainFunctionHandler.js';
 import { fileURLToPath } from 'url';
 
@@ -465,6 +471,29 @@ export async function completeUpload(req, res) {
 
         console.log('Encrypted file written to:', finalFilePath);
 
+        // Try to upload to IPFS, fallback to local storage
+        let ipfsCid = null;
+        let storageType = 'local';
+        
+        try {
+            const ipfsAvailable = await isIPFSAvailable();
+            if (ipfsAvailable) {
+                console.log('IPFS is available, uploading encrypted file...');
+                const ipfsResult = await uploadToIPFS(finalFilePath, `${uploadId}.enc`);
+                ipfsCid = ipfsResult.cid;
+                storageType = 'ipfs';
+                console.log(`✅ File uploaded to IPFS: ${ipfsCid}`);
+                
+                // Delete local file after successful IPFS upload (optional - keep as backup)
+                // await fs.unlink(finalFilePath).catch(() => {});
+            } else {
+                console.log('⚠️ IPFS not available, using local storage');
+            }
+        } catch (ipfsError) {
+            console.error('IPFS upload failed, falling back to local storage:', ipfsError.message);
+            storageType = 'local';
+        }
+
         // Detect MIME type
         const mimeType = mime.lookup(originalName) || 'application/octet-stream';
 
@@ -709,6 +738,8 @@ export async function completeUpload(req, res) {
             mimetype: mimeType,                    // Detected MIME type
             size: encryptedFileData.ciphertext.length, // Encrypted file size in bytes
             path: `uploads/${userId}/${uploadId}`, // Relative path from project root
+            ipfsCid: ipfsCid,                      // IPFS CID (null if not uploaded to IPFS)
+            storageType: storageType,              // 'ipfs' or 'local'
             userId: userId,                        // Primary user reference (ObjectId)
             uploader: userId,                      // Dual field per File model convention
             access: [],                            // Empty array for future sharing feature
@@ -842,7 +873,7 @@ export async function completeUpload(req, res) {
                 const blockchainFileData = {
                     fileId: savedFile._id.toString(),
                     filename: originalName,
-                    ipfsCid: `ipfs-${uploadId}`, // Placeholder until IPFS integration
+                    ipfsCid: ipfsCid || `local-${uploadId}`, // Use actual IPFS CID or local identifier
                     size: encryptedFileData.ciphertext.length,
                     allowedOrgsStr: allowedOrgsStr,
                     multiSigRequired: !!editAgreementRequired,
@@ -851,7 +882,8 @@ export async function completeUpload(req, res) {
                     metadata: JSON.stringify({
                         mimetype: mimeType,
                         encrypted: true,
-                        uploadedBy: userId.toString()
+                        uploadedBy: userId.toString(),
+                        storageType: storageType
                     })
                 };
                 
@@ -1046,29 +1078,47 @@ export async function downloadFile(req, res) {
             });
         }
 
-        // Read encrypted file
-        // SECURITY: Path traversal protection - ensure file path is within allowed directory
-        const filePath = path.resolve(file.path);
-        const uploadsDir = path.resolve(process.cwd(), 'uploads');
-        
-        // Verify the resolved path is within the uploads directory
-        if (!filePath.startsWith(uploadsDir)) {
-            console.error(`SECURITY: Path traversal attempt detected. File path: ${filePath}`);
-            return res.status(403).json({
-                success: false,
-                message: 'Invalid file path'
-            });
-        }
-
+        // Read encrypted file - try IPFS first, fallback to local storage
         let encryptedFileContent;
+        
         try {
-            encryptedFileContent = await fs.readFile(filePath);
+            if (file.storageType === 'ipfs' && file.ipfsCid) {
+                console.log(`Attempting to download file from IPFS: ${file.ipfsCid}`);
+                try {
+                    encryptedFileContent = await downloadFromIPFS(file.ipfsCid);
+                    console.log('✅ File downloaded from IPFS');
+                } catch (ipfsError) {
+                    console.warn('IPFS download failed, falling back to local storage:', ipfsError.message);
+                    // Fall through to local file read
+                    throw ipfsError; // Trigger local fallback
+                }
+            } else {
+                throw new Error('Using local storage');
+            }
         } catch (error) {
-            console.error('Error reading encrypted file:', error);
-            return res.status(404).json({
-                success: false,
-                message: 'File not found on disk'
-            });
+            // Fallback to local file storage
+            console.log('Reading file from local storage');
+            const filePath = path.resolve(file.path);
+            const uploadsDir = path.resolve(process.cwd(), 'uploads');
+            
+            // SECURITY: Path traversal protection - ensure file path is within allowed directory
+            if (!filePath.startsWith(uploadsDir)) {
+                console.error(`SECURITY: Path traversal attempt detected. File path: ${filePath}`);
+                return res.status(403).json({
+                    success: false,
+                    message: 'Invalid file path'
+                });
+            }
+
+            try {
+                encryptedFileContent = await fs.readFile(filePath);
+            } catch (readError) {
+                console.error('Error reading encrypted file from local storage:', readError);
+                return res.status(404).json({
+                    success: false,
+                    message: 'File not found on disk or IPFS'
+                });
+            }
         }
 
         // SECURITY: Validate encryption metadata before sending

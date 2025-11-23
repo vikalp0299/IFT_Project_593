@@ -901,7 +901,8 @@
   z-index: 1000;
   backdrop-filter: blur(4px);
   animation: fadeIn 0.2s ease;
-  padding: 1rem;
+  padding: 2rem 1rem;
+  overflow-y: auto;
 }
 
 .upload-modal-content {
@@ -910,12 +911,44 @@
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 2.5rem;
+  padding: 1.75rem;
   max-width: 500px;
   width: 90%;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  overflow-x: hidden;
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  margin: auto;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for modal */
+.upload-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.upload-modal-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 8px 0;
+}
+
+.upload-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.upload-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Firefox scrollbar */
+.upload-modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
 }
 
 @keyframes fadeIn {
@@ -939,7 +972,7 @@
 }
 
 .upload-modal-content h2 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   color: white;
   font-size: 1.5rem;
   font-weight: 700;
@@ -951,7 +984,7 @@
 .file-upload-area {
   border: 2px dashed #E5E7EB;
   border-radius: 12px;
-  padding: 3rem 2rem;
+  padding: 2rem 1.5rem;
   text-align: center;
   background: rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
@@ -1045,7 +1078,8 @@
 
 /* TTL Input Section */
 .ttl-input-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 
 .ttl-label {
@@ -1094,7 +1128,7 @@
 
 /* Access Rights */
 .access-rights-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .access-rights-section h3 {
@@ -1105,9 +1139,9 @@
 }
 
 .section-description {
-  margin: 0.25rem 0 1rem 0;
+  margin: 0.25rem 0 0.75rem 0;
   color: #D1D5DB;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .access-input-grid {
@@ -1215,8 +1249,8 @@
 }
 
 .edit-agreement-section {
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
   border: 1px dashed rgba(255, 255, 255, 0.2);
   border-radius: 12px;
 }
@@ -1317,8 +1351,168 @@
   margin-bottom: 1rem;
 }
 
+/* Small Spinner for Upload Button */
+.spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Upload Progress Section */
+.upload-progress-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+  border-radius: 12px;
+  border: 1px solid #BAE6FD;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 32px;
+  background: #FFFFFF;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #E0F2FE;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0EA5E9 0%, #3B82F6 50%, #6366F1 100%);
+  background-size: 200% 100%;
+  animation: progressGradient 2s ease infinite;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes progressGradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progress-text {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  position: relative;
+}
+
+.upload-status-text {
+  margin-top: 12px;
+  text-align: center;
+  color: #0369A1;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Update upload button to support flex layout */
+.upload-submit-button {
+  background: linear-gradient(135deg, #0E7490 0%, #4338CA 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(14, 116, 144, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.upload-submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0E7490 0%, #4338CA 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(14, 116, 144, 0.35);
+}
+
+.upload-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+}
+
+.cancel-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .upload-modal-content {
+    padding: 1.25rem;
+    max-height: calc(100vh - 2rem);
+    width: 95%;
+  }
+
+  .file-upload-area {
+    padding: 1.5rem 1rem;
+  }
+
+  .upload-icon {
+    font-size: 2.5rem;
+  }
+
   .user-homepage-header {
     padding: 1rem;
     flex-direction: column;
@@ -1394,6 +1588,35 @@
 }
 
 @media (max-width: 480px) {
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .upload-modal-content {
+    padding: 1rem;
+    max-height: calc(100vh - 1rem);
+    width: 98%;
+    border-radius: 16px;
+  }
+
+  .upload-modal-content h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .file-upload-area {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .modal-button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .access-input-grid {
+    grid-template-columns: 1fr;
+  }
+
   .user-homepage-header {
     padding: 0.75rem;
   }

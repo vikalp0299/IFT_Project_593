@@ -22,6 +22,6 @@ else
     echo "Check the logs with: docker-compose logs"
 fi
 
-echo "Starting Node.js server..."
-cd node_app
-npm start
+# echo "Starting Node.js server..."
+# cd node_app
+# npm start

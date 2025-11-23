@@ -22,6 +22,16 @@ const fileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // IPFS storage
+  ipfsCid: {
+    type: String,
+    default: null, // IPFS Content Identifier (if file is stored on IPFS)
+  },
+  storageType: {
+    type: String,
+    enum: ['local', 'ipfs'],
+    default: 'local', // 'local' for filesystem, 'ipfs' for IPFS
+  },
   userId: {                         // Explicit userId field (string or ObjectId)
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

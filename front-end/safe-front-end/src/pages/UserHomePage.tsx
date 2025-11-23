@@ -105,6 +105,9 @@ export const UserHomePage = () => {
   });
   const [isPrivateKeyServerLoggingIn, setIsPrivateKeyServerLoggingIn] = useState(false);
   const [privateKeyServerLoginError, setPrivateKeyServerLoginError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState('');
 
   useEffect(() => {
     // Check if user is authenticated
@@ -511,12 +514,19 @@ export const UserHomePage = () => {
     setEditAgreementRequired(false);
     setSelectedAgreementOrgIds([]);
     setIsDragging(false);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setUploadStatus('');
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
       alert('Please select a file to upload');
       return;
+    }
+
+    if (isUploading) {
+      return; // Prevent double upload
     }
 
     setAccessErrors(null);
@@ -526,6 +536,10 @@ export const UserHomePage = () => {
     }
 
     try {
+      setIsUploading(true);
+      setUploadProgress(0);
+      setUploadStatus('Initializing upload...');
+
       const initResponse = await authService.authenticatedRequest<{ uploadId: string }>('/api/uploads/init', {
         method: 'POST',
         body: JSON.stringify({ filename: selectedFile.name }),
@@ -538,6 +552,8 @@ export const UserHomePage = () => {
       const uploadId = initResponse.data.uploadId;
       const chunkSize = 5 * 1024 * 1024;
       const totalChunks = Math.ceil(selectedFile.size / chunkSize);
+
+      setUploadStatus(`Uploading chunks (0/${totalChunks})...`);
 
       for (let i = 0; i < totalChunks; i++) {
         const start = i * chunkSize;
@@ -560,7 +576,15 @@ export const UserHomePage = () => {
         if (!chunkResponse.ok) {
           throw new Error(`Failed to upload chunk ${i}`);
         }
+
+        // Update progress
+        const progress = Math.round(((i + 1) / totalChunks) * 80); // 80% for chunks
+        setUploadProgress(progress);
+        setUploadStatus(`Uploading chunks (${i + 1}/${totalChunks})...`);
       }
+
+      setUploadStatus('Encrypting and finalizing...');
+      setUploadProgress(85);
 
       const holdMs =
         (parseInt(ttlDays || '0', 10) * 24 * 60 * 60 +
@@ -610,6 +634,12 @@ export const UserHomePage = () => {
       });
 
       if (completeResponse.success) {
+        setUploadProgress(100);
+        setUploadStatus('Upload complete!');
+        
+        // Wait a moment to show completion
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         alert('File uploaded successfully!');
         handleCloseModal();
         fetchFiles();
@@ -618,7 +648,10 @@ export const UserHomePage = () => {
       }
     } catch (err) {
       console.error('Upload error:', err);
+      setUploadStatus('Upload failed');
       alert(err instanceof Error ? err.message : 'Failed to upload file');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -1297,20 +1330,43 @@ export const UserHomePage = () => {
               )}
             </div>
 
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="upload-progress-section">
+                <div className="progress-bar-container">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{ width: `${uploadProgress}%` }}
+                  >
+                    <span className="progress-text">{uploadProgress}%</span>
+                  </div>
+                </div>
+                <p className="upload-status-text">{uploadStatus}</p>
+              </div>
+            )}
+
             {/* Modal Actions */}
             <div className="modal-actions">
               <button 
                 onClick={handleCloseModal} 
                 className="modal-button cancel-button"
+                disabled={isUploading}
               >
                 Cancel
               </button>
               <button 
                 onClick={handleUpload} 
                 className="modal-button upload-submit-button"
-                disabled={!selectedFile}
+                disabled={!selectedFile || isUploading}
               >
-                Upload
+                {isUploading ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  'Upload'
+                )}
               </button>
             </div>
           </div>
