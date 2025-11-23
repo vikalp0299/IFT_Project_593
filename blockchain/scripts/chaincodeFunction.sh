@@ -22,7 +22,7 @@ show_help() {
     echo "  --peerName       Peer name"
     echo "  --channelName    Channel name"
     echo "  --chaincode      Chaincode name"
-    echo "  --fcn            Function to execute (InitLedger, GetAllFiles, CreateFile)"
+    echo "  --fcn            Function to execute (InitLedger, GetAllFiles, CreateFile, ProposeEdit, ApproveEdit, RejectEdit)"
     echo
     echo -e "${YELLOW}Function-Specific Parameters:${NC}"
     echo
@@ -43,6 +43,24 @@ show_help() {
     echo "  --createdAt      ISO timestamp (optional, will auto-generate if not provided)"
     echo "  --requiredOrgsStr   Comma-separated org list for required approvals (optional)"
     echo "  --metadata       JSON metadata string (optional)"
+    echo
+    echo -e "${BLUE}UpdateFile (used for both proposing and approving edits):${NC}"
+    echo "  --fileId         File identifier to edit"
+    echo "  --ipfsCid        New IPFS CID (or proposal data as JSON string)"
+    echo "  --size           New file size in bytes"
+    echo "  --metadata       Optional metadata (JSON string)"
+    echo
+    echo
+    echo -e "${BLUE}ApproveEdit:${NC}"
+    echo "  --fileId         File identifier"
+    echo "  --proposalId     Proposal ID to approve"
+    echo "  --approver       Approver's MSP ID (e.g., sunMSP)"
+    echo
+    echo -e "${BLUE}RejectEdit:${NC}"
+    echo "  --fileId         File identifier"
+    echo "  --proposalId     Proposal ID to reject"
+    echo "  --rejector       Rejector's MSP ID (e.g., sunMSP)"
+    echo "  --reason         Reason for rejection (optional)"
     echo
     echo -e "${YELLOW}Examples:${NC}"
     echo "  # Initialize Ledger"
@@ -89,6 +107,13 @@ while [[ "$#" -gt 0 ]]; do
         --createdAt) createdAt="$2"; shift ;;
         --requiredOrgsStr) requiredOrgsStr="$2"; shift ;;
         --metadata) metadata="$2"; shift ;;
+        --newContent) newContent="$2"; shift ;;
+        --proposer) proposer="$2"; shift ;;
+        --proposalId) proposalId="$2"; shift ;;
+        --approver) approver="$2"; shift ;;
+        --rejector) rejector="$2"; shift ;;
+        --reason) reason="$2"; shift ;;
+        --proposedAt) proposedAt="$2"; shift ;;
         *) echo -e "${RED}Unknown parameter: $1${NC}"; show_help; exit 1 ;;
     esac
     shift
@@ -221,10 +246,125 @@ case "$fcn" in
             exit 1
         fi
         ;;
+    
+    UpdateFile)
+        echo -e "${GREEN}Updating file (propose/approve edit)...${NC}"
+        
+        # Validate required parameters
+        if [ -z "$fileId" ] || [ -z "$ipfsCid" ] || [ -z "$size" ]; then
+            echo -e "${RED}Error: Missing required parameters for UpdateFile${NC}"
+            echo -e "${YELLOW}Required: --fileId, --ipfsCid, --size${NC}"
+            exit 1
+        fi
+        
+        # Extract proposedAt timestamp from metadata JSON if not explicitly provided
+        if [ -z "$proposedAt" ] && [ -n "$metadata" ]; then
+            proposedAt=$(echo "$metadata" | grep -o '"proposedAt":"[^"]*"' | cut -d'"' -f4)
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        echo -e "  ipfsCid: ${ipfsCid}"
+        echo -e "  size: ${size}"
+        [ -n "$metadata" ] && echo -e "  metadata: ${metadata}"
+        [ -n "$proposedAt" ] && echo -e "  proposedAt: ${proposedAt}"
+        
+        # Always pass 5 parameters when metadata is present (chaincode expects 5 params)
+        if [ -n "$metadata" ]; then
+            # Use empty string for proposedAt if not available
+            timestamp="${proposedAt:-}"
+            echo -e "${YELLOW}Executing: kubectl hlf chaincode invoke --config=\"${configFile}\" --user=\"${orgName}\" --peer=\"${peerName}\" --chaincode=\"${chaincode}\" --channel=\"${channelName}\" --fcn=UpdateFile -a \"${fileId}\" -a \"${ipfsCid}\" -a \"${size}\" -a \"${metadata}\" -a \"${timestamp}\"${NC}"
+            kubectl hlf chaincode invoke --config="${configFile}" \
+                --user="${orgName}" --peer="${peerName}" \
+                --chaincode="${chaincode}" --channel="${channelName}" \
+                --fcn=UpdateFile \
+                -a "${fileId}" \
+                -a "${ipfsCid}" \
+                -a "${size}" \
+                -a "${metadata}" \
+                -a "${timestamp}"
+        else
+            echo -e "${YELLOW}Executing: kubectl hlf chaincode invoke --config=\"${configFile}\" --user=\"${orgName}\" --peer=\"${peerName}\" --chaincode=\"${chaincode}\" --channel=\"${channelName}\" --fcn=UpdateFile -a \"${fileId}\" -a \"${ipfsCid}\" -a \"${size}\"${NC}"
+            kubectl hlf chaincode invoke --config="${configFile}" \
+                --user="${orgName}" --peer="${peerName}" \
+                --chaincode="${chaincode}" --channel="${channelName}" \
+                --fcn=UpdateFile \
+                -a "${fileId}" \
+                -a "${ipfsCid}" \
+                -a "${size}"
+        fi
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ UpdateFile executed successfully${NC}"
+        else
+            echo -e "${RED}✗ UpdateFile failed${NC}"
+            exit 1
+        fi
+        ;;
+    
+    ApproveEdit)
+        echo -e "${GREEN}Approving edit proposal...${NC}"
+        
+        # Validate required parameters
+        if [ -z "$fileId" ] || [ -z "$proposalId" ]; then
+            echo -e "${RED}Error: Missing required parameters for ApproveEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId, --proposalId${NC}"
+            exit 1
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        echo -e "  proposalId: ${proposalId}"
+        
+        echo -e "${YELLOW}Executing: kubectl hlf chaincode invoke --config=\"${configFile}\" --user=\"${orgName}\" --peer=\"${peerName}\" --chaincode=\"${chaincode}\" --channel=\"${channelName}\" --fcn=ApproveEdit -a \"${fileId}\" -a \"${proposalId}\"${NC}"
+        
+        # Invoke ApproveEdit chaincode (only needs fileId and proposalId)
+        kubectl hlf chaincode invoke --config="${configFile}" \
+            --user="${orgName}" --peer="${peerName}" \
+            --chaincode="${chaincode}" --channel="${channelName}" \
+            --fcn=ApproveEdit \
+            -a "${fileId}" \
+            -a "${proposalId}"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ ApproveEdit executed successfully${NC}"
+        else
+            echo -e "${RED}✗ ApproveEdit failed${NC}"
+            exit 1
+        fi
+        ;;
+    
+    RejectEdit)
+        echo -e "${GREEN}Rejecting edit proposal...${NC}"
+        
+        # Validate required parameters  
+        if [ -z "$fileId" ]; then
+            echo -e "${RED}Error: Missing required parameter for RejectEdit${NC}"
+            echo -e "${YELLOW}Required: --fileId${NC}"
+            exit 1
+        fi
+        
+        echo -e "${BLUE}Parameters:${NC}"
+        echo -e "  fileId: ${fileId}"
+        
+        # Invoke RejectEdit chaincode (only needs fileId)
+        kubectl hlf chaincode invoke --config="${configFile}" \
+            --user="${orgName}" --peer="${peerName}" \
+            --chaincode="${chaincode}" --channel="${channelName}" \
+            --fcn=RejectEdit \
+            -a "${fileId}"
+        
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}✓ Edit proposal rejected successfully${NC}"
+        else
+            echo -e "${RED}✗ Edit rejection failed${NC}"
+            exit 1
+        fi
+        ;;
         
     *)
         echo -e "${RED}Error: Unknown function '${fcn}'${NC}"
-        echo -e "${YELLOW}Supported functions: InitLedger, GetAllFiles, CreateFile${NC}"
+        echo -e "${YELLOW}Supported functions: InitLedger, GetAllFiles, CreateFile, ProposeEdit, ApproveEdit, RejectEdit${NC}"
         show_help
         exit 1
         ;;

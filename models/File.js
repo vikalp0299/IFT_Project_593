@@ -148,6 +148,31 @@ const fileSchema = new mongoose.Schema({
       },
     },
   ],
+  // Edit proposal tracking
+  activeProposalId: {
+    type: String, // Blockchain proposal ID
+    default: null,
+  },
+  proposedFilePath: {
+    type: String, // Path to the proposed new encrypted file version
+    default: null,
+  },
+  oldFilePath: {
+    type: String, // Path to the old encrypted file (backup during proposal)
+    default: null,
+  },
+  proposedEncryption: {
+    algorithm: {
+      type: String,
+      enum: ['AES-256-GCM'],
+    },
+    iv: {
+      type: String, // Base64 encoded IV for proposed file
+    },
+    authTag: {
+      type: String, // Base64 encoded auth tag for proposed file
+    },
+  },
 });
 
 const File = mongoose.model('File', fileSchema);

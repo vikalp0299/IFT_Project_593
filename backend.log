@@ -1,0 +1,374 @@
+
+> safe-frontend-backend@1.0.0 dev
+> nodemon --ignore './blockchain/generated_resources/**' --ignore '*.yaml' --ignore '*.tgz' --ignore '*.tar.gz' server.js
+
+[33m[nodemon] 3.1.10[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): **/*.js **/*.json[39m
+[33m[nodemon] watching extensions: js,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.2.2] injecting env (2) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.2] injecting env (0) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
+[2025-11-22T14:24:31.878Z] INFO: Server started successfully { port: '8000', environment: 'development', version: '1.0.0' }
+🚀 Server started successfully!
+📍 Environment: development
+🌐 Server URL: http://localhost:8000
+🔐 Login endpoint: http://localhost:8000/auth/login
+📝 Register endpoint: http://localhost:8000/auth/register
+🏢 Organization validation: http://localhost:8000/org/validate-organization
+🔍 SignIn organization validation: http://localhost:8000/org/validate-signin-organization
+💚 Health check: http://localhost:8000/health
+🎨 Frontend: http://localhost:5173, http://localhost:5174, http://localhost:3000
+[36m[2025-11-22T14:24:31.884Z] INFO: MongoDB connected successfully {"host":"localhost"}[0m
+✅ MongoDB connected: localhost
+[2025-11-22T14:25:13.421Z] GET /org/list?excludeSelf=true - IP: ::1
+[2025-11-22T14:25:13.444Z] GET /org/list?excludeSelf=true - Status: 304 - 23ms
+[2025-11-22T14:25:20.376Z] GET /org/departments/sunil - IP: ::1
+[2025-11-22T14:25:20.388Z] GET /org/departments/sunil - Status: 304 - 12ms
+[2025-11-22T14:25:26.966Z] POST /api/uploads/init - IP: ::1
+Init upload for user: new ObjectId('6921bce975aa3200b5ea6a0b') filename: test2.txt
+[2025-11-22T14:25:26.976Z] POST /api/uploads/init - Status: 200 - 10ms
+[2025-11-22T14:25:26.983Z] POST /api/uploads/chunk - IP: ::1
+Uploading chunk 0 for upload d6b97446-ce99-4c75-8da5-a22cb5bf0cd1
+[2025-11-22T14:25:26.996Z] POST /api/uploads/chunk - Status: 200 - 13ms
+[2025-11-22T14:25:27.000Z] POST /api/uploads/complete - IP: ::1
+Completing upload for user: new ObjectId('6921bce975aa3200b5ea6a0b')
+Completing upload: {
+  uploadId: 'd6b97446-ce99-4c75-8da5-a22cb5bf0cd1',
+  originalName: 'test2.txt',
+  userId: new ObjectId('6921bce975aa3200b5ea6a0b')
+}
+File reassembled at: /Users/warlord/Desktop/IFT_Project_593/uploads/6921bce975aa3200b5ea6a0b/d6b97446-ce99-4c75-8da5-a22cb5bf0cd1_temp
+Generated symmetric key for file encryption
+File encrypted successfully
+Encrypted file written to: /Users/warlord/Desktop/IFT_Project_593/uploads/6921bce975aa3200b5ea6a0b/d6b97446-ce99-4c75-8da5-a22cb5bf0cd1
+Encrypted symmetric key for department: Legal
+File metadata saved to database: new ObjectId('6921c7d7dd7847ed05e1be2e')
+Current user for blockchain integration: new ObjectId('6921bce975aa3200b5ea6a0b') new ObjectId('6920ee094d199e92dec91354')
+Adding file to blockchain: {
+  org: 'vik',
+  fileId: '6921c7d7dd7847ed05e1be2e',
+  filename: 'test2.txt'
+}
+Creating file in ledger...
+Running command: bash /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts/fabricSystem.sh create-file --configFile /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml --orgName vik --peerName peer0 --channelName test --chaincodeName asset --fileId 6921c7d7dd7847ed05e1be2e --filename test2.txt --ipfsCid ipfs-d6b97446-ce99-4c75-8da5-a22cb5bf0cd1 --size 41 --allowedOrgsStr sunMSP,vikMSP --multiSigRequired true --createdAt 2025-11-22T14:25:27.013Z --requiredOrgsStr vikMSP,sunMSP --metadata {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+Working directory: /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts
+stdout: [0;32m========================================[0m
+[0;32mCreating File in Ledger[0m
+
+stdout: [0;32mConfig File: /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml[0m
+[0;32mOrganization: vik -> vik-admin-default[0m
+[0;32mPeer: peer0 -> vik-peer0.default[0m
+[0;32mChannel: test[0m
+[0;32mChaincode: asset[0m
+[0;32m========================================[0m
+File Details:[0m
+  File ID:[0m          6921c7d7dd7847ed05e1be2e
+  Filename:[0m         test2.txt
+  IPFS CID:[0m         ipfs-d6b97446-ce99-4c75-8da5-a22cb5bf0cd1
+  Size:[0m             41 bytes
+  Allowed Orgs:[0m     sunMSP,vikMSP
+  Multi-Sig Req:[0m    true
+  Created At:[0m       2025-11-22T14:25:27.013Z
+  Required Orgs:[0m    vikMSP,sunMSP
+  Metadata:[0m         {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+[0;32m========================================[0m
+
+[0;32mExecuting chaincode function...[0m
+
+stdout: [0;32mCreating file in ledger...[0m
+[0;34mParameters:[0m
+
+stdout:   fileId: 6921c7d7dd7847ed05e1be2e
+  filename: test2.txt
+  ipfsCid: ipfs-d6b97446-ce99-4c75-8da5-a22cb5bf0cd1
+  size: 41
+  allowedOrgs: ["sunMSP","vikMSP"]
+  multiSigRequired: true
+  createdAt: 2025-11-22T14:25:27.013Z
+  requiredOrgs: ["vikMSP","sunMSP"]
+  metadata: {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+
+[2025-11-22T14:25:35.427Z] POST /api/uploads/init - IP: ::1
+Init upload for user: new ObjectId('6921bce975aa3200b5ea6a0b') filename: test2.txt
+[2025-11-22T14:25:35.432Z] POST /api/uploads/init - Status: 200 - 5ms
+[2025-11-22T14:25:35.437Z] POST /api/uploads/chunk - IP: ::1
+Uploading chunk 0 for upload 2ad901e5-7921-4923-83e4-dae44eb1cd02
+[2025-11-22T14:25:35.442Z] POST /api/uploads/chunk - Status: 200 - 5ms
+[2025-11-22T14:25:35.445Z] POST /api/uploads/complete - IP: ::1
+Completing upload for user: new ObjectId('6921bce975aa3200b5ea6a0b')
+Completing upload: {
+  uploadId: '2ad901e5-7921-4923-83e4-dae44eb1cd02',
+  originalName: 'test2.txt',
+  userId: new ObjectId('6921bce975aa3200b5ea6a0b')
+}
+File reassembled at: /Users/warlord/Desktop/IFT_Project_593/uploads/6921bce975aa3200b5ea6a0b/2ad901e5-7921-4923-83e4-dae44eb1cd02_temp
+Generated symmetric key for file encryption
+File encrypted successfully
+Encrypted file written to: /Users/warlord/Desktop/IFT_Project_593/uploads/6921bce975aa3200b5ea6a0b/2ad901e5-7921-4923-83e4-dae44eb1cd02
+Encrypted symmetric key for department: Legal
+File metadata saved to database: new ObjectId('6921c7dfdd7847ed05e1be3c')
+Current user for blockchain integration: new ObjectId('6921bce975aa3200b5ea6a0b') new ObjectId('6920ee094d199e92dec91354')
+Adding file to blockchain: {
+  org: 'vik',
+  fileId: '6921c7dfdd7847ed05e1be3c',
+  filename: 'test2.txt'
+}
+Creating file in ledger...
+Running command: bash /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts/fabricSystem.sh create-file --configFile /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml --orgName vik --peerName peer0 --channelName test --chaincodeName asset --fileId 6921c7dfdd7847ed05e1be3c --filename test2.txt --ipfsCid ipfs-2ad901e5-7921-4923-83e4-dae44eb1cd02 --size 41 --allowedOrgsStr sunMSP,vikMSP --multiSigRequired true --createdAt 2025-11-22T14:25:35.458Z --requiredOrgsStr vikMSP,sunMSP --metadata {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+Working directory: /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts
+stdout: [0;32m========================================[0m
+[0;32mCreating File in Ledger[0m
+
+stdout: [0;32mConfig File: /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml[0m
+[0;32mOrganization: vik -> vik-admin-default[0m
+[0;32mPeer: peer0 -> vik-peer0.default[0m
+[0;32mChannel: test[0m
+[0;32mChaincode: asset[0m
+[0;32m========================================[0m
+File Details:[0m
+  File ID:[0m          6921c7dfdd7847ed05e1be3c
+  Filename:[0m         test2.txt
+  IPFS CID:[0m         ipfs-2ad901e5-7921-4923-83e4-dae44eb1cd02
+  Size:[0m             41 bytes
+  Allowed Orgs:[0m     sunMSP,vikMSP
+  Multi-Sig Req:[0m    true
+  Created At:[0m       2025-11-22T14:25:35.458Z
+
+stdout:   Required Orgs:[0m    vikMSP,sunMSP
+  Metadata:[0m         {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+
+stdout: [0;32m========================================[0m
+
+[0;32mExecuting chaincode function...[0m
+
+stdout: [0;32mCreating file in ledger...[0m
+[0;34mParameters:[0m
+  fileId: 6921c7dfdd7847ed05e1be3c
+
+stdout:   filename: test2.txt
+  ipfsCid: ipfs-2ad901e5-7921-4923-83e4-dae44eb1cd02
+  size: 41
+  allowedOrgs: ["sunMSP","vikMSP"]
+  multiSigRequired: true
+  createdAt: 2025-11-22T14:25:35.458Z
+  requiredOrgs: ["vikMSP","sunMSP"]
+  metadata: {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+
+stdout: File 6921c7dfdd7847ed05e1be3c created successfully
+stdout: [0;32m✓ File created successfully[0m
+
+stdout: 
+[0;32m✓ File created successfully[0m
+
+
+stdout: [0;32m========================================[0m
+[0;32mFile Creation Complete![0m
+[0;32m========================================[0m
+
+child process exited with code 0
+File created successfully
+File added to blockchain successfully
+[2025-11-22T14:25:37.663Z] POST /api/uploads/complete - Status: 200 - 2218ms
+[2025-11-22T14:25:40.867Z] GET /api/getfiles - IP: ::1
+[2025-11-22T14:25:40.889Z] GET /api/getfiles - Status: 200 - 22ms
+[2025-11-22T14:26:06.611Z] GET /org/local-server - IP: ::1
+[2025-11-22T14:26:06.617Z] GET /org/local-server - Status: 304 - 6ms
+stdout: File 6921c7d7dd7847ed05e1be2e created successfully
+stdout: [0;32m✓ File created successfully[0m
+
+stdout: 
+
+stdout: [0;32m✓ File created successfully[0m
+
+
+stdout: [0;32m========================================[0m
+[0;32mFile Creation Complete![0m
+[0;32m========================================[0m
+
+child process exited with code 0
+File created successfully
+File added to blockchain successfully
+[2025-11-22T14:26:12.089Z] POST /api/uploads/complete - Status: 200 - 45089ms
+[2025-11-22T14:26:14.336Z] GET /api/getfiles - IP: ::1
+[2025-11-22T14:26:14.361Z] GET /api/getfiles - Status: 304 - 25ms
+[2025-11-22T14:26:42.476Z] GET /org/list?excludeSelf=true - IP: ::1
+[2025-11-22T14:26:42.481Z] GET /org/list?excludeSelf=true - Status: 304 - 5ms
+[2025-11-22T14:26:49.848Z] GET /org/departments/sunil - IP: ::1
+[2025-11-22T14:26:49.854Z] GET /org/departments/sunil - Status: 304 - 6ms
+[2025-11-22T14:26:54.991Z] POST /api/uploads/init - IP: ::1
+Init upload for user: new ObjectId('6921bce975aa3200b5ea6a0b') filename: test3.txt
+[2025-11-22T14:26:54.996Z] POST /api/uploads/init - Status: 200 - 5ms
+[2025-11-22T14:26:55.000Z] POST /api/uploads/chunk - IP: ::1
+Uploading chunk 0 for upload 4bbd7db8-4b04-4ede-9481-f54cc99fdee2
+[2025-11-22T14:26:55.005Z] POST /api/uploads/chunk - Status: 200 - 5ms
+[2025-11-22T14:26:55.009Z] POST /api/uploads/complete - IP: ::1
+Completing upload for user: new ObjectId('6921bce975aa3200b5ea6a0b')
+Completing upload: {
+  uploadId: '4bbd7db8-4b04-4ede-9481-f54cc99fdee2',
+  originalName: 'test3.txt',
+  userId: new ObjectId('6921bce975aa3200b5ea6a0b')
+}
+File reassembled at: /Users/warlord/Desktop/IFT_Project_593/uploads/6921bce975aa3200b5ea6a0b/4bbd7db8-4b04-4ede-9481-f54cc99fdee2_temp
+Generated symmetric key for file encryption
+File encrypted successfully
+Encrypted file written to: /Users/warlord/Desktop/IFT_Project_593/uploads/6921bce975aa3200b5ea6a0b/4bbd7db8-4b04-4ede-9481-f54cc99fdee2
+Encrypted symmetric key for department: Legal
+File metadata saved to database: new ObjectId('6921c82fdd7847ed05e1be8f')
+Current user for blockchain integration: new ObjectId('6921bce975aa3200b5ea6a0b') new ObjectId('6920ee094d199e92dec91354')
+Adding file to blockchain: {
+  org: 'vik',
+  fileId: '6921c82fdd7847ed05e1be8f',
+  filename: 'test3.txt'
+}
+Creating file in ledger...
+Running command: bash /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts/fabricSystem.sh create-file --configFile /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml --orgName vik --peerName peer0 --channelName test --chaincodeName asset --fileId 6921c82fdd7847ed05e1be8f --filename test3.txt --ipfsCid ipfs-4bbd7db8-4b04-4ede-9481-f54cc99fdee2 --size 44 --allowedOrgsStr sunMSP,vikMSP --multiSigRequired true --createdAt 2025-11-22T14:26:55.022Z --requiredOrgsStr vikMSP,sunMSP --metadata {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+Working directory: /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts
+stdout: [0;32m========================================[0m
+[0;32mCreating File in Ledger[0m
+
+stdout: [0;32mConfig File: /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml[0m
+[0;32mOrganization: vik -> vik-admin-default[0m
+[0;32mPeer: peer0 -> vik-peer0.default[0m
+[0;32mChannel: test[0m
+[0;32mChaincode: asset[0m
+[0;32m========================================[0m
+File Details:[0m
+  File ID:[0m          6921c82fdd7847ed05e1be8f
+  Filename:[0m         test3.txt
+  IPFS CID:[0m         ipfs-4bbd7db8-4b04-4ede-9481-f54cc99fdee2
+  Size:[0m             44 bytes
+  Allowed Orgs:[0m     sunMSP,vikMSP
+  Multi-Sig Req:[0m    true
+  Created At:[0m       2025-11-22T14:26:55.022Z
+  Required Orgs:[0m    vikMSP,sunMSP
+  Metadata:[0m         {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+[0;32m========================================[0m
+
+[0;32mExecuting chaincode function...[0m
+
+stdout: [0;32mCreating file in ledger...[0m
+[0;34mParameters:[0m
+  fileId: 6921c82fdd7847ed05e1be8f
+  filename: test3.txt
+
+stdout:   ipfsCid: ipfs-4bbd7db8-4b04-4ede-9481-f54cc99fdee2
+  size: 44
+  allowedOrgs: ["sunMSP","vikMSP"]
+  multiSigRequired: true
+  createdAt: 2025-11-22T14:26:55.022Z
+  requiredOrgs: ["vikMSP","sunMSP"]
+  metadata: {"mimetype":"text/plain","encrypted":true,"uploadedBy":"6921bce975aa3200b5ea6a0b"}
+
+stdout: File 6921c82fdd7847ed05e1be8f created successfully
+stdout: [0;32m✓ File created successfully[0m
+
+stdout: 
+[0;32m✓ File created successfully[0m
+
+[0;32m========================================[0m
+
+stdout: [0;32mFile Creation Complete![0m
+[0;32m========================================[0m
+
+child process exited with code 0
+File created successfully
+File added to blockchain successfully
+[2025-11-22T14:26:57.363Z] POST /api/uploads/complete - Status: 200 - 2354ms
+[2025-11-22T14:26:59.501Z] GET /api/getfiles - IP: ::1
+[2025-11-22T14:26:59.523Z] GET /api/getfiles - Status: 200 - 22ms
+[2025-11-22T14:27:15.725Z] GET /org/local-server - IP: ::1
+[2025-11-22T14:27:15.732Z] GET /org/local-server - Status: 304 - 7ms
+[2025-11-22T14:27:19.262Z] GET /api/getfiles - IP: ::1
+[2025-11-22T14:27:19.279Z] GET /api/getfiles - Status: 200 - 17ms
+[2025-11-22T14:27:21.429Z] GET /api/download/6921c82fdd7847ed05e1be8f - IP: ::1
+[2025-11-22T14:27:21.438Z] GET /api/download/6921c82fdd7847ed05e1be8f - Status: 200 - 9ms
+[2025-11-22T14:27:34.032Z] POST /api/6921c82fdd7847ed05e1be8f/propose-edit - IP: ::1
+=== proposeFileEdit called ===
+Params: [Object: null prototype] { fileId: '6921c82fdd7847ed05e1be8f' }
+Body keys: [ 'originalContent', 'newContent', 'encryptedNewFile' ]
+User: {
+  id: new ObjectId('6921bc9f75aa3200b5ea69fe'),
+  userId: new ObjectId('6921bc9f75aa3200b5ea69fe'),
+  username: 'employeesunil',
+  email: 'sunil@employee.com',
+  firstName: 'lokesh',
+  lastName: 'user',
+  role: 'Employee',
+  organizationId: new ObjectId('6920ee6e4d199e92dec91365'),
+  organizationName: 'sunil',
+  department: 'legal',
+  permissions: [ 'read', 'write' ]
+}
+Extracted values: {
+  fileId: '6921c82fdd7847ed05e1be8f',
+  hasNewContent: true,
+  hasOriginalContent: true,
+  hasEncryptedFile: true,
+  userId: new ObjectId('6921bc9f75aa3200b5ea69fe'),
+  organizationId: new ObjectId('6920ee6e4d199e92dec91365')
+}
+Proposing file edit...
+Running command: bash /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts/fabricSystem.sh propose-edit --configFile /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml --orgName sun --peerName peer0 --channelName test --chaincodeName asset --fileId 6921c82fdd7847ed05e1be8f --newContent {"originalContent":"didnt activate the private key share sheesh\n","newContent":"didnt activate the private key share sheesh\nI know right bruh ","proposedBy":"employeesunil","proposedAt":"2025-11-22T14:27:34.043Z","filename":"test3.txt","proposalId":"proposal_6921c82fdd7847ed05e1be8f_1763821654042"} --proposer sunMSP
+Working directory: /Users/warlord/Desktop/IFT_Project_593/blockchain/scripts
+stdout: [0;32m========================================[0m
+[0;32mProposing File Edit[0m
+[0;32mConfig File: /Users/warlord/Desktop/IFT_Project_593/blockchain/generated_resources/network-config.yaml[0m
+[0;32mOrganization: sun -> sun-admin-default[0m
+
+stdout: [0;32mPeer: peer0 -> sun-peer0.default[0m
+[0;32mChannel: test[0m
+[0;32mChaincode: asset[0m
+[0;32m========================================[0m
+Edit Proposal Details:[0m
+  File ID:[0m          6921c82fdd7847ed05e1be8f
+  Proposer:[0m         sunMSP
+  New Content Length:[0m 301 chars
+[0;32m========================================[0m
+
+[0;32mExecuting chaincode function...[0m
+
+stdout: [0;32mUpdating file (propose/approve edit)...[0m
+
+stdout: [0;34mParameters:[0m
+  fileId: 6921c82fdd7847ed05e1be8f
+  ipfsCid: proposal-6921c82fdd7847ed05e1be8f
+
+stdout:   size: 0
+  metadata: {"originalContent":"didnt activate the private key share sheesh
+","newContent":"didnt activate the private key share sheesh
+I know right bruh ","proposedBy":"employeesunil","proposedAt":"2025-11-22T14:27:34.043Z","filename":"test3.txt","proposalId":"proposal_6921c82fdd7847ed05e1be8f_1763821654042"}
+  proposedAt: 2025-11-22T14:27:34.043Z
+
+stdout: [0;31m✗ UpdateFile failed[0m
+
+stdout: [0;31mFailed to create edit proposal[0m
+
+child process exited with code 1
+[2025-11-22T14:27:34.287Z] POST /api/6921c82fdd7847ed05e1be8f/propose-edit - Status: 500 - 255ms
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.2.2] injecting env (2) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[dotenv@17.2.2] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+[dotenv@17.2.2] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[2025-11-22T14:39:05.435Z] INFO: Server started successfully { port: '8000', environment: 'development', version: '1.0.0' }
+🚀 Server started successfully!
+📍 Environment: development
+🌐 Server URL: http://localhost:8000
+🔐 Login endpoint: http://localhost:8000/auth/login
+📝 Register endpoint: http://localhost:8000/auth/register
+🏢 Organization validation: http://localhost:8000/org/validate-organization
+🔍 SignIn organization validation: http://localhost:8000/org/validate-signin-organization
+💚 Health check: http://localhost:8000/health
+🎨 Frontend: http://localhost:5173, http://localhost:5174, http://localhost:3000
+[36m[2025-11-22T14:39:05.441Z] INFO: MongoDB connected successfully {"host":"localhost"}[0m
+✅ MongoDB connected: localhost
+[2025-11-22T14:41:33.628Z] GET /api/getfiles - IP: ::1
+[2025-11-22T14:41:33.636Z] GET /api/getfiles - IP: ::1
+[2025-11-22T14:41:33.639Z] GET /api/getfiles - Status: 401 - 11ms
+[2025-11-22T14:41:33.640Z] GET /api/getfiles - Status: 401 - 4ms
+[2025-11-22T14:41:33.654Z] POST /auth/refresh - IP: ::1
+[2025-11-22T14:41:33.655Z] POST /auth/refresh - IP: ::1
+[2025-11-22T14:41:33.656Z] POST /auth/refresh - Status: 401 - 2ms
+[2025-11-22T14:41:33.656Z] POST /auth/refresh - Status: 401 - 1ms

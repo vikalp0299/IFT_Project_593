@@ -1,0 +1,189 @@
+.pending-approvals-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px 0;
+  color: #24292e;
+  font-size: 32px;
+}
+
+.subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.loading,
+.error,
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  font-size: 16px;
+}
+
+.loading {
+  color: #666;
+}
+
+.error {
+  background: #ffeef0;
+  border: 1px solid #ff8b94;
+  color: #d73a49;
+  border-radius: 6px;
+}
+
+.empty-state {
+  background: #f6f8fa;
+  border-radius: 6px;
+  color: #666;
+}
+
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pending-card {
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 24px;
+  transition: box-shadow 0.2s;
+}
+
+.pending-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.file-info h3 {
+  margin: 0 0 12px 0;
+  color: #24292e;
+  font-size: 20px;
+}
+
+.metadata {
+  display: flex;
+  gap: 12px;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.proposal-info {
+  background: #f6f8fa;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.proposal-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.proposal-detail label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.proposal-detail span {
+  font-size: 14px;
+  color: #24292e;
+}
+
+.proposal-id {
+  font-family: 'Courier New', monospace;
+  background: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: #fff3cd;
+  color: #856404;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.approvals-section {
+  margin-bottom: 20px;
+}
+
+.approvals-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.approvals-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.approval-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #d4edda;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.approval-org {
+  color: #155724;
+  font-weight: 600;
+}
+
+.approval-check {
+  color: #28a745;
+  font-size: 16px;
+}
+
+.no-approvals {
+  color: #999;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  padding: 10px 24px;
+  background: #2ea44f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #2c974b;
+}

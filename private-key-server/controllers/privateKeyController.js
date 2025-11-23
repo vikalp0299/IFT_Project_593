@@ -626,7 +626,28 @@ export const decryptSymmetricKey = async (req, res) => {
 
     // CRITICAL SECURITY CHECK: Verify authenticated user belongs to the same organization and department
     // as specified in the file's access rights (prevent user from spoofing their org/dept)
+    console.log('=== Organization Access Check ===');
+    console.log('From request (file access rights):', {
+      organizationName,
+      normalizedOrg,
+      departmentName,
+      normalizedDept,
+    });
+    console.log('From JWT token (authenticated user):', {
+      userOrgName,
+      userDeptName,
+      deptNameToVerify,
+    });
+    console.log('Match results:', {
+      orgMatch: normalizedOrg === userOrgName,
+      deptMatch: normalizedDept === deptNameToVerify,
+    });
+    
     if (normalizedOrg !== userOrgName) {
+      console.error('Organization mismatch!', {
+        expected: normalizedOrg,
+        actual: userOrgName,
+      });
       return res.status(403).json({
         success: false,
         message: 'Access denied: Authenticated user does not belong to the organization specified in file access rights',
@@ -635,6 +656,10 @@ export const decryptSymmetricKey = async (req, res) => {
     }
 
     if (normalizedDept !== deptNameToVerify) {
+      console.error('Department mismatch!', {
+        expected: normalizedDept,
+        actual: deptNameToVerify,
+      });
       return res.status(403).json({
         success: false,
         message: 'Access denied: Authenticated user does not belong to the department specified in file access rights',

@@ -884,4 +884,283 @@ export default class blockChainFunctionHandler {
             });
         });
     }
+
+    proposeEdit(configFile, orgName, peerName, channelName, chaincodeName, fileId, proposalData) {
+        console.log("Proposing file edit...");
+        
+        if (!fileId || !proposalData) {
+            return Promise.reject(new Error('Missing required parameters: fileId, proposalData'));
+        }
+        
+        // Extract proposer from proposalData or default to orgMSP
+        const proposerMSP = `${orgName}MSP`;
+        
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const args = [
+                scriptPath,
+                "propose-edit",
+                "--configFile", configFile,
+                "--orgName", orgName,
+                "--peerName", peerName,
+                "--channelName", channelName,
+                "--chaincodeName", chaincodeName,
+                "--fileId", fileId,
+                "--newContent", proposalData,
+                "--proposer", proposerMSP
+            ];
+            
+            console.log('Running command:', 'bash', args.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', args, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("Edit proposal created successfully");
+                    resolve({
+                        success: true,
+                        message: "Edit proposal created successfully",
+                        fileId: fileId,
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`Edit proposal failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`Edit proposal failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
+
+    approveEdit(configFile, orgName, peerName, channelName, chaincodeName, fileId, proposalId) {
+        console.log("Approving edit proposal...");
+        
+        if (!fileId || !proposalId) {
+            return Promise.reject(new Error('Missing required parameters: fileId, proposalId'));
+        }
+        
+        const approverMSP = `${orgName}MSP`;
+        
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const args = [
+                scriptPath,
+                "approve-edit",
+                "--configFile", configFile,
+                "--orgName", orgName,
+                "--peerName", peerName,
+                "--channelName", channelName,
+                "--chaincodeName", chaincodeName,
+                "--fileId", fileId,
+                "--proposalId", proposalId,
+                "--approver", approverMSP
+            ];
+            
+            console.log('Running command:', 'bash', args.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', args, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("Edit proposal approved successfully");
+                    resolve({
+                        success: true,
+                        message: "Edit proposal approved successfully",
+                        fileId: fileId,
+                        proposalId: proposalId,
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`Edit approval failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`Edit approval failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
+
+    rejectEdit(configFile, orgName, peerName, channelName, chaincodeName, fileId, proposalId, reason = 'No reason provided') {
+        console.log("Rejecting edit proposal...");
+        
+        if (!fileId || !proposalId) {
+            return Promise.reject(new Error('Missing required parameters: fileId, proposalId'));
+        }
+        
+        const rejectorMSP = `${orgName}MSP`;
+        
+        return new Promise((resolve, reject) => {
+            const scriptPath = path.join(__dirname, '../scripts/fabricSystem.sh');
+            const args = [
+                scriptPath,
+                "reject-edit",
+                "--configFile", configFile,
+                "--orgName", orgName,
+                "--peerName", peerName,
+                "--channelName", channelName,
+                "--chaincodeName", chaincodeName,
+                "--fileId", fileId,
+                "--proposalId", proposalId,
+                "--rejector", rejectorMSP,
+                "--reason", reason
+            ];
+            
+            console.log('Running command:', 'bash', args.join(' '));
+            console.log('Working directory:', path.join(__dirname, '../scripts'));
+
+            const child = spawn('bash', args, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+                console.log(`stdout: ${data}`);
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+                console.error(`stderr: ${data}`);
+            });
+
+            child.on('close', (code) => {
+                console.log(`child process exited with code ${code}`);
+                if (code === 0) {
+                    console.log("Edit proposal rejected successfully");
+                    resolve({
+                        success: true,
+                        message: "Edit proposal rejected successfully",
+                        fileId: fileId,
+                        proposalId: proposalId,
+                        reason: reason,
+                        output: stdoutData
+                    });
+                } else {
+                    console.error(`Edit rejection failed with code ${code}`);
+                    console.error('Full stderr:', stderrData);
+                    console.error('Full stdout:', stdoutData);
+                    reject(new Error(`Edit rejection failed with code ${code}. Error: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
+
+    /**
+     * Query Chaincode - Generic query function for any chaincode query
+     */
+    queryChaincode(configFile, orgName, peerName, channelName, chaincodeName, functionName, args = []) {
+        console.log(`Querying chaincode function: ${functionName}`);
+        
+        return new Promise((resolve, reject) => {
+            // Build kubectl hlf chaincode query command
+            const fullOrgName = `${orgName}-admin-default`;
+            const fullPeerName = `${orgName}-${peerName}.default`;
+            
+            const kubectlArgs = [
+                'hlf', 'chaincode', 'query',
+                '--config', configFile,
+                '--user', fullOrgName,
+                '--peer', fullPeerName,
+                '--chaincode', chaincodeName,
+                '--channel', channelName,
+                '--fcn', functionName
+            ];
+            
+            // Add arguments
+            args.forEach(arg => {
+                kubectlArgs.push('-a', arg);
+            });
+            
+            console.log('Running kubectl command:', 'kubectl', kubectlArgs.join(' '));
+
+            const child = spawn('kubectl', kubectlArgs, {
+                cwd: path.join(__dirname, '../scripts'),
+                env: process.env
+            });
+
+            let stderrData = '';
+            let stdoutData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+            });
+
+            child.on('close', (code) => {
+                if (code === 0) {
+                    console.log('Query successful');
+                    resolve(stdoutData.trim());
+                } else {
+                    console.error(`Query failed with code ${code}`);
+                    console.error('stderr:', stderrData);
+                    reject(new Error(`Query failed: ${stderrData}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                console.error('Spawn error:', err);
+                reject(err);
+            });
+        });
+    }
 }
+
+
