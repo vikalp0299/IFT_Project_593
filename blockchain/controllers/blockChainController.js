@@ -459,8 +459,11 @@ export async function joinBlockchain(req, res) {
             // Update organization blockchain settings
             organization.hasBlockchain = true;
             organization.blockchainOrgName = blockchainOrgName;
+            if (!organization.organizationChannels.includes(mainChannelName)) {
+                organization.organizationChannels.push(mainChannelName);
+            }
             await organization.save();
-            console.log(`Organization ${organization.name} updated with blockchain settings: hasBlockchain=true, blockchainOrgName=${blockchainOrgName}`);
+            console.log(`Organization ${organization.name} updated with blockchain settings: hasBlockchain=true, blockchainOrgName=${blockchainOrgName}, channel=${mainChannelName}`);
 
             // Clear heartbeat before completing
             clearInterval(heartbeatInterval);

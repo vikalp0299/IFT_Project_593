@@ -363,6 +363,9 @@ export const uploadChunk = [
  * Structure: /uploads/<userId>/<uploadId>
  */
 export async function completeUpload(req, res) {
+    console.log('🎯 COMPLETE UPLOAD CALLED!!!');
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('Request user:', req.user);
     try {
     const {
       uploadId,
@@ -469,6 +472,10 @@ export async function completeUpload(req, res) {
           ? Number(timeToHoldMs)
           : 24 * 60 * 60 * 1000;
 
+        console.log('=== ACCESS RIGHTS PROCESSING ===');
+        console.log('req.user:', JSON.stringify(req.user, null, 2));
+        console.log('Raw accessRights from frontend:', accessRights);
+
         const sanitizedAccessRights = Array.isArray(accessRights)
           ? accessRights
               .map((entry) => {
@@ -506,6 +513,56 @@ export async function completeUpload(req, res) {
               })
               .filter(Boolean)
           : [];
+
+        console.log('sanitizedAccessRights after initial mapping:', sanitizedAccessRights);
+
+        // Automatically add uploader's organization/department to accessRights if not already included
+        const uploaderOrgId = req.user?.organizationId;
+        const uploaderDept = req.user?.department;
+        console.log('=== UPLOADER AUTO-ADD CHECK ===');
+        console.log('uploaderOrgId:', uploaderOrgId);
+        console.log('uploaderDept:', uploaderDept);
+        console.log('hasUser:', !!req.user);
+        
+        if (uploaderOrgId && uploaderDept) {
+          const uploaderOrgIdStr = uploaderOrgId.toString();
+          const alreadyHasAccess = sanitizedAccessRights.some(
+            ar => ar.organizationId.toString() === uploaderOrgIdStr && 
+                  ar.departmentName === uploaderDept.toLowerCase()
+          );
+          
+          console.log('Already has access?', alreadyHasAccess);
+          
+          if (!alreadyHasAccess) {
+            // Fetch uploader's organization and department details
+            const uploaderOrg = await Organization.findById(uploaderOrgId).select('name displayName');
+            const uploaderDeptDoc = await Department.findOne({
+              organization: uploaderOrgId,
+              departmentName: uploaderDept.toLowerCase()
+            }).select('_id departmentName displayName');
+            
+            console.log('Found uploader org:', uploaderOrg?.name);
+            console.log('Found uploader dept:', uploaderDeptDoc?.departmentName);
+            
+            if (uploaderOrg && uploaderDeptDoc) {
+              sanitizedAccessRights.push({
+                organizationId: new mongoose.Types.ObjectId(uploaderOrgId),
+                organizationName: uploaderOrg.name.toLowerCase().trim(),
+                organizationDisplayName: uploaderOrg.displayName?.trim() || uploaderOrg.name,
+                departmentId: uploaderDeptDoc._id,
+                departmentName: uploaderDeptDoc.departmentName.toLowerCase().trim(),
+                departmentDisplayName: uploaderDeptDoc.displayName?.trim() || uploaderDeptDoc.departmentName,
+              });
+              console.log(`✓ Added uploader's org/dept (${uploaderOrg.name}/${uploaderDept}) to accessRights`);
+            } else {
+              console.warn('⚠ Could not add uploader to accessRights - org or dept not found');
+            }
+          } else {
+            console.log('✓ Uploader already in accessRights');
+          }
+        } else {
+          console.warn('⚠ Missing uploaderOrgId or uploaderDept from req.user');
+        }
 
         const sanitizedAgreementOrgs =
           editAgreementRequired && Array.isArray(editAgreementOrganizations)
@@ -681,7 +738,7 @@ export async function completeUpload(req, res) {
             }
             
             // Fetch organization to get blockchainOrgName
-            const organization = await Organization.findById(organizationId).select('blockchainOrgName hasBlockchain');
+            const organization = await Organization.findById(organizationId).select('blockchainOrgName hasBlockchain organizationChannels');
             
             if (!organization) {
                 throw new Error('Organization not found');
@@ -693,6 +750,11 @@ export async function completeUpload(req, res) {
                 throw new Error('Organization blockchain name not configured');
             } else {
                 const orgName = organization.blockchainOrgName;
+                
+                // Get channel name from organization (use first channel if multiple)
+                const channelName = organization.organizationChannels && organization.organizationChannels.length > 0
+                    ? organization.organizationChannels[0]
+                    : 'test'; // fallback to 'test' if no channels configured
                 
                 // Get blockchain org names for all organizations in accessRights and agreementOrgs
                 const orgIds = new Set();
@@ -803,7 +865,7 @@ export async function completeUpload(req, res) {
                     configFile,
                     orgName,
                     'peer0',
-                    'test',
+                    channelName,
                     blockchainFileData,
                     'asset'
                 );
@@ -959,7 +1021,7 @@ export async function downloadFile(req, res) {
         if (!encryptedKeyEntry) {
             return res.status(403).json({
                 success: false,
-                message: 'You do not have access to decrypt this file. Your department is not in the access list.'
+                message: 'You do not have access to decrypt this file. Your department is not in the access list. Please ensure the file was shared with your department.'
             });
         }
 
@@ -1123,7 +1185,7 @@ export const proposeFileEdit = async (req, res) => {
         }
 
         // Get organization blockchain info
-        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain organizationChannels');
         
         if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
             return res.status(400).json({
@@ -1131,6 +1193,11 @@ export const proposeFileEdit = async (req, res) => {
                 message: 'Organization does not have blockchain enabled'
             });
         }
+        
+        // Get channel name from organization (use first channel if multiple)
+        const channelName = organization.organizationChannels && organization.organizationChannels.length > 0
+            ? organization.organizationChannels[0]
+            : 'test'; // fallback to 'test' if no channels configured
 
         const proposerMSP = `${organization.blockchainOrgName}MSP`;
 
@@ -1244,7 +1311,7 @@ export const proposeFileEdit = async (req, res) => {
             configFile,
             organization.blockchainOrgName,
             'peer0',
-            'test',
+            channelName,
             'asset',  // chaincodeName
             fileId,
             proposalData
@@ -1319,7 +1386,7 @@ export const approveFileEdit = async (req, res) => {
         }
 
         // Get organization blockchain info
-        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain organizationChannels');
         
         if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
             return res.status(400).json({
@@ -1327,6 +1394,11 @@ export const approveFileEdit = async (req, res) => {
                 message: 'Organization does not have blockchain enabled'
             });
         }
+        
+        // Get channel name from organization (use first channel if multiple)
+        const channelName = organization.organizationChannels && organization.organizationChannels.length > 0
+            ? organization.organizationChannels[0]
+            : 'test'; // fallback to 'test' if no channels configured
 
         const approverMSP = `${organization.blockchainOrgName}MSP`;
 
@@ -1338,7 +1410,7 @@ export const approveFileEdit = async (req, res) => {
             configFile,
             organization.blockchainOrgName,
             'peer0',
-            'test',
+            channelName,
             'asset',  // chaincodeName
             fileId,
             proposalId
@@ -1451,7 +1523,7 @@ export const rejectFileEdit = async (req, res) => {
         }
 
         // Get organization blockchain info
-        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain organizationChannels');
         
         if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
             return res.status(400).json({
@@ -1459,6 +1531,11 @@ export const rejectFileEdit = async (req, res) => {
                 message: 'Organization does not have blockchain enabled'
             });
         }
+        
+        // Get channel name from organization (use first channel if multiple)
+        const channelName = organization.organizationChannels && organization.organizationChannels.length > 0
+            ? organization.organizationChannels[0]
+            : 'test'; // fallback to 'test' if no channels configured
 
         const rejectorMSP = `${organization.blockchainOrgName}MSP`;
 
@@ -1470,10 +1547,10 @@ export const rejectFileEdit = async (req, res) => {
             configFile,
             organization.blockchainOrgName,
             'peer0',
-            'test',
+            channelName,
+            'asset',  // chaincodeName
             fileId,
             proposalId,
-            rejectorMSP,
             reason || 'No reason provided'
         );
 
@@ -1607,7 +1684,7 @@ export const getProposalDetails = async (req, res) => {
         }
 
         // Get organization blockchain info
-        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain');
+        const organization = await Organization.findById(userOrg).select('blockchainOrgName hasBlockchain organizationChannels');
         
         if (!organization || !organization.hasBlockchain || !organization.blockchainOrgName) {
             return res.status(400).json({
@@ -1615,6 +1692,11 @@ export const getProposalDetails = async (req, res) => {
                 message: 'Organization does not have blockchain enabled'
             });
         }
+        
+        // Get channel name from organization (use first channel if multiple)
+        const channelName = organization.organizationChannels && organization.organizationChannels.length > 0
+            ? organization.organizationChannels[0]
+            : 'test'; // fallback to 'test' if no channels configured
 
         // Query blockchain using existing GetEditApprovals function
         const blockchainHandler = new blockChainFunctionHandler();
@@ -1625,7 +1707,7 @@ export const getProposalDetails = async (req, res) => {
                 configFile,
                 organization.blockchainOrgName,
                 'peer0',
-                'test',
+                channelName,
                 'asset',
                 'GetEditApprovals',
                 [fileId]

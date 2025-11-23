@@ -18,23 +18,35 @@ const ProposalReviewPage: React.FC = () => {
   const [showRejectInput, setShowRejectInput] = useState(false);
 
   useEffect(() => {
-    loadProposal();
+    let isMounted = true;
+    
+    const loadProposalSafely = async () => {
+      if (!fileId || !proposalId) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        const details = await getProposalDetails(fileId, proposalId);
+        if (isMounted) {
+          setProposal(details);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err.response?.data?.message || 'Failed to load proposal details');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProposalSafely();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [fileId, proposalId]);
-
-  const loadProposal = async () => {
-    if (!fileId || !proposalId) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-      const details = await getProposalDetails(fileId, proposalId);
-      setProposal(details);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load proposal details');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleApprove = async () => {
     if (!fileId || !proposalId) return;

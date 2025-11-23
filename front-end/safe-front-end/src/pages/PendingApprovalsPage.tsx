@@ -11,21 +11,33 @@ const PendingApprovalsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPendingEdits();
+    let isMounted = true;
+    
+    const loadPendingEditsSafely = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const edits = await getPendingEdits();
+        if (isMounted) {
+          setPendingEdits(edits);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err.response?.data?.message || 'Failed to load pending approvals');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+    
+    loadPendingEditsSafely();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  const loadPendingEdits = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const edits = await getPendingEdits();
-      setPendingEdits(edits);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load pending approvals');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleReviewProposal = (fileId: string, proposalId: string) => {
     navigate(`/proposal-review/${fileId}/${proposalId}`);
@@ -54,6 +66,13 @@ const PendingApprovalsPage: React.FC = () => {
         <p className="subtitle">
           Files awaiting your organization's approval for proposed edits
         </p>
+        <button 
+          onClick={() => navigate('/user/home')} 
+          className="btn-home"
+          style={{ marginTop: '10px' }}
+        >
+          ← Back to File Upload
+        </button>
       </div>
 
       {pendingEdits.length === 0 ? (
