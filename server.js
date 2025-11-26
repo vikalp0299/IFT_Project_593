@@ -34,6 +34,10 @@ import { requestLogger, errorLogger, log } from './middleware/logger.js';
 import { serverConfig, securityConfig, rateLimitConfig, appConfig } from './config/index.js';
 import blockchainRouter from './router/blockchainRouter.js';
 import localServerRouter from './router/localserverRouter.js';
+import cronRouter from './router/cronRouter.js';
+
+// Cron jobs
+import { startTimeToHoldCleanup } from './cron/timeToHoldCleanup.js';
 
 // Load environment variables
 dotenv.config();
@@ -110,6 +114,7 @@ app.use('/api/keys', keyRouter);
 app.use('/org', orgRouter);
 app.use('/api/blockchain',blockchainRouter);
 app.use('/api/local-servers', localServerRouter);
+app.use('/api/cron', cronRouter);
 
 // Static file serving (after API routes to avoid conflicts)
 app.use(express.static(path.join(__dirpath, 'public')));
@@ -256,6 +261,17 @@ app.use((err, req, res, next) => {
 // Connect to database
 connectDB();
 
+// Start cron jobs
+let cronJob;
+try {
+  cronJob = startTimeToHoldCleanup();
+  log.info('Time-to-hold cleanup cron job started');
+  console.log('⏰ Time-to-hold cleanup cron job started (runs every 5 minutes)');
+} catch (error) {
+  log.error('Failed to start time-to-hold cleanup cron job', { error: error.message });
+  console.error('❌ Failed to start time-to-hold cleanup cron job:', error);
+}
+
 // Start server
 const server = app.listen(serverConfig.port, () => {
   log.info('Server started successfully', {
@@ -279,6 +295,13 @@ const server = app.listen(serverConfig.port, () => {
 const gracefulShutdown = async (signal) => {
   log.info('Graceful shutdown initiated', { signal });
   console.log(`\n🛑 ${signal} received. Starting graceful shutdown...`);
+  
+  // Stop cron jobs
+  if (cronJob) {
+    cronJob.stop();
+    log.info('Cron jobs stopped');
+    console.log('✅ Cron jobs stopped');
+  }
   
   server.close(async () => {
     log.info('HTTP server closed');
