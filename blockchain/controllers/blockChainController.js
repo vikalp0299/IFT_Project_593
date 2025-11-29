@@ -414,21 +414,37 @@ export async function joinBlockchain(req, res) {
             await sleep(14000);
             sendUpdate('in_progress', 'Peer nodes created successfully', 2*100/14);
 
-            // Create channels - FIXED: Include both organizations in channel creation
-            sendUpdate('in_progress', 'Creating channels...', 3*100/14);
-            await controller.create_Channel(mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName);
+            // Create channels - Query all organizations already in this channel
+            sendUpdate('in_progress', 'Updating channel configuration...', 3*100/14);
+            
+            // Find all organizations that have already successfully joined this channel
+            const existingChannelMembers = await Organization.find({
+                organizationChannels: mainChannelName,
+                hasBlockchain: true
+            }).select('blockchainOrgName').lean();
+            
+            const existingOrgNames = existingChannelMembers
+                .map(org => org.blockchainOrgName)
+                .filter(name => name);
+            
+            // Build complete member list: existing members first, then new org (matches test.js order)
+            const allChannelMembers = [...existingOrgNames, blockchainOrgName].filter((name, index, self) => self.indexOf(name) === index);
+            
+            console.log('Existing channel members from DB:', existingOrgNames);
+            console.log('All channel members for update:', allChannelMembers);
+            await controller.create_Channel(mainChannelName, allChannelMembers, ordererOrgName);
             await sleep(14000);
-            sendUpdate('in_progress', 'Channels created successfully', 4*100/14);
+            sendUpdate('in_progress', 'Channel configuration updated successfully', 4*100/14);
 
-            // Join channel operations - FIXED: Both channelName parameters should match
+            // Join channel operations - Create follower channels for all members
             sendUpdate('in_progress', 'Joining channel...', 5*100/14);
-            await controller.create_follower_Channel(mainChannelName, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName, 1);
+            await controller.create_follower_Channel(mainChannelName, mainChannelName, allChannelMembers, ordererOrgName, 1);
             await sleep(14000);
             sendUpdate('in_progress', 'Channel joined successfully', 6*100/14);
 
-            // Step 6: Creating identities and network config - FIXED: Include both organizations
+            // Step 6: Creating identities and network config - Use all channel members
             sendUpdate('in_progress', 'Setting up identities and network configuration...', 7*100/14);
-            await controller.create_identities_and_network_config(mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], ordererOrgName);
+            await controller.create_identities_and_network_config(mainChannelName, allChannelMembers, ordererOrgName);
             await sleep(14000);
             sendUpdate('in_progress', 'Identities and network configuration set up successfully', 8*100/14);
 
@@ -438,16 +454,17 @@ export async function joinBlockchain(req, res) {
             await sleep(14000);
             sendUpdate('in_progress', 'Chaincode for metadata installed successfully', 10*100/14);
 
-            // Approve chaincode with current version - FIXED: Include both organizations
+            // Approve chaincode with current version - Use all channel members
             sendUpdate('in_progress', 'Approving chaincode...', 11*100/14);
             console.log("Initial tracker for commit:", currentTracker);
-            await controller.approve_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], '../generated_resources/network-config.yaml');
+            console.log("Approving chaincode for organizations:", allChannelMembers);
+            await controller.approve_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, allChannelMembers, '../generated_resources/network-config.yaml');
             await sleep(14000);
             sendUpdate('in_progress', 'Chaincode approved successfully', 12*100/14);
 
-            // Step 11: Commit chaincode - FIXED: Include both organizations
+            // Step 11: Commit chaincode - Use all channel members
             sendUpdate('in_progress', 'Committing chaincode...', 13*100/14);
-            await controller.commit_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, [creatorBlockchainOrgName, blockchainOrgName], '../generated_resources/network-config.yaml');
+            await controller.commit_chaincode('asset', currentTracker.version, currentTracker.sequence, mainChannelName, allChannelMembers, '../generated_resources/network-config.yaml');
             await sleep(14000);
             sendUpdate('in_progress', 'Chaincode committed successfully', 14*100/14);
 
